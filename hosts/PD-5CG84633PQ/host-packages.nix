@@ -9,6 +9,7 @@
     notion-app-enhanced
     github-desktop
     gitkraken
+    bitwarden
     # nvtop great tool for AMD/Intel/NVIDIA GPUs
     # takes time to build and upgrade
     # Moved here to make it optional
