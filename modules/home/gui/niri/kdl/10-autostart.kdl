@@ -1,0 +1,12 @@
+spawn-at-startup "nm-applet"
+spawn-at-startup "blueman-applet"
+spawn-at-startup "udiskie"
+spawn-at-startup "start-polkit-agent"
+spawn-at-startup "swww-daemon"
+spawn-at-startup "swww" "img" "/home/dwilliams/Pictures/Wallpapers/astralbed.webp" "--transition-type" "any" "--transition-fps" "60" "--transition-duration" "1.0"
+spawn-at-startup "waybar"
+
+switch-events {
+   lid-close {spawn "swaylock";}
+}
+

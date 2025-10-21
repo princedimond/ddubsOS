@@ -1,0 +1,55 @@
+/* Rofi theme for wallpaper grid. Inherits colors from your main menu theme. */
+@import "menu.config.rasi"
+
+/* Window styling: rounded corners and transparency so Hyprland can blur/shadow */
+window {
+  transparency: "real";
+  location: center;
+  anchor:   center;
+  width:    85%; /* reduce width to avoid full-screen feel */
+  border:   3px solid;             /* adjusted accent border */
+  border-radius: 18px;
+  border-color: @selected;         /* use blue accent from theme */
+  background-color: @background;   /* keep imported theme colors */
+  opacity: 0.96;                   /* slight transparency */
+}
+
+/* Main container */
+mainbox { padding: 12px; }  /* inner spacing between border and content */
+
+/* Compact 5x3 grid with minimal gutters and scrollbar */
+listview {
+  columns: 5;
+  lines: 3;
+  layout: vertical;   /* required to place text under icon */
+  dynamic: true;
+  fixed-columns: true;
+  fixed-height:  true;
+  spacing: 1px;       /* ultra-tight gutters */
+  scrollbar: true;    /* enable scrollbar */
+}
+
+/* Tiles: image-first; transparent background unless selected */
+element {
+  orientation: vertical;
+  padding: 1px 1px;   /* minimal inner padding */
+  border-radius: 12px;
+  background-color: transparent;
+}
+
+element selected {
+  background-color: @selected;
+  text-color:       @background;
+}
+
+element-icon {
+  size: 200px;              /* reduced to shrink overall height */
+  horizontal-align: 0.5;    /* center */
+}
+
+element-text {
+  horizontal-align: 0.5;    /* center beneath image */
+  margin: 1px 0 0 0;        /* minimal gap below icon */
+  font: "JetBrains Mono Nerd Font 8"; /* compact text */
+}
+

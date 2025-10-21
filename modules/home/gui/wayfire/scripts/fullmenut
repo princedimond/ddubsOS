@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+CONFIG="$HOME/.config/wayfire/wofifullt/config.ini"
+STYLE="$HOME/.config/wayfire/wofifullt/style.css"
+COLORS="$HOME/.config/wayfire/wofifullt/colors"
+
+if [[ ! $(pidof wofi) ]]; then
+wofi --show drun --prompt 'Search...' --height=700 --conf ${CONFIG} --style ${STYLE} --color ${COLORS}
+else
+	pkill wofi
+fi

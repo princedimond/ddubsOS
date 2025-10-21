@@ -1,0 +1,122 @@
+{
+  description = "ZaneyOS";
+
+  inputs = {
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable"; # Change to unstable branch if needed
+    nvf.url = "github:notashelf/nvf";
+    stylix.url = "github:danth/stylix";
+    hyprpanel = {
+      url = "github:jas-singhfsu/hyprpanel";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = {nixpkgs, ...} @ inputs: let
+    system = "x86_64-linux";
+    host = "prometheus";
+    profile = "nvidia-laptop";
+    username = "dwilliams";
+  in {
+    nixosConfigurations = {
+      amd = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs;
+          inherit username;
+          inherit host;
+          inherit profile;
+        };
+        modules = [
+          ./profiles/amd
+          {
+            environment.etc."resolv.conf".text = ''
+              nameserver 192.168.40.3
+              nameserver 8.8.8.8
+              options ndots:0
+            '';
+          }
+        ];
+      };
+      nvidia = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs;
+          inherit username;
+          inherit host;
+          inherit profile;
+        };
+        modules = [
+          ./profiles/nvidia
+          {
+            environment.etc."resolv.conf".text = ''
+              nameserver 192.168.40.3
+              nameserver 8.8.8.8
+              options ndots:0
+            '';
+          }
+        ];
+      };
+      nvidia-laptop = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs;
+          inherit username;
+          inherit host;
+          inherit profile;
+        };
+        modules = [
+          ./profiles/nvidia-laptop
+          {
+            environment.etc."resolv.conf".text = ''
+              nameserver 192.168.40.3
+              nameserver 8.8.8.8
+              options ndots:0
+            '';
+          }
+        ];
+      };
+      intel = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs;
+          inherit username;
+          inherit host;
+          inherit profile;
+        };
+        modules = [
+          ./profiles/intel
+          {
+            environment.etc."resolv.conf".text = ''
+              nameserver 192.168.40.3
+              nameserver 8.8.8.8
+              options ndots:0
+            '';
+          }
+        ];
+      };
+      vm = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs;
+          inherit username;
+          inherit host;
+          inherit profile;
+        };
+        modules = [
+          ./profiles/vm
+          {
+            environment.etc."resolv.conf".text = ''
+              nameserver 192.168.40.3
+              nameserver 8.8.8.8
+              options ndots:0
+            '';
+          }
+        ];
+      };
+    };
+  };
+}

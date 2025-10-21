@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Wrapper for fastfetch and direct usage. Falls back to plain output; use --fastfetch for single line
+# Accepts: --json, --since, --fastfetch
+
+SCRIPT_DIR=$(dirname "$0")
+
+if command -v nix >/dev/null 2>&1; then
+  # Build/run via nix-instantiate + bash to avoid needing a full flake
+  drv=$(nix-build -Q --no-out-link -E 'with import <nixpkgs> {}; callPackage (import '"$SCRIPT_DIR"'/total-uptime.nix) {}')
+  "$drv"/bin/total-uptime "$@"
+else
+  echo "nix is not available. Please install Nix to run total-uptime." >&2
+  exit 1
+fi
+

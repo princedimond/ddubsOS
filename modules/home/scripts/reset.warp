@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOGFILE="${HOME}/warp.reset.log"
+
+log() {
+  local msg="$1"
+  printf "%s [reset.warp] %s\n" "$(date '+%Y-%m-%d %H:%M:%S %z')" "$msg" | tee -a "$LOGFILE"
+}
+
+log_section() {
+  local title="$1"
+  log "----- ${title} -----"
+}
+
+find_pids() {
+  local pids=()
+  if command -v pgrep >/dev/null 2>&1; then
+    # Try by exact name first
+    mapfile -t pids < <(pgrep -x warp-terminal 2>/dev/null || true)
+    # Fallback to command line match
+    if [ "${#pids[@]}" -eq 0 ]; then
+      mapfile -t pids < <(pgrep -f warp-terminal 2>/dev/null || true)
+    fi
+    # Final fallback for generic Warp matches (avoid matching this script)
+    if [ "${#pids[@]}" -eq 0 ]; then
+      mapfile -t pids < <(pgrep -f '[Ww]arp( |-)terminal|\bWarp\b' 2>/dev/null || true)
+    fi
+  else
+    mapfile -t pids < <(ps -eo pid,cmd | grep -E '[w]arp-terminal|[W]arp' | awk '{print $1}' || true)
+  fi
+  echo "${pids[@]:-}"
+}
+
+pids=( $(find_pids) )
+
+log "Starting reset of Warp Terminal. Found PIDs: ${pids[*]:-none}"
+
+if [ "${#pids[@]}" -gt 0 ]; then
+  for pid in "${pids[@]}"; do
+    if [ -d "/proc/$pid" ]; then
+      log_section "Pre-termination diagnostics for PID $pid"
+      # Basic process info
+      ps -p "$pid" -o pid,ppid,stat,pri,ni,rtprio,stime,etime,pcpu,pmem,nlwp,cmd >> "$LOGFILE" 2>&1 || true
+
+      # Process tree (if available)
+      if command -v pstree >/dev/null 2>&1; then
+        echo "==== pstree for $pid ====" >> "$LOGFILE"
+        pstree -a -p "$pid" >> "$LOGFILE" 2>&1 || true
+      fi
+
+      # Open files (prefer lsof if available)
+      if command -v lsof >/dev/null 2>&1; then
+        echo "==== lsof for $pid ====" >> "$LOGFILE"
+        lsof -p "$pid" >> "$LOGFILE" 2>&1 || true
+      else
+        echo "==== /proc/$pid/fd listing ====" >> "$LOGFILE"
+        ls -l "/proc/$pid/fd" >> "$LOGFILE" 2>&1 || true
+      fi
+
+      # Thread backtraces via gdb (best-effort)
+      if command -v gdb >/dev/null 2>&1; then
+        echo "==== gdb thread backtraces for $pid ====" >> "$LOGFILE"
+        # Try without sudo first, write into reset log
+        if gdb -q -n -batch -ex "set pagination off" -ex "thread apply all bt" -p "$pid" >> "$LOGFILE" 2>&1; then
+          :
+        else
+          # Retry with sudo if available (may prompt for password)
+          if command -v sudo >/dev/null 2>&1; then
+            echo "==== retrying with sudo gdb for $pid ====" >> "$LOGFILE"
+            sudo gdb -q -n -batch -ex "set pagination off" -ex "thread apply all bt" -p "$pid" >> "$LOGFILE" 2>&1 || true
+          fi
+        fi
+
+        # Also write to a separate stacktrace file in HOME for convenience
+        if command -v sudo >/dev/null 2>&1; then
+          sudo gdb -q -n -batch -ex "set pagination off" -ex "thread apply all bt" -p "$pid" >> "${HOME}/stacktraces.txt" 2>&1 || true
+        else
+          gdb -q -n -batch -ex "set pagination off" -ex "thread apply all bt" -p "$pid" >> "${HOME}/stacktraces.txt" 2>&1 || true
+        fi
+      fi
+
+      # Scheduler, status, and other useful /proc info
+      for f in status sched wchan limits io smaps_rollup oom_score oom_score_adj; do
+        if [ -r "/proc/$pid/$f" ]; then
+          echo "==== /proc/$pid/$f ====" >> "$LOGFILE"
+          cat "/proc/$pid/$f" >> "$LOGFILE" 2>&1 || true
+        fi
+      done
+    fi
+  done
+
+  # Send SIGTERM
+  log_section "Sending SIGTERM"
+  kill -TERM "${pids[@]}" 2>>"$LOGFILE" || true
+
+  # Wait 3 seconds
+  sleep 3
+
+  # Check if any remain
+  remaining=()
+  for pid in "${pids[@]}"; do
+    if kill -0 "$pid" 2>/dev/null; then
+      remaining+=( "$pid" )
+    fi
+  done
+  if [ "${#remaining[@]}" -gt 0 ]; then
+    log "After SIGTERM, still running: ${remaining[*]} (not escalating to SIGKILL)"
+  else
+    log "All Warp Terminal processes exited after SIGTERM."
+  fi
+else
+  log "No running warp-terminal process found."
+fi
+
+# Restart Warp Terminal
+log_section "Restarting Warp Terminal"
+restart_cmd=""
+if command -v warp-terminal >/dev/null 2>&1; then
+  restart_cmd="warp-terminal"
+elif command -v flatpak >/dev/null 2>&1 && flatpak info dev.warp.Warp >/dev/null 2>&1; then
+  restart_cmd="flatpak run dev.warp.Warp"
+elif compgen -G "${HOME}/.local/bin/Warp*.AppImage" >/dev/null 2>&1; then
+  newest_appimage="$(ls -1t "${HOME}"/.local/bin/Warp*.AppImage 2>/dev/null | head -n1)"
+  if [ -n "$newest_appimage" ]; then
+    restart_cmd="\"$newest_appimage\""
+  fi
+fi
+
+if [ -n "$restart_cmd" ]; then
+  nohup bash -lc "$restart_cmd" >>"$LOGFILE" 2>&1 &
+  disown || true
+  log "Launched: $restart_cmd"
+else
+  log "Could not find a command to start Warp. Ensure 'warp-terminal' is on PATH or install via Flatpak (dev.warp.Warp)."
+  exit 1
+fi
+
+exit 0
+

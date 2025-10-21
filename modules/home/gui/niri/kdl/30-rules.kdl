@@ -1,0 +1,83 @@
+// all windows
+window-rule {
+   geometry-corner-radius 4
+   clip-to-geometry true
+}
+
+window-rule {
+   match app-id=r#"zen$"# title="^Picture-in-Picture$"
+   open-floating true
+}
+
+window-rule {
+   match app-id="kitty" 
+   default-column-width { proportion 0.75;} 
+}
+
+window-rule {
+   match app-id=r#"^Bitwarden$"#
+   block-out-from "screen-capture"
+}
+
+window-rule {
+   match is-floating=true
+   geometry-corner-radius 10
+   clip-to-geometry true
+
+   shadow {
+      on
+      softness 30
+      spread 5
+      offset x=0 y=5
+      draw-behind-window true
+      color "#00000070"
+   }
+}
+
+
+window-rule {
+   match app-id="pragtical" 
+   match app-id="zen"
+   open-on-workspace "WRK"
+   default-column-width { proportion 1.0; }
+}
+
+window-rule {
+   match app-id="musikcube"
+   open-on-workspace "MUS"
+   default-column-width { proportion 1.0; }
+}
+
+window-rule {
+   match is-active=false
+   opacity 0.95
+}
+
+window-rule {
+   match is-active=true
+   opacity 1.0
+}
+
+// Route browsers to a dedicated workspace
+window-rule {
+   match app-id=r#"(?i)^(google-chrome(?:-stable)?|chrome|chromium(?:-browser)?)$"#
+   open-on-workspace "Browsers"
+}
+
+// Route Discord variants to a dedicated workspace
+window-rule {
+   match app-id=r#"^(discord|discord-canary|vesktop)$"#
+   open-on-workspace "Discord"
+}
+
+// Route Signal (both cases) to a dedicated workspace
+window-rule {
+   match app-id=r#"(?i)^signal$"#
+   open-on-workspace "Signal"
+}
+
+layer-rule {
+  match namespace="swww-daemon"
+  place-within-backdrop true
+}
+
