@@ -11,33 +11,41 @@
     zfs.package = lib.mkOverride 99 pkgs.zfs_cachyos;
 
     kernelModules = [ "v4l2loopback" ];
-    # Build v4l2loopback with the same (LLVM) toolchain as the CachyOS kernel
-    # by passing LLVM=1 to Kbuild. This avoids 'gcc: command not found' when the
-    # kernel was built with clang.
+    # Build v4l2loopback with GCC to match the kernel compiler
+    # CachyOS kernel was built with GCC 14.3.0, so we must use GCC for module compatibility
     extraModulePackages = [
       (
-        (config.boot.kernelPackages.v4l2loopback.override {
-          stdenv = pkgs.llvmPackages.stdenv;
-        }).overrideAttrs (old: {
+        config.boot.kernelPackages.v4l2loopback.overrideAttrs (old: {
           outputs = [ "out" ];
-          # Use unwrapped clang/lld to avoid nix cc-wrapper injecting unsupported flags
-          nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.llvmPackages.clang-unwrapped pkgs.llvmPackages.lld ];
-          # Export CC/LD/LLVM in the build environment to ensure Kbuild picks clang/lld
-          CC = "${pkgs.llvmPackages.clang-unwrapped}/bin/clang";
-          LD = "${pkgs.llvmPackages.lld}/bin/ld.lld";
-          LLVM = "1";
-          # Suppress unused-command-line-argument errors from kernel CFLAGS when using clang
+          # Use GCC to match kernel compiler - no stdenv override needed
+          nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.gcc pkgs.binutils ];
+          # Clear problematic environment variables
+          NIX_CFLAGS_COMPILE = "";
+          # Use standard GCC toolchain
+          preBuild = ''
+            # Ensure GCC is used to match kernel compiler
+            export CC=gcc
+            export LD=ld
+            export HOSTCC=gcc
+            export HOSTLD=ld
+          '';
+          # Standard make flags without LLVM
           makeFlags = (old.makeFlags or []) ++ [
-            "LLVM=1"
-            "CC=${pkgs.llvmPackages.clang-unwrapped}/bin/clang"
-            "LD=${pkgs.llvmPackages.lld}/bin/ld.lld"
-            "EXTRA_CFLAGS=-Wno-error=unused-command-line-argument -Wno-unused-command-line-argument"
+            "CC=gcc"
+            "LD=ld"
+            "HOSTCC=gcc"
+            "HOSTLD=ld"
           ];
           # Only install the kernel module; skip userspace utils entirely
           installPhase = ''
             runHook preInstall
             make -C ${config.boot.kernelPackages.kernel.dev}/lib/modules/${config.boot.kernelPackages.kernel.modDirVersion}/build \
-              M=$PWD INSTALL_MOD_PATH=$out modules_install
+              M=$PWD INSTALL_MOD_PATH=$out \
+              CC=gcc \
+              LD=ld \
+              HOSTCC=gcc \
+              HOSTLD=ld \
+              modules_install
             runHook postInstall
           '';
           # Ensure any upstream postInstall that tries to install utils is disabled

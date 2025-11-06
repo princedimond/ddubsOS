@@ -29,7 +29,7 @@ in
           clang-tools
           docker-compose-language-service
           docker-compose
-          docker-language-server
+          #docker-language-server
           typescript-language-server
         ]
       else

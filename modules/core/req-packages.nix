@@ -84,7 +84,7 @@
       google-chrome
       gping # graphical ping
       gimp # Great Photo Editor
-      glxinfo # for inxi video info
+      mesa-demos # for inxi video info
       grimblast # needed for screenshots
       htop # Simple Terminal Based System Monitor
       inxi # CLI System Information Tool
