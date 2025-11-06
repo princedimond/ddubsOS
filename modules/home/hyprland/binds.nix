@@ -13,11 +13,11 @@ in
       "ALT, space, Workspace Overview, exec, vicinae"
       "$modifier,A, App Overview, exec, agsv1 -t 'overview'"
       "$modifier,R, Rofi Legacy Menu, exec, rofi-legacy.menu"
-      "$modifier,D, Rofi Menu, exec, rofi.menu"
+      "$modifier SHIFT,Return, Rofi Menu, exec, rofi.menu"
 
       # ============= TERMINALS =============
       "$modifier,Return, Terminal, exec, ${terminal}"
-      "$modifier SHIFT,Return, Foot Terminal (Floating), exec, foot --app-id=foot-floating"
+      #"$modifier SHIFT,Return, Foot Terminal (Floating), exec, foot --app-id=foot-floating"
       "$modifier ALT,Return, WezTerm, exec, wezterm"
       "$modifier CTRL,Return, Ghostty, exec, ghostty"
       "$modifier SHIFT,T, Scratchpad Terminal, exec, pypr toggle term"
