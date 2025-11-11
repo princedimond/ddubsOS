@@ -1,4 +1,5 @@
-{inputs, ...}: {
+{ inputs, ... }:
+{
   imports = [
     # Chaotic Nyx: provides CachyOS kernel packages and ZFS variants
     inputs.chaotic.nixosModules.default
@@ -30,13 +31,13 @@
     ./virtualisation.nix
     ./xserver.nix
     inputs.stylix.nixosModules.stylix
-    
+
     # Apps modules
     ../apps/warp-terminal-current.nix
   ];
-  
+
   # Enable warp-terminal-current globally on all hosts
-  programs.warp-terminal-current.enable = true;
+  programs.warp-terminal-current.enable = false;
 
   # Avoid building userland utils for v4l2loopback inside the kernel-module derivation.
   # Upstream Makefile contains a utils/ tool (v4l2loopback-ctl) that requires glibc, which
@@ -70,40 +71,44 @@
         };
       };
 
-      linuxPackages = prev.linuxPackages.extend (lpFinal: lpPrev: {
-        v4l2loopback = lpPrev.v4l2loopback.overrideAttrs (old: {
-          buildPhase = ''
-            make ''${makeFlags[@]} -C ${lpPrev.kernel.dev}/lib/modules/${lpPrev.kernel.modDirVersion}/build \
-              M=$PWD KCPPFLAGS="" modules
-          '';
-          installPhase = ''
-            runHook preInstall
-            make ''${makeFlags[@]} -C ${lpPrev.kernel.dev}/lib/modules/${lpPrev.kernel.modDirVersion}/build \
-              M=$PWD modules_install INSTALL_MOD_PATH=$out
-            runHook postInstall
-          '';
-          postBuild = ''
-            :
-          '';
-        });
-      });
-      linuxPackages_cachyos = prev.linuxPackages_cachyos.extend (lpFinal: lpPrev: {
-        v4l2loopback = lpPrev.v4l2loopback.overrideAttrs (old: {
-          buildPhase = ''
-            make ''${makeFlags[@]} -C ${lpPrev.kernel.dev}/lib/modules/${lpPrev.kernel.modDirVersion}/build \
-              M=$PWD KCPPFLAGS="" modules
-          '';
-          installPhase = ''
-            runHook preInstall
-            make ''${makeFlags[@]} -C ${lpPrev.kernel.dev}/lib/modules/${lpPrev.kernel.modDirVersion}/build \
-              M=$PWD modules_install INSTALL_MOD_PATH=$out
-            runHook postInstall
-          '';
-          postBuild = ''
-            :
-          '';
-        });
-      });
+      linuxPackages = prev.linuxPackages.extend (
+        lpFinal: lpPrev: {
+          v4l2loopback = lpPrev.v4l2loopback.overrideAttrs (old: {
+            buildPhase = ''
+              make ''${makeFlags[@]} -C ${lpPrev.kernel.dev}/lib/modules/${lpPrev.kernel.modDirVersion}/build \
+                M=$PWD KCPPFLAGS="" modules
+            '';
+            installPhase = ''
+              runHook preInstall
+              make ''${makeFlags[@]} -C ${lpPrev.kernel.dev}/lib/modules/${lpPrev.kernel.modDirVersion}/build \
+                M=$PWD modules_install INSTALL_MOD_PATH=$out
+              runHook postInstall
+            '';
+            postBuild = ''
+              :
+            '';
+          });
+        }
+      );
+      linuxPackages_cachyos = prev.linuxPackages_cachyos.extend (
+        lpFinal: lpPrev: {
+          v4l2loopback = lpPrev.v4l2loopback.overrideAttrs (old: {
+            buildPhase = ''
+              make ''${makeFlags[@]} -C ${lpPrev.kernel.dev}/lib/modules/${lpPrev.kernel.modDirVersion}/build \
+                M=$PWD KCPPFLAGS="" modules
+            '';
+            installPhase = ''
+              runHook preInstall
+              make ''${makeFlags[@]} -C ${lpPrev.kernel.dev}/lib/modules/${lpPrev.kernel.modDirVersion}/build \
+                M=$PWD modules_install INSTALL_MOD_PATH=$out
+              runHook postInstall
+            '';
+            postBuild = ''
+              :
+            '';
+          });
+        }
+      );
     })
   ];
 

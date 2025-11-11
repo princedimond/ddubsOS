@@ -57,6 +57,7 @@
     neofetch # system info fetcher
     nomacs # video image preview tool
     netpeek # network scanner
+    orca-slicer
     pastel # CLI color generator / converter
     picard # For Changing Music Metadata & Getting Cover Art
     pinta # simple paint pgm
@@ -66,6 +67,7 @@
     superfile # TUI Filemgr
     typtea # terminal typing test with language support
     twingate # twingate VPN client
+    xarchiver
     # Geting current warp terminal from flake  9/16/25 Leaving as backup
     #warp-terminal # AI integrated terminal unstable branch
     # stablePkgs.warp-terminal # AI terminal stable branch running newer versions
