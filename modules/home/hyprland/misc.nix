@@ -1,9 +1,10 @@
-{ ... }: {
+{ ... }:
+{
   wayland.windowManager.hyprland = {
     settings = {
       misc = {
         focus_on_activate = false;
-        disable_hyprland_qtutils_check = true;
+        #disable_hyprland_qtutils_check = true;
         mouse_move_focuses_monitor = true;
         layers_hog_keyboard_focus = true;
         initial_workspace_tracking = 0;
