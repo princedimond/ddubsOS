@@ -1,7 +1,8 @@
-{ pkgs
-, host
-, options
-, ...
+{
+  pkgs,
+  host,
+  options,
+  ...
 }:
 let
   inherit (import ../../hosts/${host}/variables.nix) hostId;
@@ -12,6 +13,7 @@ in
     hostId = hostId;
     networkmanager.enable = true;
     timeServers = options.networking.timeServers.default ++ [ "pool.ntp.org" ];
+    nftables.enable = true;
     firewall = {
       enable = true;
       allowedTCPPorts = [

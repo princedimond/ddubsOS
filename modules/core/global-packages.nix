@@ -45,6 +45,8 @@
     hyfetch # includisve system fetch
     iotop # IO monitoring tool
     kdePackages.okular # PDF reader
+    nss_latest
+    nss
     losslesscut-bin # Cut videos w/o re-rendering
     lnav # Log navigator  great tool to review logs
     lunarvim # alternative NVIM config
@@ -63,10 +65,12 @@
     pinta # simple paint pgm
     remmina # remote connection tool RDP/SSH,etc
     resources # btop like CLI tool
+    rpi-imager
     switcheroo # quick image manipulation tool
     superfile # TUI Filemgr
     typtea # terminal typing test with language support
     twingate # twingate VPN client
+    warp-terminal
     xarchiver
     # Geting current warp terminal from flake  9/16/25 Leaving as backup
     #warp-terminal # AI integrated terminal unstable branch

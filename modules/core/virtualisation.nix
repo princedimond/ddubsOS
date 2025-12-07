@@ -1,8 +1,18 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   # Only enable either docker or podman -- Not both
   virtualisation = {
     docker = {
       enable = true;
+    };
+    incus = {
+      enable = true;
+      ui = {
+        enable = true;
+      };
+      agent = {
+        enable = true;
+      };
     };
 
     podman.enable = false;
