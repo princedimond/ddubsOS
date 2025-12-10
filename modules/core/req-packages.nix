@@ -81,7 +81,7 @@
       gnumake # make command
       gparted # needed for nix-iso building
       grim # needed for screenshots
-      google-chrome
+      #google-chrome
       gping # graphical ping
       gimp # Great Photo Editor
       mesa-demos # for inxi video info

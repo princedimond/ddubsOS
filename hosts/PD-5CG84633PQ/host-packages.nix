@@ -10,6 +10,16 @@
     github-desktop
     gitkraken
     bitwarden-desktop
+    affine
+    ferdium
+    meld
+    orca-slicer
+    rpi-imager
+    warp-terminal
+    microsoft-edge
+    xarchiver
+    nss
+    nss_latest
     # nvtop great tool for AMD/Intel/NVIDIA GPUs
     # takes time to build and upgrade
     # Moved here to make it optional
