@@ -1,9 +1,17 @@
 English | [Español](./zcli.es.md)
 
-# ddubsOS Command Line Utility (zcli) - Version 1.1.0
+# ddubsOS Command Line Utility (zcli) - Version 1.2.0
 zcli is a handy tool for performing common maintenance tasks on your ddubsOS
 system with a single command. Below is a detailed guide to its usage and
 commands.
+
+## What’s new in v1.2.0
+
+- Panel selection expanded: panelChoice now supports hyprpanel | waybar | dms | noctalia.
+  - Set with: `zcli settings set panelChoice <hyprpanel|waybar|dms|noctalia>`.
+  - Hyprland startup updated to launch the selected panel; Noctalia runs via `qs -c noctalia-shell`.
+- Noctalia Shell integration: packaged QuickShell config is linked under `~/.config/quickshell/noctalia-shell` when selected.
+- Settings hints updated to include new panel options.
 
 ## What’s new in v1.1.0
 
@@ -40,6 +48,9 @@ zcli settings --list-bools
 # Set browser and terminal
 zcli settings set browser google-chrome-stable
 zcli settings set terminal kitty
+
+# Set panel (hyprpanel | waybar | dms | noctalia)
+zcli settings set panelChoice noctalia
 
 # Set boolean attributes (accepts true/false/on/off/yes/no/1/0)
 zcli settings set gnomeEnable true
@@ -96,6 +107,7 @@ descriptions:
 | trim        | ✂️   | Trims filesystems to improve SSD performance and optimize storage.                                                                                    | `zcli trim`                             |
 || update      | 🔄   | Updates the flake and rebuilds the system. Now offers an interactive staging prompt to stage new/unstaged files before building.                      | `zcli update`                           |
 || update-host | 🏠   | Automatically sets the host and profile in your `flake.nix` file based on the current system. It detects the GPU type or prompts for input if needed. | `zcli update-host [hostname] [profile]` |
+|| update-warp | ⚡   | Update vendored Warp Terminal (current) to the latest upstream release; recomputes SRI and updates versions.json. Optional --commit to auto-commit. | `zcli update-warp [--commit]` |
 || stage       | ✅   | Interactively stage changes (or use --all to stage everything) without rebuilding.                                                            | `zcli stage`, `zcli stage --all`        |
 
 ## Detailed Command Descriptions
@@ -128,6 +140,12 @@ descriptions:
   updating the `hostname` and `profile` in your `~/ddubsos/flake.nix` file. It
   attempts to detect your GPU type; if it fails, you'll be prompted to enter the
   details manually.
+
+- **⚡ update-warp**: Updates the vendored Warp Terminal (current) packaging inside this repo.
+  - Bumps to the latest upstream release by following Warp’s download redirects.
+  - Recomputes SRI hashes and updates pkgs/warp-terminal-current/versions.json.
+  - Optional `--commit` will auto-commit the versions file change.
+  - Rebuild afterwards with `zcli rebuild`.
 
 ## Emacs notes
 
@@ -214,6 +232,6 @@ constraints.
 
 - **Why use zcli?** This utility saves time on routine tasks, reducing the need
   for multiple commands or manual edits.
-- **Version and Compatibility:** Ensure you're using the latest version (1.1.0
+- **Version and Compatibility:** Ensure you're using the latest version (1.2.0
   as per the source). For any issues, generate a diagnostic report with
   `zcli diag` and consult your system logs.

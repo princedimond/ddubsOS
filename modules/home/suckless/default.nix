@@ -1,9 +1,13 @@
-{ pkgs, lib, host, ... }:
-let
-  inherit (import ../../hosts/${host}/variables.nix) dwmEnable;
-  suckless-pkgs = import ./pkgs.nix { inherit pkgs; };
-in
 {
+  pkgs,
+  lib,
+  host,
+  ...
+}: let
+  # Note: this file is at modules/home/suckless, so we need to go up three levels to reach top-level hosts/
+  inherit (import ../../../hosts/${host}/variables.nix) dwmEnable;
+  suckless-pkgs = import ./pkgs.nix {inherit pkgs;};
+in {
   # Note: This module is only imported when dwmEnable = true (see modules/home/default.nix:78)
   home.packages = with suckless-pkgs; [
     dwm
@@ -35,7 +39,7 @@ in
   xdg.configFile."suckless/scripts/power".source = ../dwm-setup/suckless/scripts/power;
   xdg.configFile."suckless/scripts/redshift-off".source = ../dwm-setup/suckless/scripts/redshift-off;
   xdg.configFile."suckless/scripts/redshift-on".source = ../dwm-setup/suckless/scripts/redshift-on;
-  
+
   # Set environment variable for qs-keybinds to know dwm is enabled
   home.sessionVariables = {
     QS_HAS_DWM = "1";

@@ -1,9 +1,4 @@
-{
-  pkgs,
-  ...
-}:
-
-let
+{pkgs, ...}: let
   # Install any helper scripts shipped in modules/home/waybar/scripts into ~/.config/waybar/scripts
   scriptsDir = ./scripts;
   scripts = builtins.attrNames (builtins.readDir scriptsDir);
@@ -69,9 +64,7 @@ let
     # Stream cava output and transform
     exec cava -p "$config_file" | sed -u "$dict"
   '';
-
-in
-{
+in {
   # Ensure bundled Waybar scripts are installed under ~/.config/waybar/scripts
   home.file = builtins.listToAttrs (
     map (name: {
@@ -80,7 +73,8 @@ in
         source = "${scriptsDir}/${name}";
         executable = true;
       };
-    }) scripts
+    })
+    scripts
   );
 
   programs.waybar = {
@@ -134,7 +128,8 @@ in
 
         "custom/menu" = {
           format = "  ";
-          on-click = "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window";
+          # on-click = "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window";
+          on-click = "launch-nwg-menu";
           on-click-middle = "$HOME/.config/hypr/UserScripts/WallpaperSelect.sh";
           on-click-right = "$HOME/.config/hypr/scripts/WaybarLayout.sh";
           tooltip = true;
@@ -174,7 +169,7 @@ in
 
         "custom/weather" = {
           return-type = "json";
-exec = "~/.config/waybar/scripts/Weather.py";
+          exec = "sh -lc 'WEATHER_ICON_STYLE=emoji WEATHER_TOOLTIP_MARKUP=1 ~/.config/waybar/scripts/Weather.py'";
           interval = 600;
           tooltip = true;
         };

@@ -1,6 +1,7 @@
-{ profile
-, lib
-, ...
+{
+  profile,
+  lib,
+  ...
 }: {
   programs.fish = {
     enable = true;

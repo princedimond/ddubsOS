@@ -153,6 +153,12 @@
   };
 
   home.file = {
+    ".config/fastfetch/fastfetch3.config.jsonc" = {
+      source = ./fastfetch3.config.jsonc;
+    };
+  };
+
+  home.file = {
     ".config/fastfetch/images" = {
       recursive = true;
       source = ./images;

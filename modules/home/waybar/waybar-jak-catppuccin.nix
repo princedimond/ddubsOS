@@ -1,9 +1,4 @@
-{
-  pkgs,
-  ...
-}:
-
-let
+{pkgs, ...}: let
   # Install any helper scripts shipped in modules/home/waybar/scripts into ~/.config/waybar/scripts
   scriptsDir = ./scripts;
   scripts = builtins.attrNames (builtins.readDir scriptsDir);
@@ -99,9 +94,7 @@ let
     mantle = "#181825";
     crust = "#11111b";
   };
-
-in
-{
+in {
   # Ensure bundled Waybar scripts are installed under ~/.config/waybar/scripts
   home.file = builtins.listToAttrs (
     map (name: {
@@ -110,7 +103,8 @@ in
         source = "${scriptsDir}/${name}";
         executable = true;
       };
-    }) scripts
+    })
+    scripts
   );
 
   programs.waybar = {
@@ -132,40 +126,38 @@ in
         "margin-right" = 8;
 
         modules-left = [
+          "custom/separator#line"
           "custom/startmenu"
-          "custom/separator#blank"
-          "custom/separator#blank"
           "custom/qs_wallpapers_apply"
           "custom/separator#blank"
           "custom/qs_vid_wallpapers_apply"
-          "custom/separator#blank"
+          "custom/separator#line"
           "custom/separator#blank"
           "custom/cava_mviz"
           "custom/separator#blank"
-          #"hyprland/window"
-          "custom/separator#blank_2"
+          "custom/separator#line"
+          "tray"
+          "custom/separator#line"
         ];
 
         modules-center = [
-          "custom/separator#blank"
-          "custom/separator#dot-line"
+          "custom/separator#line"
           "hyprland/workspaces#rw"
-          "clock"
-          "custom/separator#dot-line"
-          "idle_inhibitor"
+          "custom/separator#line"
         ];
 
         modules-right = [
-          "custom/weather"
+          "custom/separator#line"
           "custom/swaync"
-          "tray"
-          "custom/separator#dot-line"
-          "group/laptop"
-          "custom/separator#dot-line"
-          "group/mobo_drawer"
+          "custom/separator#line"
+          "idle_inhibitor"
+          "custom/separator#line"
+          "clock"
+          "custom/separator#line"
+          "custom/weather"
           "custom/separator#line"
           "group/audio"
-          "custom/separator#dot-line"
+          "custom/separator#line"
           "custom/power"
         ];
 
@@ -180,7 +172,7 @@ in
           "critical-threshold" = 82;
           "format-critical" = "{temperatureC}°C {icon}";
           format = "{temperatureC}°C {icon}";
-          "format-icons" = [ "󰈸" ];
+          "format-icons" = ["󰈸"];
           "on-click-right" = "$HOME/.config/hypr/scripts/WaybarScripts.sh --nvtop";
         };
 
@@ -405,7 +397,7 @@ in
               "󰕾"
               ""
             ];
-            "ignored-sinks" = [ "Easy Effects Sink" ];
+            "ignored-sinks" = ["Easy Effects Sink"];
           };
           "scroll-step" = 5.0;
           "on-click" = "$HOME/.config/hypr/scripts/Volume.sh --toggle";
@@ -452,24 +444,26 @@ in
           "window-rewrite" = {
             "title<.*amazon.*>" = " ";
             "title<.*reddit.*>" = " ";
+            "title<.*[Hh]elium.*>" = " ";
             "class<firefox|org.mozilla.firefox|librewolf|floorp|mercury-browser|[Cc]achy-browser>" = " ";
             "class<zen>" = "󰰷 ";
             "class<waterfox|waterfox-bin>" = " ";
             "class<microsoft-edge>" = " ";
             "class<Chromium|Thorium|[Cc]hrome>" = " ";
+            "class<helium>" = " ";
             "class<brave-browser>" = "🦁 ";
             "class<tor browser>" = " ";
             "class<firefox-developer-edition>" = "🦊 ";
             "class<kitty|konsole>" = " ";
             "class<kitty-dropterm>" = " ";
-            "class<com.mitchellh.ghostty>" = " ";
+            "class<com.mitchellh.ghostty>" = " 󰊠";
             "class<org.wezfurlong.wezterm>" = " ";
-            "class<Warp|warp|dev.warp.Warp|warp-terminal>" = " ";
+            "class<Warp|warp|dev.warp.Warp|warp-terminal>" = "󰰭 ";
             "class<[Tt]hunderbird|[Tt]hunderbird-esr>" = " ";
             "class<eu.betterbird.Betterbird>" = " ";
             "title<.*gmail.*>" = "󰊫 ";
             "class<[Tt]elegram-desktop|org.telegram.desktop|io.github.tdesktop_x64.TDesktop>" = " ";
-            "class<discord|[Ww]ebcord|Vesktop>" = " ";
+            "class<discord|discord-canary|[Ww]ebcord|[Vv]esktop|com.discordapp.Discord|dev.vencord.Vesktop>" = " ";
             "title<.*whatsapp.*>" = " ";
             "title<.*zapzap.*>" = " ";
             "title<.*messenger.*>" = " ";
@@ -487,6 +481,8 @@ in
             "title<.*Picture-in-Picture.*>" = " ";
             "title<.*youtube.*>" = " ";
             "class<vlc>" = "󰕼 ";
+            "class<[Kk]denlive|org.kde.kdenlive>" = "🎬 ";
+            "title<.*Kdenlive.*>" = "🎬 ";
             "title<.*cmus.*>" = " ";
             "class<[Ss]potify>" = " ";
             "class<virt-manager>" = " ";
@@ -495,7 +491,7 @@ in
             "class<virtualbox manager>" = "💽 ";
             "title<virtualbox>" = "💽 ";
             "class<remmina|org.remmina.Remmina>" = "🖥️ ";
-            "class<VSCode|code-url-handler|code-oss|codium|codium-url-handler|VSCodium>" = "󰨞 ";
+            "class<VSCode|code|code-url-handler|code-oss|codium|codium-url-handler|VSCodium>" = "󰨞 ";
             "class<dev.zed.Zed>" = "󰵁";
             "class<codeblocks>" = "󰅩 ";
             "title<.*github.*>" = " ";
@@ -506,6 +502,7 @@ in
             "title<.*nvim ~.*>" = " ";
             "title<.*vim.*>" = " ";
             "title<.*nvim.*>" = " ";
+            "title<.*Discord.*>" = " ";
             "title<.*figma.*>" = " ";
             "title<.*jira.*>" = " ";
             "class<jetbrains-idea>" = " ";
@@ -522,6 +519,15 @@ in
             "class<org.pipewire.Helvum>" = "󰓃";
             "class<localsend>" = "";
             "class<PrusaSlicer|UltiMaker-Cura|OrcaSlicer>" = "󰹛";
+
+            "class<io.github.kolunmi.Bazaar>" = " ";
+            "title<^Bazaar$>" = " ";
+
+            "class<com.gabm.satty>" = " ";
+            "title<^satty$>" = " ";
+
+            "class<[Bb]ox[Bb]uddy|io.github.dvlv.boxbuddy|io.github.dvlv.BoxBuddy>" = " ";
+            "title<.*BoxBuddy.*>" = " ";
 
             # qs-* apps
             "title<Hyprland Keybinds>" = " ";
@@ -576,7 +582,7 @@ in
 
         "group/laptop" = {
           orientation = "inherit";
-          modules = [ "battery" ];
+          modules = ["battery"];
         };
 
         "group/audio" = {
@@ -609,7 +615,7 @@ in
         # ---------- Custom modules (from ModulesCustom) ----------
         "custom/weather" = {
           return-type = "json";
-          exec = "~/.config/waybar/scripts/Weather.py";
+          exec = "sh -lc 'WEATHER_ICON_STYLE=emoji WEATHER_TOOLTIP_MARKUP=1 ~/.config/waybar/scripts/Weather.py'";
           interval = 600;
           tooltip = true;
         };
@@ -658,8 +664,7 @@ in
           "on-click-right" = "$HOME/.config/hypr/UserScripts/WallpaperRandom.sh";
           "on-click-middle" = "$HOME/.config/hypr/scripts/WaybarStyles.sh";
           tooltip = true;
-          "tooltip-format" =
-            "Left Click: Wallpaper Menu\nMiddle Click: Random wallpaper\nRight Click: Waybar Styles Menu";
+          "tooltip-format" = "Left Click: Wallpaper Menu\nMiddle Click: Random wallpaper\nRight Click: Waybar Styles Menu";
         };
         "custom/hint" = {
           format = "󰺁 HINT!";
@@ -690,8 +695,7 @@ in
           "on-click-right" = "$HOME/.config/hypr/scripts/WaybarStyles.sh";
           "on-click-middle" = "$HOME/.config/hypr/UserScripts/WallpaperSelect.sh";
           tooltip = true;
-          "tooltip-format" =
-            "Left Click: Switch Dark-Light Themes\nMiddle Click: Wallpaper Menu\nRight Click: Waybar Styles Menu";
+          "tooltip-format" = "Left Click: Switch Dark-Light Themes\nMiddle Click: Wallpaper Menu\nRight Click: Waybar Styles Menu";
         };
         "custom/lock" = {
           format = "󰌾";
@@ -701,18 +705,20 @@ in
         };
         "custom/menu" = {
           format = "  ";
-          "on-click" = "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window";
+          # "on-click" = "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window";
+          "on-click" = "launch-nwg-menu";
           "on-click-middle" = "$HOME/.config/hypr/UserScripts/WallpaperSelect.sh";
           "on-click-right" = "$HOME/.config/hypr/scripts/WaybarLayout.sh";
           tooltip = true;
-          "tooltip-format" =
-            "Left Click: Rofi Menu\nMiddle Click: Wallpaper Menu\nRight Click: Waybar Layout Menu";
+          "tooltip-format" = "Left Click: Rofi Menu\nMiddle Click: Wallpaper Menu\nRight Click: Waybar Layout Menu";
         };
         "custom/startmenu" = {
           tooltip = true;
           "tooltip-format" = "App menu";
           format = "";
-          on-click = "rofi -show drun";
+          # on-click = "rofi -show drun";
+          on-click = "launch-nwg-menu";
+          "on-click-right" = "nwg-drawer -mr 225 -ml 225 -mt 200 -mb 200 -is 48 --spacing 15";
         };
 
         # Integrated CAVA visualizer using the inline script above
@@ -812,209 +818,207 @@ in
     ];
 
     # Consolidated style (Catppuccin Mocha) inlined
-    style =
-      let
-        c = catppuccinColors;
-      in
-      ''
-        @define-color rosewater ${c.rosewater};
-        @define-color flamingo  ${c.flamingo};
-        @define-color pink      ${c.pink};
-        @define-color mauve     ${c.mauve};
-        @define-color red       ${c.red};
-        @define-color maroon    ${c.maroon};
-        @define-color peach     ${c.peach};
-        @define-color yellow    ${c.yellow};
-        @define-color green     ${c.green};
-        @define-color teal      ${c.teal};
-        @define-color sky       ${c.sky};
-        @define-color sapphire  ${c.sapphire};
-        @define-color blue      ${c.blue};
-        @define-color lavender  ${c.lavender};
-        @define-color text      ${c.text};
-        @define-color subtext1  ${c.subtext1};
-        @define-color subtext0  ${c.subtext0};
-        @define-color overlay2  ${c.overlay2};
-        @define-color overlay1  ${c.overlay1};
-        @define-color overlay0  ${c.overlay0};
-        @define-color surface2  ${c.surface2};
-        @define-color surface1  ${c.surface1};
-        @define-color surface0  ${c.surface0};
-        @define-color base      ${c.base};
-        @define-color mantle    ${c.mantle};
-        @define-color crust     ${c.crust};
+    style = let
+      c = catppuccinColors;
+    in ''
+      @define-color rosewater ${c.rosewater};
+      @define-color flamingo  ${c.flamingo};
+      @define-color pink      ${c.pink};
+      @define-color mauve     ${c.mauve};
+      @define-color red       ${c.red};
+      @define-color maroon    ${c.maroon};
+      @define-color peach     ${c.peach};
+      @define-color yellow    ${c.yellow};
+      @define-color green     ${c.green};
+      @define-color teal      ${c.teal};
+      @define-color sky       ${c.sky};
+      @define-color sapphire  ${c.sapphire};
+      @define-color blue      ${c.blue};
+      @define-color lavender  ${c.lavender};
+      @define-color text      ${c.text};
+      @define-color subtext1  ${c.subtext1};
+      @define-color subtext0  ${c.subtext0};
+      @define-color overlay2  ${c.overlay2};
+      @define-color overlay1  ${c.overlay1};
+      @define-color overlay0  ${c.overlay0};
+      @define-color surface2  ${c.surface2};
+      @define-color surface1  ${c.surface1};
+      @define-color surface0  ${c.surface0};
+      @define-color base      ${c.base};
+      @define-color mantle    ${c.mantle};
+      @define-color crust     ${c.crust};
 
-        * {
-          font-family: "JetBrainsMono Nerd Font";
-          font-weight: bold;
-          min-height: 0;
-          font-size: 101%;
-          font-feature-settings: '"zero", "ss01", "ss02", "ss03", "ss04", "ss05", "cv31"';
-        }
+      * {
+        font-family: "JetBrainsMono Nerd Font";
+        font-weight: bold;
+        min-height: 0;
+        font-size: 101%;
+        font-feature-settings: '"zero", "ss01", "ss02", "ss03", "ss04", "ss05", "cv31"';
+      }
 
-        window#waybar {
-          background-color: @base;
-          border-radius: 5px;
-        }
+      window#waybar {
+        background-color: @base;
+        border-radius: 5px;
+      }
 
-        tooltip {
-          background: @base;
-          opacity: 1;
-          border-radius: 10px;
-          border-width: 2px;
-          border-style: solid;
-          border-color: @sapphire;
-        }
-        tooltip label { color: @blue; }
+      tooltip {
+        background: @base;
+        opacity: 1;
+        border-radius: 10px;
+        border-width: 2px;
+        border-style: solid;
+        border-color: @sapphire;
+      }
+      tooltip label { color: @blue; }
 
-        /* Extra spacing between NixOS start menu and CAVA */
-        #custom-startmenu { margin-left: 8px; margin-right: 16px; }
-        #custom-cava_mviz { margin-left: 8px; }
+      /* Extra spacing between NixOS start menu and CAVA */
+      #custom-startmenu { margin-left: 4px; margin-right: 8px; }
+      #custom-cava_mviz { margin-left: 4px; }
 
-        #taskbar button, #workspaces button {
-          color: @surface2;
-          background-color: transparent;
-          padding-top: 4px;
-          padding-bottom: 4px;
-          padding-right: 6px;
-          padding-left: 4px;
-        }
-        #taskbar button.active { color: @maroon; }
-        #workspaces button.active { color: @green; }
-        #taskbar button.focused, #workspaces button.focused {
-          color: @rosewater;
-          background: transparent;
-          border-radius: 15px;
-        }
-        #workspaces button.urgent {
-          color: #11111b;
-          background: transparent;
-          border-radius: 15px;
-        }
-        #taskbar button:hover, #workspaces button:hover {
-          background: transparent;
-          color: @flamingo;
-          border-radius: 15px;
-        }
-        /* Workspaces colors: inactive= @sapphire (pale blue), active= @green, empty= @red */
-        #workspaces button { color: @sapphire; }
-        #workspaces button.empty { color: @red; }
+      #taskbar button, #workspaces button {
+        color: @surface2;
+        background-color: transparent;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        padding-right: 6px;
+        padding-left: 4px;
+      }
+      #taskbar button.active { color: @maroon; }
+      #workspaces button.active { color: @green; }
+      #taskbar button.focused, #workspaces button.focused {
+        color: @rosewater;
+        background: transparent;
+        border-radius: 15px;
+      }
+      #workspaces button.urgent {
+        color: #11111b;
+        background: transparent;
+        border-radius: 15px;
+      }
+      #taskbar button:hover, #workspaces button:hover {
+        background: transparent;
+        color: @flamingo;
+        border-radius: 15px;
+      }
+      /* Workspaces colors: inactive= @sapphire (pale blue), active= @green, empty= @red */
+      #workspaces button { color: @sapphire; }
+      #workspaces button.empty { color: @red; }
 
-        #backlight,
-        #backlight-slider,
-        #battery,
-        #bluetooth,
-        #clock,
-        #cpu,
-        #disk,
-        #idle_inhibitor,
-        #keyboard-state,
-        #memory,
-        #mode,
-        #mpris,
-        #network,
-        #power-profiles-daemon,
-        #pulseaudio,
-        #pulseaudio-slider,
-        #taskbar button,
-        #taskbar,
-        #temperature,
-        #tray,
-        #window,
-        #wireplumber,
-        #workspaces,
-        #custom-backlight,
-        #custom-browser,
-        #custom-cava_mviz,
-        #custom-cycle_wall,
-        #custom-dot_update,
-        #custom-file_manager,
-        #custom-keybinds,
-        #custom-keyboard,
-        #custom-light_dark,
-        #custom-lock,
-        #custom-hint,
-        #custom-hypridle,
-        #custom-menu,
-        #custom-playerctl,
-        #custom-power_vertical,
-        #custom-power,
-        #custom-quit,
-        #custom-reboot,
-        #custom-settings,
-        #custom-spotify,
-        #custom-swaync,
-        #custom-tty,
-        #custom-updater,
-        #custom-weather,
-        #custom-weather.clearNight,
-        #custom-weather.cloudyFoggyDay,
-        #custom-weather.cloudyFoggyNight,
-        #custom-weather.default,
-        #custom-weather.rainyDay,
-        #custom-weather.rainyNight,
-        #custom-weather.severe,
-        #custom-weather.showyIcyDay,
-        #custom-weather.snowyIcyNight,
-        #custom-weather.sunnyDay {
-          opacity: 1;
-          padding-top: 4px;
-          padding-bottom: 4px;
-          padding-right: 6px;
-          padding-left: 6px;
-        }
+      #backlight,
+      #backlight-slider,
+      #battery,
+      #bluetooth,
+      #clock,
+      #cpu,
+      #disk,
+      #idle_inhibitor,
+      #keyboard-state,
+      #memory,
+      #mode,
+      #mpris,
+      #network,
+      #power-profiles-daemon,
+      #pulseaudio,
+      #pulseaudio-slider,
+      #taskbar button,
+      #taskbar,
+      #temperature,
+      #tray,
+      #window,
+      #wireplumber,
+      #workspaces,
+      #custom-backlight,
+      #custom-browser,
+      #custom-cava_mviz,
+      #custom-cycle_wall,
+      #custom-dot_update,
+      #custom-file_manager,
+      #custom-keybinds,
+      #custom-keyboard,
+      #custom-light_dark,
+      #custom-lock,
+      #custom-hint,
+      #custom-hypridle,
+      #custom-menu,
+      #custom-playerctl,
+      #custom-power_vertical,
+      #custom-power,
+      #custom-quit,
+      #custom-reboot,
+      #custom-settings,
+      #custom-spotify,
+      #custom-swaync,
+      #custom-tty,
+      #custom-updater,
+      #custom-weather,
+      #custom-weather.clearNight,
+      #custom-weather.cloudyFoggyDay,
+      #custom-weather.cloudyFoggyNight,
+      #custom-weather.default,
+      #custom-weather.rainyDay,
+      #custom-weather.rainyNight,
+      #custom-weather.severe,
+      #custom-weather.showyIcyDay,
+      #custom-weather.snowyIcyNight,
+      #custom-weather.sunnyDay {
+        opacity: 1;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        padding-right: 6px;
+        padding-left: 6px;
+      }
 
-        #idle_inhibitor.activated { color: @green; }
-        #idle_inhibitor.deactivated { color: @red; }
-        #mpris { color: @rosewater; }
-        #battery { color: @green; padding-left: 15px; border-radius: 15px 0 0 15px; }
-        @keyframes blink { to { background-color: #ffffff; color: #333333; } }
-        #battery.critical:not(.charging) {
-          color: #f53c3c;
-          animation-name: blink;
-          animation-duration: 0.5s;
-          animation-timing-function: linear;
-          animation-iteration-count: infinite;
-          animation-direction: alternate;
-        }
-        #custom-lock, #custom-power { color: @red; border-radius: 15px; font-weight: bolder; padding-left: 1px; }
-        #network { background-color: transparent; color: @mauve; }
-        #backlight { color: @flamingo; }
-        #custom-weather { color: @green; border-radius: 15px; background-color: transparent; }
-        #custom-menu { color: #89b4fa; }
-        #pulseaudio { background-color: transparent; color: @blue; }
-        #clock, #clock-calender { color: @green; }
-        /* Use the same pale blue as clock for these icons */
-        #custom-qs_wallpapers_apply,
-        #custom-qs_vid_wallpapers_apply { color: @sapphire; }
+      #idle_inhibitor.activated { color: @green; }
+      #idle_inhibitor.deactivated { color: @red; }
+      #mpris { color: @rosewater; }
+      #battery { color: @green; padding-left: 15px; border-radius: 15px 0 0 15px; }
+      @keyframes blink { to { background-color: #ffffff; color: #333333; } }
+      #battery.critical:not(.charging) {
+        color: #f53c3c;
+        animation-name: blink;
+        animation-duration: 0.5s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+      }
+      #custom-lock, #custom-power { color: @red; border-radius: 15px; font-weight: bolder; padding-left: 1px; }
+      #network { background-color: transparent; color: @mauve; }
+      #backlight { color: @flamingo; }
+      #custom-weather { color: @green; border-radius: 15px; background-color: transparent; }
+      #custom-menu { color: #89b4fa; }
+      #pulseaudio { background-color: transparent; color: @blue; }
+      #clock, #clock-calender { color: @green; }
+      /* Use the same pale blue as clock for these icons */
+      #custom-qs_wallpapers_apply,
+      #custom-qs_vid_wallpapers_apply { color: @sapphire; }
 
-        /* Focused window title */
-        #window { color: @lavender; }
-        /* When offscreen (offscreen-css = true) */
-        #window.offscreen { color: @overlay1; }
-        /* Subtle hover effect */
-        #window:hover { color: @rosewater; transition: color 120ms ease-in-out; }
+      /* Focused window title */
+      #window { color: @lavender; }
+      /* When offscreen (offscreen-css = true) */
+      #window.offscreen { color: @overlay1; }
+      /* Subtle hover effect */
+      #window:hover { color: @rosewater; transition: color 120ms ease-in-out; }
 
-        /* Playerctl track text */
-        #custom-playerctl { color: @lavender; }
-        #custom-playerctl:hover { color: @rosewater; transition: color 120ms ease-in-out; }
+      /* Playerctl track text */
+      #custom-playerctl { color: @lavender; }
+      #custom-playerctl:hover { color: @rosewater; transition: color 120ms ease-in-out; }
 
-        /* Start menu and notifications in green; turn red on new alerts */
-        #custom-startmenu { color: @green; }
-        #custom-swaync { color: @green; }
-        #custom-swaync.notification,
-        #custom-swaync.dnd-notification,
-        #custom-swaync.inhibited-notification { color: @red; }
-        /* Group drawer button color */
-        #group-mobo_drawer { color: @green; }
+      /* Start menu and notifications in green; turn red on new alerts */
+      #custom-startmenu { color: @green; }
+      #custom-swaync { color: @green; }
+      #custom-swaync.notification,
+      #custom-swaync.dnd-notification,
+      #custom-swaync.inhibited-notification { color: @red; }
+      /* Group drawer button color */
+      #group-mobo_drawer { color: @green; }
 
-        #backlight-slider slider, #pulseaudio-slider slider {
-          min-height: 7px; min-width: 15px; opacity: 0; background-color: @text; border-radius: 3px; box-shadow: 1px 5px 6px 1px #272727;
-        }
-        #backlight-slider trough, #pulseaudio-slider trough {
-          min-height: 100px; min-width: 7px; border-radius: 5px; background-color: @surface0;
-        }
-        #backlight-slider highlight, #pulseaudio-slider highlight { min-width: 5px; border-radius: 5px; background-color: @blue; }
-      '';
+      #backlight-slider slider, #pulseaudio-slider slider {
+        min-height: 7px; min-width: 15px; opacity: 0; background-color: @text; border-radius: 3px; box-shadow: 1px 5px 6px 1px #272727;
+      }
+      #backlight-slider trough, #pulseaudio-slider trough {
+        min-height: 100px; min-width: 7px; border-radius: 5px; background-color: @surface0;
+      }
+      #backlight-slider highlight, #pulseaudio-slider highlight { min-width: 5px; border-radius: 5px; background-color: @blue; }
+    '';
   };
 }

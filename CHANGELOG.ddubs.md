@@ -4,56 +4,160 @@
 
 ---
 
-# 🚀 **Current Release - ddubsOS v2.dev**
+# 🚀 \*\*Current Release - ddubsOS v2.7.2
+
+## Updated:
+
+- `nxivim` theme to `tokyonight`
+- `alejandra` as nix formatter in `flake.nix`
+- Alejandra also in `nixvim.nix`
+- Ran `nix fmt ./` to revise all files
+
+# 🚀 \*\*Current Release - ddubsOS v2.7.1
+
+## Updated:
+
+- `oxwm-parser` for new `config.lua` format. (again)
+- `oxwm` configuration with bindings my apps
+- configuration to only install current build of Warp Terminal
+- `kitty.nix` Added desktop file for `kitty-bg`
+  - Now kitty with random wallpaper can run from launcher
+- `fonts.nix` Re-enabled `symbola` font. Builds OK again
+- Noctalia-shell to v3.5.0-git
+- Thanks to @mugdad for figuring it out
+- Noctalia docs show `qs -c noctalia-shell`
+  - This results in older version being loaded
+  - Just run `exec-once = noctala-shell` instead
+  - This gets you current commit, now shows in `about:`
+  - Also need to change the keybinds to `noctalia-shelll ipc call...`
+
+## Added:
+
+- Image Preview to `nixvim` `leader fm` for find media files
+- `dino` and `gajim` Jabber XMPP clients
+- `ff3` A simple, and elegent fastfetch config
+- `Nero Hyprland` theme to `vscode.nix`
+- `code-runner` plugin to `vscode.nix`
+- `antigravity` IDE (based on vscodium)
+- Nero Hyprland theme to vscode
+- `WindowRules-ng.nix` to prepare for Hyprland 0.53 changes
+- Hyprland animations from Jak's dotfiles
+- Animations:
+  - hyde optimized
+  - ml4w classic
+  - ml4w fast
+  - ml4w high
+  - Mahaveer-me-1
+  - Mahaveer-me-2
+
+## Removed:
+
+- Home Manager setting defaults for `noctalia`
+  - It would just reset to them after reboot or re-login
+
+## Fixed:
+
+- `kb_variants` was set to `us` layout by default
+- Dropdown Terminal
+- GPU profies getting defaulted to AMD
+
+## Features:
+
+## Option to build Hyprland from source or NixPkgs (2025-11-19)
+
+- `hyprlandSource` in `hosts/<host>/variables.nix` to enable source build
+
+## 🧱 OXWM (X11 tiling WM) integration (2025-11-07)
+
+- Added optional OXWM desktop integration.
+  - Home Manager module: `modules/home/gui/oxwm.nix` (installs oxwm + X11
+    utilities like rofi, dunst, picom, feh, xclip, xdotool, xrandr, etc.)
+  - User polkit agent enabled for X11 sessions via polkit-gnome
+  - Host toggle: set `oxwmEnable = true;` in `hosts/<host>/variables.nix`
+  - System session: upstream `oxwm.nixosModules.default` included for host-first
+    builds (xsessions entry)
+  - Project: https://github.com/tonybanters/oxwm
+
+## 🧬 Folding@home client (2025-11-07)
+
+- Added Folding@home client to global packages: `fahclient`
+- Team: PewDiePie — ID `1066966`
+
+## ⌨️ Hyprland: Layout-aware SUPER+J/K (2025-11-05)
+
+- New dynamic cycle bindings with clear labels:
+  - `$modifier, J, Cycle to next window, cyclenext`
+  - `$modifier, K, Cycle to previous window, cyclenext, prev`
+- Behavior adapts to the active layout at login and after layout swaps:
+  - Dwindle: native cyclenext bindings
+  - Master: uses `layoutmsg` cyclenext/cycleprev under the hood
+- Implementation:
+  - `hypr-layout-init` reads `general:layout` and (un)binds J/K appropriately;
+    run on login via `exec-once`
+  - `swap_layout` toggles master/dwindle and re-runs `hypr-layout-init`
+  - Default layout remains declarative in Nix; runtime init reconciles to the
+    live value
+
+## 🔧 ** Older Bug Fixes & Maintenance**
+
+### 🗂️ ** Updated FAQ **
+
+- Rewrite of `FAQ.md` and `FAQ.es.md`
+- Table of contents for easier navigation
+- Redid formatting for easier reading
+
+### 📦 **Nixpkgs Alias Deprecation Fixes (2025-10-31)**
+
+- **Issue**: `nix flake check` was failing due to deprecated package aliases in
+  newer nixpkgs
+- **Root cause**: nixpkgs deprecated several package names in favor of new ones,
+  causing evaluation errors
+- **Fixes applied**:
+  - `noto-fonts-emoji` → `noto-fonts-color-emoji` (modules/core/fonts.nix:28)
+    - Updated due to nixpkgs package rename for color emoji support
+  - `vaapiIntel` → `intel-vaapi-driver` (modules/drivers/intel-drivers.nix:19)
+    - VAAPI Intel driver was renamed; new package provides same functionality
+  - `vaapiVdpau` → `libva-vdpau-driver` (modules/drivers/intel-drivers.nix:20)
+    - VDPAU wrapper for VA-API also renamed in latest nixpkgs
+- **Input cleanup**: Removed hyprpanel from flake inputs
+  - hyprpanel is now available directly from nixpkgs, eliminating need for
+    separate input
+  - Reduced flake complexity and avoided potential `wrapGAppsHook` version
+    conflicts
+- **Result**: All NixOS configurations now pass `nix flake check` successfully
+
+### 🗑️ **Removed Problematic Host Configuration**
+
+- **hosts/explorer**: Removed due to broken CUDA dependencies
+  - Root cause: davinci-resolve and nvtopPackages.nvidia had dependencies on
+    cuda12.8-cuda_cuobjdump which is marked as broken in current nixpkgs
+  - This affected `nix flake check` and prevented clean builds
+  - Host can be restored if CUDA package issues are resolved upstream
 
 ## 🎯 **New Features Spotlight**
 
-### 🚀 **Vicinae Launcher Integration**
+### 🪐 **sway tiling window manager**
 
-- **🎯 High-Performance Native Launcher**: Integrated Vicinae, a modern C++/Qt-based application launcher inspired by Raycast
-- **📦 Complete NixOS Integration**: 
-  - Added as flake input with cachix configuration for faster builds
-  - Home Manager module at `modules/home/vicinae.nix` with profile-based configuration
-  - Follows ddubsOS variables pattern: `enableVicinae` and `vicinaeProfile` in host variables
-- **🎨 Four Preconfigured Profiles**:
-  - `minimal`: Basic app launcher only (enabled on all hosts by default)
-  - `standard`: Adds file search + clipboard history (500 items)
-  - `developer`: Standard + calculator + extensions + coding optimizations
-  - `power-user`: All features + advanced settings + performance tuning
-- **✨ Modern UI Experience**:
-  - Default keybinding: `Alt+Space` (avoiding Super+Space conflicts)
-  - 16px rounded corners for contemporary appearance
-  - 95% opacity with clean, professional styling
-  - Disabled store, documentation, sponsor, and theme manager items for productivity focus
-- **🌍 Universal Deployment**: 
-  - Enabled across all ddubsOS hosts with consistent minimal profile
-  - Automatic systemd service management and desktop entry creation
-  - Clean interface with only essential features: applications, system controls
-- **📚 Comprehensive Documentation**:
-  - English guide: `docs/HOWTO-Customize-Vicinae.md`
-  - Spanish translation: `docs/HOWTO-Customize-Vicinae.es.md` 
-  - Integration guide: `docs/VICINAE-INTEGRATION.md`
-  - Feature documentation: `docs/features/vicinae-launcher.md`
-- **🎛️ Easy Customization**: 
-  - NixOS-managed configuration (automatic)
-  - Manual JSON editing for fine-tuning
-  - UI-based settings for interactive changes
-  - Profile switching via host variables
-- **⚡ Performance Benefits**:
-  - Minimal resource usage with basic profile
-  - Fast startup and response times
-  - No unnecessary background indexing or extensions
-  - Clean, focused launcher experience
+- Config from `CuerdOS`
+- https://cuerdos.github.io/
 
 ### 🌐 Declarative Default Browser (XDG MIME handlers)
 
-- New Home Manager module: `modules/home/xdg/default-apps.nix` declaratively sets the system default web browser using your per-host setting in `hosts/<host>/variables.nix`.
-- Honors your `browser` variable (defaults to `google-chrome-stable`) and maps it to the correct `.desktop` ID, setting these handlers:
-  - `x-scheme-handler/http`, `x-scheme-handler/https`, `text/html`, `application/xhtml+xml`
-- Prevents apps (e.g., Discord or Zen) from permanently overriding `~/.config/mimeapps.list` — your declared defaults are re-applied on rebuild.
+- New Home Manager module: `modules/home/xdg/default-apps.nix` declaratively
+  sets the system default web browser using your per-host setting in
+  `hosts/<host>/variables.nix`.
+- Honors your `browser` variable (defaults to `google-chrome-stable`) and maps
+  it to the correct `.desktop` ID, setting these handlers:
+  - `x-scheme-handler/http`, `x-scheme-handler/https`, `text/html`,
+    `application/xhtml+xml`
+- Prevents apps (e.g., Discord or Zen) from permanently overriding
+  `~/.config/mimeapps.list` — your declared defaults are re-applied on rebuild.
 - Already supported browser keys (no extra steps needed):
-  - `google-chrome`, `google-chrome-stable`, `firefox`, `firefox-esr`, `brave`, `chromium`, `vivaldi`, `floorp`, `zen`, `zen-browser`
-- Zen special case: if you set the browser to Zen (keys `zen` or `zen-browser`), you must also enable the package because Zen is still in beta and provided via a flake input (built during the Nix build):
+  - `google-chrome`, `google-chrome-stable`, `firefox`, `firefox-esr`, `brave`,
+    `chromium`, `vivaldi`, `floorp`, `zen`, `zen-browser`
+- Zen special case: if you set the browser to Zen (keys `zen` or `zen-browser`),
+  you must also enable the package because Zen is still in beta and provided via
+  a flake input (built during the Nix build):
   ```nix path=null start=null
   # hosts/<host>/variables.nix
   enableZenBrowser = true;
@@ -80,7 +184,7 @@
 - How to use: edit your host's `variables.nix`, set `starshipChoice` to the
   desired file, then `zcli rebuild`.
 
-### 🪐 **COSMIC Desktop (Alpha)**
+### 🪐 **COSMIC Desktop (Beta)**
 
 - 🧩 Toggle-based enablement: Added `cosmicEnable` to hosts/<host>/variables.nix
   (default: false across all hosts and in hosts/default template)
@@ -311,16 +415,122 @@
 
 ---
 
+## ✨ **Recent Changes** (October 2025)
+
+## 📅 10-25-25
+
+- Added
+  - Panels: Dark Material Shell (DMS) and Noctalia Shell are now selectable via
+    `panelChoice` (per-host setting).
+    - Hyprland startup updated to stop other bars and launch the chosen panel.
+    - Noctalia is packaged as a QuickShell config; run with
+      `qs -c noctalia-shell`.
+  - MangoWC: integrated as an optional Home Manager module; enable with
+    `enableMangowc = true;`.
+  - Start menu: added zellij and nwg-menu entries to the custom start menu.
+- Changed
+  - Kernels: standardized on nixpkgs kernels; Cachy kernels removed from the
+    stack.
+- Removed
+  - Filesystems: removed support for ZFS and bcachefs in this configuration.
+
+## 📅 10-21-25
+
+- v4l2loopback: re-enable using upstream kernel module on standard kernel
+  - Add `boot.kernelModules = [ "v4l2loopback" ];`
+  - Add
+    `boot.extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];`
+  - Works with `pkgs.linuxPackages_latest`; no custom derivations or overlays
+    needed
+  - If device numbering/labels are desired, add module options via
+    `boot.extraModprobeConfig`
+
+## 📅 10-20-25
+
+- Kernel: switch from CachyOS to standard NixOS latest kernel
+  - Set `boot.kernelPackages = pkgs.linuxPackages_latest`
+  - Removed Chaotic Nyx module import that provided CachyOS kernels/ZFS variants
+  - Dropped ZFS package pin (`boot.zfs.package = pkgs.zfs_cachyos`) since ZFS is
+    not in use
+- v4l2loopback: remove custom build/overlays
+  - Deleted GCC/clang workaround derivation and overlays that rebuilt the
+    module/userspace
+  - Removed `v4l2loopbackCtl` userspace tool from required packages
+  - Result: eliminates frequent build failures during `flake` updates caused by
+    out-of-tree rebuilds
+- Files touched
+  - `modules/core/boot.nix`: select linuxPackages_latest; removed
+    ZFS/v4l2loopback custom build
+  - `modules/core/default.nix`: removed `inputs.chaotic.nixosModules.default`
+    and v4l2loopback overlays
+  - `modules/core/req-packages.nix`: removed `v4l2loopbackCtl`
+- Rationale
+  - Not using ZFS; CachyOS + custom v4l2loopback rebuilds were brittle and often
+    failed on channel bumps
+  - Prefer upstream-supported kernel/modules for stability and simpler
+    maintenance
+- Action
+  - Rebuild: `zcli rebuild` (or `nh os switch`) to apply the kernel change
+
 ## ✨ **Recent Changes** (September 2025)
+
+## 📅 9-27-25
+
+- Warp Terminal (current) packaging is now vendored inside ddubsOS for seamless
+  updates
+  - New local package: pkgs/warp-terminal-current/{package.nix, versions.json}
+  - New local updaters: pkgs/warp-terminal-current/update.sh and warp-latest.sh
+  - Overlay now consumes the vendored package; external flake input removed
+  - Flake outputs expose packages.${system}.warp-terminal-current from the
+    vendored package
+  - zcli gained a new subcommand:
+    - zcli update-warp [--commit]
+      - Bumps to the latest upstream Warp release by following download
+        redirects
+      - Computes SRI hashes and updates versions.json
+      - Optional --commit to auto-commit the bump
+  - Module polish:
+    - programs.warp-terminal-current.waylandSupport now defaults to true
+    - Desktop entry now uses configurable Icon=${cfg.iconName} (default:
+      warp-terminal-bld)
+- Docs updated (EN/ES):
+  - docs/zcli/zcli.md and docs/zcli/zcli.es.md now document zcli update-warp
+  - modules/apps/warp-terminal-current.md updated to reflect vendored packaging
+    and local update flow
+
+## 📅 9-24-25
+
+- ✅ **Waybar**:
+- `Weather.py`
+  - Fixed reliability issues, now uses OpenMeto
+  - Updated weather condition icons to color
+  - Created variables for location, metric, or imperial
+- `waybar-jak-catppuccin.nix`
+  - Fixed some styling, spacing issues
+  - Rearranged the widgets for better balance
+  - Made it default waybar in `default` host
+- 🚀 **Proxmox BackupClient**:
+  - Configure scripts to backup, list backups and restore
+    - `pbs-home-backup`
+    - `pbs-home-ls-all`
+    - `pbs-home-restore-last`
+    - `pbs-home-last`
+    - `pbs-home-prune`
+    - `pbs-home-show`
+    - `pbs-home-ls`
+    - `pbs-home-restore`
+    - `pbs-home-verify`
 
 ## 📅 9-22-25
 
 - 📚 qs-cheatsheets / 📚 qs-docs — Markdown rendering + search UX overhaul
   - ✅ Rendering fidelity: pre-convert Markdown → HTML using pandoc (GFM)
-    - HTML artifacts written under: $TMPDIR/html/<category>/<language>/<file>.html
+    - HTML artifacts written under:
+      $TMPDIR/html/<category>/<language>/<file>.html
     - Fallback: if conversion fails, content is escaped and wrapped in <pre>
   - 🖼️ Viewer: switched QML content area to TextEdit.RichText
-    - New property htmlContent preferred for display; falls back to escaped pre of markdown
+    - New property htmlContent preferred for display; falls back to escaped pre
+      of markdown
     - Code blocks, tables, and lists now render correctly
   - 🔎 Search UX: removed inline <span> highlighting; added Matches side panel
     - Shows snippet per hit (~80 chars), click to jump
@@ -328,87 +538,126 @@
     - Prev/Next wired to jumpToMatch(index)
   - 🧩 QML model/properties: htmlContent, matchesModel; display prefers HTML
   - 🧰 Dependencies added: pandoc, jq, sed
-  - 🛠️ Nix escaping fix: escape Bash parameter expansion as ''${...} inside Nix strings
-  - 📝 Docs updated (EN/ES): detailed pipeline, viewer change, Matches panel, tips, and troubleshooting
+  - 🛠️ Nix escaping fix: escape Bash parameter expansion as ''${...} inside Nix
+    strings
+  - 📝 Docs updated (EN/ES): detailed pipeline, viewer change, Matches panel,
+    tips, and troubleshooting
 
 ## 📅 9-18-25
 
-- Flake: Added NUR input and overlay; included nur.repos.charmbracelet.crush in global packages
+- Flake: Added NUR input and overlay; included nur.repos.charmbracelet.crush in
+  global packages
 
 ## 📅 9-17-25
 
-- 🛠️ **Suckless Package Refactor**: Modernized dwm, st, and slstatus build system
-  - **Nix Integration**: Replaced manual `stdenv.mkDerivation` blocks with nixpkgs `overrideAttrs` approach
-  - **Better Maintainability**: Now leverages battle-tested nixpkgs build logic and dependency management
-  - **Preserved Customizations**: Maintains all custom source paths, patches, and static linking configurations
-  - **Conditional Building**: Suckless tools only built when host has `dwmEnable = true` in variables.nix
-  - **Architecture**: 
-    - `modules/home/suckless/pkgs.nix` - Uses `pkgs.dwm.overrideAttrs`, `pkgs.st.overrideAttrs`, `pkgs.slstatus.overrideAttrs`
-    - `modules/home/default.nix:78` - Conditionally imports suckless module based on `dwmEnable`
-    - `modules/home/suckless/dwm-session.nix` - System-level DWM service configuration
-  - **Benefits**: Automatic dependency resolution, better error handling, easier maintenance when nixpkgs updates
+- 🛠️ **Suckless Package Refactor**: Modernized dwm, st, and slstatus build
+  system
+  - **Nix Integration**: Replaced manual `stdenv.mkDerivation` blocks with
+    nixpkgs `overrideAttrs` approach
+  - **Better Maintainability**: Now leverages battle-tested nixpkgs build logic
+    and dependency management
+  - **Preserved Customizations**: Maintains all custom source paths, patches,
+    and static linking configurations
+  - **Conditional Building**: Suckless tools only built when host has
+    `dwmEnable = true` in variables.nix
+  - **Architecture**:
+    - `modules/home/suckless/pkgs.nix` - Uses `pkgs.dwm.overrideAttrs`,
+      `pkgs.st.overrideAttrs`, `pkgs.slstatus.overrideAttrs`
+    - `modules/home/default.nix:78` - Conditionally imports suckless module
+      based on `dwmEnable`
+    - `modules/home/suckless/dwm-session.nix` - System-level DWM service
+      configuration
+  - **Benefits**: Automatic dependency resolution, better error handling, easier
+    maintenance when nixpkgs updates
 
 - qs-keybinds: Window-manager modes and UI refinements
-  - Added Niri, BSPWM, and DWM modes alongside existing Hyprland/Emacs/Kitty/WezTerm/Yazi modes
+  - Added Niri, BSPWM, and DWM modes alongside existing
+    Hyprland/Emacs/Kitty/WezTerm/Yazi modes
   - Split header into two rows:
     - Top row: window managers (Hyprland, Niri, BSPWM, DWM)
     - Second row: application views (Emacs, Kitty, WezTerm, Yazi, Cheatsheets)
   - Availability is host-dependent with detection and env overrides:
     - Buttons are hidden when the mode is unavailable on the host
-    - Graceful fallback: when a mode is invoked but unavailable, the app shows an "unavailable mode" banner and renders an empty list instead of exiting
-    - Optional env overrides for host state: QS_HAS_NIRI, QS_HAS_HYPR, QS_HAS_BSPWM, QS_HAS_DWM (0/1)
+    - Graceful fallback: when a mode is invoked but unavailable, the app shows
+      an "unavailable mode" banner and renders an empty list instead of exiting
+    - Optional env overrides for host state: QS_HAS_NIRI, QS_HAS_HYPR,
+      QS_HAS_BSPWM, QS_HAS_DWM (0/1)
   - Hyprland integration:
-    - Added window rules for "Niri Keybinds", "BSPWM Keybinds", and "DWM Keybinds" (float, center, no border/shadow, rounding, opacity) to match the rest of the qs-* overlays
-  - Layout: increased key column width and dynamic sizing to prevent long combinations (e.g., Mod+Ctrl+Shift+Wheel) from overlapping descriptions
+    - Added window rules for "Niri Keybinds", "BSPWM Keybinds", and "DWM
+      Keybinds" (float, center, no border/shadow, rounding, opacity) to match
+      the rest of the qs-\* overlays
+  - Layout: increased key column width and dynamic sizing to prevent long
+    combinations (e.g., Mod+Ctrl+Shift+Wheel) from overlapping descriptions
   - Parsers:
     - Niri: new parser reads binds from ~/.config/niri/config.kdl
-    - BSPWM: sxhkd parser reads ~/.config/sxhkd/sxhkdrc; handles blank/indented lines robustly
+    - BSPWM: sxhkd parser reads ~/.config/sxhkd/sxhkdrc; handles blank/indented
+      lines robustly
     - DWM: switched to sxhkd-based parser at ~/.config/suckless/sxhkd/sxhkdrc
     - Yazi: fixed submode case nesting; general shell case/esac fixes
   - Build/packaging fixes:
-    - Escaped QS_HAS_* env references in the Nix-generated script to avoid Nix evaluation errors
-    - Corrected a missing quote in Hyprland window rules that caused a syntax error
+    - Escaped QS*HAS*\* env references in the Nix-generated script to avoid Nix
+      evaluation errors
+    - Corrected a missing quote in Hyprland window rules that caused a syntax
+      error
 
 ## 📅 9-16-25
 
 - 📚 **qs-docs**: New Qt6 QML documentation viewer for ~/ddubsos/docs/
-  - **Smart documentation browsing**: Dedicated app for technical documentation with real-time search
-  - **Multi-language support**: Supports both English and Spanish documentation files
+  - **Smart documentation browsing**: Dedicated app for technical documentation
+    with real-time search
+  - **Multi-language support**: Supports both English and Spanish documentation
+    files
   - **Intuitive interface**: Clean, modern UI matching the qs-cheatsheets design
   - **Keybinding**: `SUPER+SHIFT+D` launches qs-docs for quick access
   - **File organization**: Reads from `~/ddubsos/docs/` directory structure
   - **Search functionality**: Real-time filtering through documentation content
   - **Hyprland integration**: Window rules for floating and centering
-  - **Technical documentation**: Comprehensive English and Spanish documentation included
+  - **Technical documentation**: Comprehensive English and Spanish documentation
+    included
     - Architecture details and file layouts
     - UI components and error handling
     - Performance considerations and maintenance
     - Future development plans
 
 - 🔧 **qs-keybinds**: Fixed critical QML syntax errors preventing app launch
-  - **Issue resolved**: Removed duplicate ListView components with conflicting IDs
+  - **Issue resolved**: Removed duplicate ListView components with conflicting
+    IDs
   - **QML structure**: Fixed unclosed elements and malformed template hierarchy
-  - **Full functionality**: All modes now work correctly (hyprland, emacs, kitty, wezterm, yazi, cheatsheets)
-  - **Template generation**: Ensured proper heredoc generation without truncation
-  - **Testing verified**: App launches and functions as expected across all configurations
+  - **Full functionality**: All modes now work correctly (hyprland, emacs,
+    kitty, wezterm, yazi, cheatsheets)
+  - **Template generation**: Ensured proper heredoc generation without
+    truncation
+  - **Testing verified**: App launches and functions as expected across all
+    configurations
 
-- ⌨️ **Enhanced Quick-Select Keybinds**: Unified access to documentation and configuration tools
+- ⌨️ **Enhanced Quick-Select Keybinds**: Unified access to documentation and
+  configuration tools
   - **SUPER+SHIFT+K**: Launch qs-keybinds (keybindings viewer)
   - **SUPER+SHIFT+C**: Launch qs-cheatsheets (cheatsheets browser)
   - **SUPER+SHIFT+D**: Launch qs-docs (documentation viewer)
-  - **Consistent interface**: All three apps share similar UI design and behavior
-  - **Professional workflow**: Quick access to help, documentation, and configuration reference
+  - **Consistent interface**: All three apps share similar UI design and
+    behavior
+  - **Professional workflow**: Quick access to help, documentation, and
+    configuration reference
 
-- 🚀 **Warp Terminal**: Dual-version support with current build and stable versions
-  - **Package integration**: Added `warp-terminal-current` from flake input with Wayland support enabled
-  - **Current build wrapper**: Created `warp-bld` executable that wraps latest upstream version with runtime backend detection
-  - **Environment handling**: Automatically selects Wayland or X11 backend based on `XDG_SESSION_TYPE`
-  - **Version checker**: New `warp-check` script compares stable vs current build versions and displays status
-  - **Desktop entries**: Separate GUI launchers for stable ("Warp") and current build ("Warp (Current bld)")
+- 🚀 **Warp Terminal**: Dual-version support with current build and stable
+  versions
+  - **Package integration**: Added `warp-terminal-current` from flake input with
+    Wayland support enabled
+  - **Current build wrapper**: Created `warp-bld` executable that wraps latest
+    upstream version with runtime backend detection
+  - **Environment handling**: Automatically selects Wayland or X11 backend based
+    on `XDG_SESSION_TYPE`
+  - **Version checker**: New `warp-check` script compares stable vs current
+    build versions and displays status
+  - **Desktop entries**: Separate GUI launchers for stable ("Warp") and current
+    build ("Warp (Current bld)")
   - **Cross-platform**: Works on both AMD and Intel GPU systems with Hyprland
-  - **Runtime libraries**: Fixed Wayland connection panics by including required libraries in package build
-  - **System activation**: Added desktop database and icon cache updates for proper menu integration
-  - **Available commands**: 
+  - **Runtime libraries**: Fixed Wayland connection panics by including required
+    libraries in package build
+  - **System activation**: Added desktop database and icon cache updates for
+    proper menu integration
+  - **Available commands**:
     - `warp-terminal` - stable version from nixpkgs
     - `warp-bld` - current upstream build with automatic backend selection
     - `warp-check` - version comparison and system status utility
@@ -416,49 +665,74 @@
 ## 📅 9-15-25
 
 - 🔓 **qs-wlogout**: New compact Qt6 QML power menu implementation
-  - **Compact design**: Small, centered floating window (520x320px) without huge blur frames
-  - **Six power options**: Lock, Logout, Suspend, Hibernate, Shutdown, Reboot in 3x2 grid
-  - **Proper Hyprland integration**: Uses `hyprctl dispatch exit` for clean logout to SDDM
-  - **Semi-transparent styling**: Blur-compatible background with rounded corners (20px radius)
-  - **Keyboard shortcuts**: L, E, U, H, S, R keys for quick access; Escape to close
+  - **Compact design**: Small, centered floating window (520x320px) without huge
+    blur frames
+  - **Six power options**: Lock, Logout, Suspend, Hibernate, Shutdown, Reboot in
+    3x2 grid
+  - **Proper Hyprland integration**: Uses `hyprctl dispatch exit` for clean
+    logout to SDDM
+  - **Semi-transparent styling**: Blur-compatible background with rounded
+    corners (20px radius)
+  - **Keyboard shortcuts**: L, E, U, H, S, R keys for quick access; Escape to
+    close
   - **Click-to-close**: Click anywhere on menu background to dismiss
   - **Window rules**: Hyprland rules for floating, centering, and visual effects
   - **Visual improvements**: Eliminated large shadow/blur boxes around menu area
-  - **Qt6 QML runtime**: Uses standard Qt6 components instead of quickshell-specific ones
-  - **Icon support**: 64x64 PNG icons for each power action with fallback generation
-  - **🇪🇸 Spanish language support**: Use `-es` flag or `QS_WLOGOUT_SPANISH=1` for Spanish text
-    - **Spanish translations**: Bloquear, Cerrar Sesión, Suspender, Hibernar, Apagar, Reiniciar
-    - **Usage examples**: 
+  - **Qt6 QML runtime**: Uses standard Qt6 components instead of
+    quickshell-specific ones
+  - **Icon support**: 64x64 PNG icons for each power action with fallback
+    generation
+  - **🇪🇸 Spanish language support**: Use `-es` flag or `QS_WLOGOUT_SPANISH=1`
+    for Spanish text
+    - **Spanish translations**: Bloquear, Cerrar Sesión, Suspender, Hibernar,
+      Apagar, Reiniciar
+    - **Usage examples**:
       - `qs-wlogout -es` (Spanish mode)
       - `qs-wlogout` (English default)
       - `QS_WLOGOUT_SPANISH=1 qs-wlogout` (Environment variable)
     - **Hyprland integration**: Modify binding to default to Spanish mode
-      - **Current binding**: `"ALT SHIFT,Q,exec, qs-wlogout"` in `modules/home/hyprland/binds.nix:68`
+      - **Current binding**: `"ALT SHIFT,Q,exec, qs-wlogout"` in
+        `modules/home/hyprland/binds.nix:68`
       - **For Spanish default**: Change to `"ALT SHIFT,Q,exec, qs-wlogout -es"`
-      - **Alternative method**: Set environment variable in binding: `"ALT SHIFT,Q,exec, QS_WLOGOUT_SPANISH=1 qs-wlogout"`
+      - **Alternative method**: Set environment variable in binding:
+        `"ALT SHIFT,Q,exec, QS_WLOGOUT_SPANISH=1 qs-wlogout"`
+
 ## 📅 9-10-25
 
 - ZCLI v1.1.0 — Interactive staging before rebuild/update
-  - New pre-build flow: lists untracked/unstaged files with indices; choose numbers or 'all' to stage, or press Enter to skip.
-  - New flags: `--no-stage` (skip prompt), `--stage-all` (stage everything automatically)
-  - New command: `zcli stage [--all]` to run the staging selector without rebuilding
+  - New pre-build flow: lists untracked/unstaged files with indices; choose
+    numbers or 'all' to stage, or press Enter to skip.
+  - New flags: `--no-stage` (skip prompt), `--stage-all` (stage everything
+    automatically)
+  - New command: `zcli stage [--all]` to run the staging selector without
+    rebuilding
   - Deterministic git path pinned in dispatcher (GIT_BIN)
   - Help and docs updated (docs/zcli.md, docs/zcli.es.md)
 
 - 🆕 Wallpapers: Restore on login with fallbacks and Hyprpanel-safe startup
-  - New script: `qs-wallpapers-restore` restores the last selected wallpaper at session start
+  - New script: `qs-wallpapers-restore` restores the last selected wallpaper at
+    session start
     - Reads state written by `qs-wallpapers-apply`:
       - `$XDG_STATE_HOME/qs-wallpapers/current.json` (path, backend, timestamp)
       - `$XDG_STATE_HOME/qs-wallpapers/current_wallpaper` (plain text path)
-    - Preferred order: recorded backend → `swww` → `hyprpaper` → `mpvpaper` → `waypaper`
-    - Hyprpanel safety: waits up to `QS_RESTORE_WAIT_HYPRPANEL_SECONDS` (default 15s) for `hyprpanel` before starting `swww-daemon`; if `waybar` is already running, proceeds immediately
-    - Stops conflicting daemons between attempts (e.g., stop mpvpaper/hyprpaper before swww; stop swww/hyprpaper before mpvpaper)
+    - Preferred order: recorded backend → `swww` → `hyprpaper` → `mpvpaper` →
+      `waypaper`
+    - Hyprpanel safety: waits up to `QS_RESTORE_WAIT_HYPRPANEL_SECONDS` (default
+      15s) for `hyprpanel` before starting `swww-daemon`; if `waybar` is already
+      running, proceeds immediately
+    - Stops conflicting daemons between attempts (e.g., stop mpvpaper/hyprpaper
+      before swww; stop swww/hyprpaper before mpvpaper)
     - Override order via `QS_RESTORE_ORDER` (comma-separated)
-  - Apply script enhancement: `qs-wallpapers-apply` now persists the selection to the state files above
-  - Hyprland integration: `modules/home/hyprland/exec-once.nix` now calls `qs-wallpapers-restore`
-    - Hyprpanel branch: `hyprpanel` then `qs-wallpapers-restore`, with fallback to default `stylixImage` via `waypaper --backend swaybg`
-    - Waybar branch: starts `swww-daemon`/`waybar`, then `qs-wallpapers-restore` with fallback to `stylixImage` via `waypaper --backend swww`
-  - Packaging: added `qs-wallpapers-restore` to `home.packages` in `modules/home/scripts/default.nix`
+  - Apply script enhancement: `qs-wallpapers-apply` now persists the selection
+    to the state files above
+  - Hyprland integration: `modules/home/hyprland/exec-once.nix` now calls
+    `qs-wallpapers-restore`
+    - Hyprpanel branch: `hyprpanel` then `qs-wallpapers-restore`, with fallback
+      to default `stylixImage` via `waypaper --backend swaybg`
+    - Waybar branch: starts `swww-daemon`/`waybar`, then `qs-wallpapers-restore`
+      with fallback to `stylixImage` via `waypaper --backend swww`
+  - Packaging: added `qs-wallpapers-restore` to `home.packages` in
+    `modules/home/scripts/default.nix`
   - Docs:
     - Updated: `docs/qs-wallpapers.md` (persistence + restore integration)
     - New: `docs/qs-wallpaper-restore.md` (behavior, env vars, exit semantics)
@@ -517,7 +791,7 @@ services.logind.settings.Login = {
     and consume packages only via pkgs.
 
 - Refactor: modules/core/req-packages.nix now consumes these from pkgs instead
-  of inputs.*.packages.${system}.default.
+  of inputs.\*.packages.${system}.default.
 
 - Docs: Updated docs/project-guide.md and docs/project-guide.es.md to document
   the overlay approach and note that future external packages (e.g., quickshell)
@@ -606,7 +880,7 @@ services.logind.settings.Login = {
     consistency
 - 🖥️ Displays/Monitors (formatting/docs update, not a new feature): Migrated
   guidance to Hyprland monitorv2
-  - hosts/*/variables.nix: moved monitor settings to the bottom; commented
+  - hosts/\*/variables.nix: moved monitor settings to the bottom; commented
     legacy `monitor =` lines; added equivalent `hyprMonitorsV2` blocks; default
     VM provides `Virtual-1` in v2 and legacy (commented)
   - hosts/default/variables.nix: consolidated all monitor examples at the
@@ -620,7 +894,7 @@ services.logind.settings.Login = {
     3.13)
   - https://github.com/nixos/nixpkgs/issues/437058
   - Fix being tracked: https://github.com/NixOS/nixpkgs/pull/438729
-  - Action: Using rofi as the fallback app launcher; will re-enable nwg-* tools
+  - Action: Using rofi as the fallback app launcher; will re-enable nwg-\* tools
     when upstream issues are resolved
 
 ## ✨ **Recent Changes** (August 2025)
@@ -860,15 +1134,15 @@ services.logind.settings.Login = {
     - Notably:
       - pygls (via cmake-language-server) failed import-time checks (lsprotocol
         API mismatch).
-      - i3ipc (pulled by nwg-* apps) failed async pytest suites, e.g. "Failed:
+      - i3ipc (pulled by nwg-\* apps) failed async pytest suites, e.g. "Failed:
         async def functions are not natively supported."
   - Actions taken
     - Commented out cmake-language-server in editors module (evil-helix).
-    - Disabled all nwg-* applications except nwg-dock-hyprland (kept enabled).
+    - Disabled all nwg-\* applications except nwg-dock-hyprland (kept enabled).
     - Overlays to skip upstream tests were attempted but removed; will re-enable
       packages once upstream fixes land.
   - Plan
-    - Monitor nixpkgs updates; re-enable cmake-language-server and nwg-* once
+    - Monitor nixpkgs updates; re-enable cmake-language-server and nwg-\* once
       fixed.
 
 #### 📅 **8-24-25**
@@ -879,17 +1153,17 @@ services.logind.settings.Login = {
   - Notably:
     - pygls (via cmake-language-server chain) failed import-time checks
       (lsprotocol API mismatch).
-    - i3ipc (pulled by nwg-* apps) failed async pytest suites with errors like:
+    - i3ipc (pulled by nwg-\* apps) failed async pytest suites with errors like:
       - "Failed: async def functions are not natively supported."
       - PytestRemovedIn9 warnings about async fixtures and BrokenPipeError
         during tests.
 - Actions taken
   - Commented out cmake-language-server in editors module (evil-helix).
-  - Disabled all nwg-* applications EXCEPT nwg-dock-hyprland (kept enabled).
+  - Disabled all nwg-\* applications EXCEPT nwg-dock-hyprland (kept enabled).
   - Attempted overlays to skip upstream tests (pygls/i3ipc) but removed to avoid
     complexity—will re-enable packages once upstream is fixed.
 - Plan
-  - Monitor nixpkgs updates; re-enable cmake-language-server and nwg-* apps
+  - Monitor nixpkgs updates; re-enable cmake-language-server and nwg-\* apps
     (nwg-displays, nwg-panel, etc.) when the upstream Python packages are fixed.
   - Keep Warp and other desired updates from the newer nixpkgs while avoiding
     the failing packages for now.
@@ -1145,19 +1419,27 @@ services.logind.settings.Login = {
 #### 📅 **9-13-25**
 
 - 📝 Emacs/Doom refactor: standardize Emacs as a Home Manager feature
-  - ✅ Enabled Emacs user daemon (services.emacs.enable) and set emacsclient as default editor (emacs-pgtk)
-  - 🔄 Home Manager activation now bootstraps Doom on first run (git clone into ~/.emacs.d if empty) and runs `doom sync -u` on every activation
-  - 🧹 Removed zcli Doom subcommands and the installer wiring; simplified zcli help
-  - 📄 Docs updated (zcli.md/es, FAQ, project-guide EN/ES, getting-started cheatsheets) to reflect emacsclient usage and the new `et` terminal wrapper
+  - ✅ Enabled Emacs user daemon (services.emacs.enable) and set emacsclient as
+    default editor (emacs-pgtk)
+  - 🔄 Home Manager activation now bootstraps Doom on first run (git clone into
+    ~/.emacs.d if empty) and runs `doom sync -u` on every activation
+  - 🧹 Removed zcli Doom subcommands and the installer wiring; simplified zcli
+    help
+  - 📄 Docs updated (zcli.md/es, FAQ, project-guide EN/ES, getting-started
+    cheatsheets) to reflect emacsclient usage and the new `et` terminal wrapper
 
 - 🎨 Terminal Emacs (TTY) color/contrast improvements
-  - 🌈 Truecolor pipeline: export COLORTERM=truecolor; prefer xterm-direct/tmux-direct when available via new `et` wrapper
-  - 🖤 TTY faces: force dark background and set higher-contrast defaults; normalize bold to avoid brightening
+  - 🌈 Truecolor pipeline: export COLORTERM=truecolor; prefer
+    xterm-direct/tmux-direct when available via new `et` wrapper
+  - 🖤 TTY faces: force dark background and set higher-contrast defaults;
+    normalize bold to avoid brightening
   - 🔧 tmux: set default-terminal tmux-256color and keep RGB terminal-overrides
-  - 🌓 Terminal configs: disable bold→bright mapping in Ghostty/WezTerm; set WezTerm opacity to 1.0 for deeper dark
+  - 🌓 Terminal configs: disable bold→bright mapping in Ghostty/WezTerm; set
+    WezTerm opacity to 1.0 for deeper dark
 
 - 🚀 Convenience
-  - New `et` wrapper for terminal Emacs: picks truecolor terminfo and launches `emacsclient -t -a ""`
+  - New `et` wrapper for terminal Emacs: picks truecolor terminfo and launches
+    `emacsclient -t -a ""`
   - GUI: `emacsclient -c -n -a ""` returns immediately to the shell
 
 #### 📅 **9-7-25**
@@ -1237,7 +1519,7 @@ services.logind.settings.Login = {
   - Theming: darker Catppuccin-like UI (title/status/error/prompt/selected
     panels)
   - NixOS-safe syntax include: include
-    /run/current-system/sw/share/nano/*.nanorc
+    /run/current-system/sw/share/nano/\*.nanorc
   - Usability: line numbers, softwrap, tabstospaces, autoindent, matchbrackets,
     whitespace markers, smoother scrolling via unset jumpyscrolling, ^S to save
   - Fixes: removed invalid options; resolved parse errors; adjusted message

@@ -1,26 +1,26 @@
 English | [Español](./README.es.md)
 
-<div align="center">
+# ddubsOS  
 
-# ddubsOS -- v2.5
-
-Document Date: September 10th, 2025
+Document Date: November, 25th, 2025
 
 **ddubsOS** is a fork of **ZaneyOS**. This is the configuration I use on my
 systems every day—from towers, laptops, and VMs.
 
-📣 New: The ddubsOS Wiki is live!
+> 📣 The ddubsOS Wiki is live (English/Spanish)!
 
-- Browse the wiki (English/Spanish): https://github.com/dwilliam62/ddubsos-wiki
-- Cheatsheets index:
-  https://github.com/dwilliam62/ddubsos-wiki/blob/main/Cheatsheets.md
+- 🌐 Wiki: https://gitlab.com/dwilliam62/ddubsos/-/wikis/home
+- 📘 Cheatsheets Library: cheatsheets/README.md | [Español](cheatsheets/README.es.md)
+- ❓ FAQ: FAQ.md | FAQ.es.md
+- 🤝 Contributing: CONTRIBUTING.md | CONTRIBUTING.es.md
+- 📏 Code of Conduct: CODE_OF_CONDUCT.md | CODE_OF_CONDUCT.es.md
 
-## Features & Additions
+## ✨ Features & Additions
 
 I have added a lot of packages and features not found in ZaneyOS. Some may find
 it bloated, but this fork is how I am learning to make **NixOS** do what I want.
-I am also defaulting to `Hyprpanel` vs. `waybar` But the waybar config files are
-still there and Hyprpanel can be disabled in favor of waybar
+
+The default panel is `waybar`. `Hyprpanel` is available and can be enabled if you prefer it.
 
 - IMPORTANT: New [Cheatsheets Library](cheatsheets/README.md) — centralized,
   human-friendly docs for tools and ddubsOS specifics. English |
@@ -28,10 +28,10 @@ still there and Hyprpanel can be disabled in favor of waybar
 - IMPORTANT: [FAQ](FAQ.md) — comprehensive answers and tips. English |
   [Español](FAQ.es.md)
 
-## Documentation
+## 📚 Documentation
 
-- Wiki: [ddubsOS Wiki](https://github.com/dwilliam62/ddubsos-wiki) | Cheatsheets
-  index: https://github.com/dwilliam62/ddubsos-wiki/blob/main/Cheatsheets.md
+- Wiki: [ddubsOS Wiki](https://gitlab.com/dwilliam62/ddubsos/-/wikis/home)
+- Cheatsheets Library: [English](cheatsheets/README.md) | [Español](cheatsheets/README.es.md)
 - README: English | [Español](./README.es.md)
 - Cheatsheets Library: [English](cheatsheets/README.md) |
   [Español](cheatsheets/README.es.md)
@@ -48,7 +48,7 @@ still there and Hyprpanel can be disabled in favor of waybar
   [Español](docs/project-guide.es.md)
 - zcli: [English](docs/zcli.md) | [Español](docs/zcli.es.md)
 
-### New in refactor branch (ddubos-refactor)
+### 🆕 Add host into flake.nix
 
 - Host-based flake outputs alongside legacy profile outputs
   - Build by host (preferred):
@@ -73,18 +73,18 @@ still there and Hyprpanel can be disabled in favor of waybar
   - Status: docs/ddubos-refactor-status.md
   - Test plan: docs/ddubos-refactor-testplan.md
 
-### Installed Tools & Enhancements
+## 🧰 Installed Tools & Enhancements
 
 - **Window Manager:** Hyprland Plugins, pyprland scratchpad, Wayfire
 - **Desktop Environment:** GNOME, and BSPWM ## Currently disabled, being
   reworked ##
-- **Multiple Editors:** NeoVim configured with NVF, Evil Helix, vscode, the
+- **Multiple Editors:** NeoVim configured with NVF (or nixvim), Evil Helix, vscode, the
   later with plugins, LSPs installed
 - **Terminals:** Kitty, WezTerm, Ghostty, Foot, all configured, and themed
 - **Shell:** ZSH as default, BASH, and Fish
-- **Wallpapers:** I have about 500MB of wallpapers
+- **Wallpapers:** I have about 400MB of webp compressed wallpapers
 
-### Modular Configurations
+## 🧩 Modular Configuration
 
 I aimed to make the setup **modular**. There is a **Nix configuration file** for
 packages that need custom configurations, including:
@@ -97,9 +97,7 @@ stable branch, this config will change (break?) often. 🚀
 Feel free to fork it and make it your own. Or you might find the more slimmed
 down config of ZaneyOS more to your liking.
 
-<img align="center" width="80%" src="img/ddubsos-waybar-ss-1.png" />
-
-</div>
+<p align="center"><img width="80%" src="img/ddubsos-waybar-ss-1.png" /></p>
 
 <details>
 <summary><h2>More Screenshots</h2></summary>
@@ -149,7 +147,7 @@ down config of ZaneyOS more to your liking.
 
 The ddubsOS Wiki is now available (English/Spanish):
 
-- https://github.com/dwilliam62/ddubsos-wiki
+- https://gitlab.com/dwilliam62/ddubsos/-/wikis/home
 
 #### 🍖 Requirements
 
@@ -157,7 +155,7 @@ The ddubsOS Wiki is now available (English/Spanish):
 - The `ddubsos` folder (this repo) is expected to be in your home directory.
 - You must have installed NIXOS using **GPT** parition with booting with
   **UEFI**.
-- ** 500MB minimum /boot parititon required. **
+- ** 1GB minimum /boot parititon required. **
 - Systemd-boot is what is supported
 - For GRUB you will have to brave the internet for a how-to. ☺️
 - Manually editing your host specific files.
@@ -183,12 +181,102 @@ The ddubsOS Wiki is now available (English/Spanish):
   `modules/core/global-packages.nix` file.
 - Easy to understand file structure and simple, but encompassing, configuration.
 
-<div align="center">
+## 📖 Do yourself a favor — read the [FAQ](FAQ.md) and the [Wiki](https://gitlab.com/dwilliam62/ddubsos/-/wikis/home)
 
-Please do yourself a favor and
-[read the wiki](https://zaney.org/wiki/zaneyos-2.3/).
+## ⬇️ Installation
 
-</div>
+<details>
+<summary><strong> Install with script </strong></summary>
+
+### 📜 Script:
+
+This is the easiest and recommended way of starting out. The script is not meant
+to allow you to change every option that you can in the flake or help you
+install extra packages. It is simply here so you can get my configuration
+installed with as little chances of breakages and then fiddle to your hearts
+content!
+
+Simply copy this and run it:
+
+![ddubsOS First Install Command](img/first-install-cmd.jpg)
+
+```
+nix-shell -p git curl wget vim pciutils
+```
+
+Then:
+
+![ddubsOS Install Script Command](img/install-script.jpg)
+
+```
+sh <(curl -L https://gitlab.com/dwilliam62/ddubsos/-/raw/main/install-ddubsos.sh)
+```
+
+#### The install process will look something like this:
+
+![First Part Of Install](img/1.jpg)
+
+![Second Part Of Install](img/2.jpg)
+
+#### After the install completes your environment will probably look broken. Just reboot and you will see this as your login:
+
+![Display Manager](img/3.jpg)
+
+#### Then after login you should see a screen like this:
+
+![Desktop Example](img/4.jpg)
+
+</details>
+
+<details>
+<summary><strong> Manual install process </strong></summary>
+
+1. Run this command to ensure Git & Vim are installed:
+
+```
+nix-shell -p git curl wget vim pciutils
+```
+
+2. Clone this repo & enter it:
+
+```
+cd && git clone https://gitlab.com/dwilliam62/ddubsos --depth=1 ~/ddubsos
+cd ddubsos
+```
+
+- _You should stay in this folder for the rest of the install_
+
+3. Create the host folder for your machine(s) like so:
+
+```
+cp -r hosts/default hosts/<your-desired-hostname>
+git add .
+```
+
+4. Edit `hosts/<your-desired-hostname>/variables.nix`.
+
+5. Edit `flake.nix` and fill in your username, profile (gpu), and hostname.
+
+6. Generate your hardware.nix like so:
+
+```
+nixos-generate-config --show-hardware-config > hosts/<your-desired-hostname>/hardware.nix
+```
+
+7. Run this to enable flakes and install the flake replacing hostname with
+   whatever you put as the hostname:
+
+```
+NIX_CONFIG="experimental-features = nix-command flakes"
+sudo nixos-rebuild switch --flake .#profile
+    - (`profile` is your GPU. amd, intel, nvidia, nvidia-laptop, vm)
+```
+
+Now when you want to rebuild the configuration you have access to an alias
+called `fr` that will rebuild the flake and you do not have to be in the
+`zaneyos` folder for it to work.
+
+</details>
 
 #### 📦 How To Install Packages?
 
@@ -208,7 +296,7 @@ Please do yourself a favor and
 - Contact us on [Discord](https://discord.gg/2cRdBs8) as well, for a potentially
   faster response.
 
-- Don't forget to checkout the [FAQ](https://zaney.org/wiki/zaneyos-2.3/faq)
+- Don't forget to checkout the [FAQ](FAQ.md)
 
 # Hyprland Keybindings
 
@@ -218,6 +306,7 @@ Below are the keybindings for Hyprland, formatted for easy reference.
 
 - `$modifier + Return` → Launch `terminal`
 - `$modifier + Shift + Return` → Launch `rofi-launcher`
+- `$modifier + Tab` → Toggle `Quickshell Overview` (workspace overview with live previews)
 - `$modifier + Shift + W` → Open `Wallpaper Picker`
 - `$modifier + Shift + A` → Open `Animated Wallpaper Menu`
 - `$modifier + Alt + W` → Open `wallsetter`
@@ -285,108 +374,13 @@ Below are the keybindings for Hyprland, formatted for easy reference.
 - `Alt + Tab` → Cycle to next window
 - `Alt + Tab` → Bring active window to top
 
-## Installation:
-
-<details>
-<summary><strong> ⬇️ Install with script </strong></summary>
-
-### 📜 Script:
-
-This is the easiest and recommended way of starting out. The script is not meant
-to allow you to change every option that you can in the flake or help you
-install extra packages. It is simply here so you can get my configuration
-installed with as little chances of breakages and then fiddle to your hearts
-content!
-
-Simply copy this and run it:
-
-![ddubsOS First Install Command](img/first-install-cmd.jpg)
-
-```
-nix-shell -p git curl wget vim pciutils
-```
-
-Then:
-
-![ddubsOS Install Script Command](img/install-script.jpg)
-
-```
-sh <(curl -L https://gitlab.com/dwilliam62/ddubsos/-/raw/bae85cf9eded4a2b7096fad78ea7bcafca514846/install-ddubsos.sh)
-```
-
-#### The install process will look something like this:
-
-![First Part Of Install](img/1.jpg)
-
-![Second Part Of Install](img/2.jpg)
-
-#### After the install completes your environment will probably look broken. Just reboot and you will see this as your login:
-
-![Display Manager](img/3.jpg)
-
-#### Then after login you should see a screen like this:
-
-![Desktop Example](img/4.jpg)
-
-</details>
-
-<details>
-<summary><strong> 🦽 Manual install process:  </strong></summary>
-
-1. Run this command to ensure Git & Vim are installed:
-
-```
-nix-shell -p git curl wget vim pciutils
-```
-
-2. Clone this repo & enter it:
-
-```
-cd && git clone https://gitlab.com/dwilliam62/ddubsos --depth=1 ~/ddubsos
-cd ddubsos
-```
-
-- _You should stay in this folder for the rest of the install_
-
-3. Create the host folder for your machine(s) like so:
-
-```
-cp -r hosts/default hosts/<your-desired-hostname>
-git add .
-```
-
-4. Edit `hosts/<your-desired-hostname>/variables.nix`.
-
-5. Edit `flake.nix` and fill in your username, profile (gpu), and hostname.
-
-6. Generate your hardware.nix like so:
-
-```
-nixos-generate-config --show-hardware-config > hosts/<your-desired-hostname>/hardware.nix
-```
-
-7. Run this to enable flakes and install the flake replacing hostname with
-   whatever you put as the hostname:
-
-```
-NIX_CONFIG="experimental-features = nix-command flakes" 
-sudo nixos-rebuild switch --flake .#profile 
-    - (`profile` is your GPU. amd, intel, nvidia, nvidia-laptop, vm)
-```
-
-Now when you want to rebuild the configuration you have access to an alias
-called `fr` that will rebuild the flake and you do not have to be in the
-`zaneyos` folder for it to work.
-
-</details>
-
 ### Special Recognitions:
 
 Thank you for all your assistance
 
 - Zaney https://gitlab.com/zaney
 - Jakoolit https://github.com/jakoolit
-- Justaguylinux https://github.com/drewgrif
+- Justaguylinux https://codeberg.org/justaguylinux
 - Jerry Starke https://github.com/JerrySM64
 - Redbeardymcgee
 - iynaix

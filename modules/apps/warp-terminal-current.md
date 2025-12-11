@@ -1,16 +1,18 @@
+English | [Español](./warp-terminal-current.es.md)
+
 # Warp Terminal (Current) Module {#opt-programs.warp-terminal-current.enable}
 
 This module provides access to the bleeding-edge/current version of Warp Terminal, packaged directly from the latest releases. 
 
 Installs TWO separate executables:
 - **`warp-terminal`** - Stable version from nixpkgs 
-- **`warp-bld`** - Bleeding-edge version from war-terminal source
+- **`warp-bld`** - Bleeding-edge version from vendored "current" package (this repo)
 
 ## Overview
 
 - **Package**: `warp-terminal-current` 
-- **Source**: https://github.com/dwilliam62/war-terminal
-- **Updates**: Automatically updated via `zcli update` (flake update process)
+- **Source**: Vendored in this repo at `pkgs/warp-terminal-current` (based on upstream Warp releases)
+- **Updates**: Run `scripts/update-warp-current.sh` (or see below) to bump to the latest release with verified hashes
 - **Platforms**: x86_64-linux, aarch64-linux
 - **License**: Unfree (proprietary)
 
@@ -50,8 +52,8 @@ programs.warp-terminal-current = {
 
 ### `programs.warp-terminal-current.package`
 - **Type**: Package
-- **Default**: `pkgs.warp-terminal-current`
-- **Description**: The warp-terminal-current package to use (allows overrides)
+- **Default**: `pkgs.warp-bld`
+- **Description**: The warp-bld wrapper package to use (bleeding-edge; wraps `pkgs.warp-terminal-current`) (allows overrides)
 
 ### `programs.warp-terminal-current.desktopName`
 - **Type**: String
@@ -74,10 +76,23 @@ When enabled, creates:
 
 ## Updates
 
-The package version is automatically updated when you run:
+Preferred workflow (recommended):
 ```bash
-zcli update  # Updates flake.lock, including warp-terminal-current
-zcli rebuild # Rebuilds system with latest version
+zcli update-warp          # bump vendored versions.json with verified SRI hashes
+zcli rebuild              # rebuild to activate the new current version
+```
+- Optional: add --commit to auto-commit the versions bump: `zcli update-warp --commit`
+
+Alternative (direct helpers):
+```bash
+scripts/update-warp-current.sh  # runs the vendored updater
+zcli rebuild
+```
+
+Verify-only (no rebuild):
+```bash
+pkgs/warp-terminal-current/warp-latest.sh   # updates versions.json in-place
+# Optionally commit the change
 ```
 
 ## Differences from Stable
@@ -90,7 +105,7 @@ zcli rebuild # Rebuilds system with latest version
 ### Build Failures
 If the package fails to build, it's likely due to:
 1. Network issues downloading from releases.warp.dev
-2. Hash mismatches (run `zcli update` to get latest hashes)
+2. Hash mismatches (run `scripts/update-warp-current.sh` to refresh hashes)
 3. Unfree license not allowed (should be handled automatically in ddubsos)
 
 ### Version Information

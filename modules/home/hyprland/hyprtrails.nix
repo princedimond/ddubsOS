@@ -1,7 +1,7 @@
 # Hyprtrails adds a color tail on floating windows when moved.
-{ pkgs, ... }: {
+{pkgs, ...}: {
   wayland.windowManager.hyprland = {
-    plugins = [ pkgs.hyprlandPlugins.hyprtrails ];
+    plugins = [pkgs.hyprlandPlugins.hyprtrails];
     settings = {
       plugin = {
         hyprtrails = {

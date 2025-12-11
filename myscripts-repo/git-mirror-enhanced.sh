@@ -73,6 +73,7 @@ GITLAB_USERS=(
 # Codeberg repositories - will fetch all repos for each user
 CODEBERG_USERS=(
     "ranjan"
+    "justaguylinux"
 )
 
 # Bitbucket repositories - will fetch all repos for each user
@@ -403,6 +404,115 @@ create_or_update_working_copy() {
 # API FUNCTIONS (Same as original script - keeping them for completeness)
 # ============================================================================
 
+# New function: create or update a working copy directly from remote URL (no local bare mirror)
+# Usage: sync_working_copy_from_remote <remote_url> <working_copy_path> <display_name>
+sync_working_copy_from_remote() {
+    local remote_url="$1"
+    local working_copy_path="$2"
+    local display_name="$3"
+
+    local original_dir=$(pwd)
+
+    if [[ -d "$working_copy_path" ]]; then
+        log_message "INFO" "Updating working copy from remote: $display_name"
+
+        if [[ ! -d "$working_copy_path/.git" ]]; then
+            log_message "WARNING" "Existing path is not a git repo, recreating: $working_copy_path"
+            rm -rf "$working_copy_path"
+            mkdir -p "$(dirname "$working_copy_path")" || {
+                log_message "ERROR" "Failed to create parent directory: $(dirname "$working_copy_path")"
+                FAILED_REPOS+=("$display_name (mkdir failed)")
+                FAILED_COUNT=$((FAILED_COUNT + 1))
+                return 1
+            }
+            if timeout 300 git clone "$remote_url" "$working_copy_path" 2>&1 | tee -a "$LOG_FILE" >/dev/null; then
+                NEW_WORKING_COPIES=$((NEW_WORKING_COPIES + 1))
+                print_colored "$GREEN" "📝 New working copy: $display_name"
+                log_message "SUCCESS" "Created new working copy: $display_name"
+            else
+                log_message "ERROR" "Failed to clone working copy: $display_name"
+                print_colored "$RED" "❌ Failed to create working copy: $display_name"
+                FAILED_REPOS+=("$display_name (clone failed)")
+                FAILED_COUNT=$((FAILED_COUNT + 1))
+            [[ -d "$working_copy_path" ]] && rm -rf "$working_copy_path"
+                return 1
+            fi
+            return 0
+        fi
+
+        cd "$working_copy_path" || {
+            log_message "ERROR" "Failed to enter working copy: $working_copy_path"
+            FAILED_REPOS+=("$display_name (cd failed)")
+            FAILED_COUNT=$((FAILED_COUNT + 1))
+            return 1
+        }
+
+        # Ensure remote.origin.url matches upstream
+        local current_origin
+        current_origin=$(git config --get remote.origin.url 2>/dev/null || echo "")
+        if [[ "$current_origin" != "$remote_url" ]]; then
+            if ! git remote set-url origin "$remote_url" 2>/dev/null; then
+                log_message "WARNING" "Failed to update origin URL; recreating working copy: $display_name"
+                cd "$original_dir"
+                rm -rf "$working_copy_path"
+                sync_working_copy_from_remote "$remote_url" "$working_copy_path" "$display_name"
+                return $?
+            fi
+        fi
+
+        # Fetch and fast-forward current branch if possible
+        if timeout 180 git fetch --all --prune 2>&1 | tee -a "$LOG_FILE" >/dev/null; then
+            local current_branch
+            current_branch=$(git branch --show-current 2>/dev/null || echo "")
+            if [[ -n "$current_branch" ]] && git show-ref --verify --quiet "refs/remotes/origin/$current_branch"; then
+                if git merge --ff-only "origin/$current_branch" 2>&1 | tee -a "$LOG_FILE" >/dev/null; then
+                    UPDATED_WORKING_COPIES=$((UPDATED_WORKING_COPIES + 1))
+                    print_colored "$GREEN" "📝 Updated working copy: $display_name"
+                    log_message "SUCCESS" "Updated working copy: $display_name"
+                else
+                    print_colored "$YELLOW" "⚠️  Local changes prevent fast-forward: $display_name"
+                    log_message "WARNING" "Could not fast-forward (local changes?): $display_name"
+                fi
+            else
+                print_colored "$CYAN" "ℹ️  Fetched updates (detached HEAD or no tracking branch): $display_name"
+                log_message "INFO" "Working copy updated (no tracking branch): $display_name"
+            fi
+        else
+            log_message "ERROR" "Fetch failed for working copy: $display_name"
+            print_colored "$RED" "❌ Failed to update working copy: $display_name"
+            FAILED_REPOS+=("$display_name (fetch failed)")
+            FAILED_COUNT=$((FAILED_COUNT + 1))
+            cd "$original_dir"
+            return 1
+        fi
+
+        cd "$original_dir"
+        return 0
+    else
+        # Fresh clone
+        log_message "INFO" "Creating working copy: $display_name"
+        mkdir -p "$(dirname "$working_copy_path")" || {
+            log_message "ERROR" "Failed to create parent directory: $(dirname "$working_copy_path")"
+            FAILED_REPOS+=("$display_name (mkdir failed)")
+            FAILED_COUNT=$((FAILED_COUNT + 1))
+            return 1
+        }
+        if timeout 600 git clone "$remote_url" "$working_copy_path" 2>&1 | tee -a "$LOG_FILE" >/dev/null; then
+            NEW_WORKING_COPIES=$((NEW_WORKING_COPIES + 1))
+            print_colored "$GREEN" "📝 New working copy: $display_name"
+            log_message "SUCCESS" "Created new working copy: $display_name"
+            return 0
+        else
+            log_message "ERROR" "Failed to clone working copy: $display_name"
+            print_colored "$RED" "❌ Failed to create working copy: $display_name"
+            FAILED_REPOS+=("$display_name (clone failed)")
+            FAILED_COUNT=$((FAILED_COUNT + 1))
+            [[ -d "$working_copy_path" ]] && rm -rf "$working_copy_path"
+            return 1
+        fi
+    fi
+}
+
 # Function to get all repositories for a GitHub user
 get_github_user_repos() {
     local username="$1"
@@ -597,109 +707,29 @@ get_codeberg_user_repos() {
 # Enhanced function to mirror a single repository (now also creates working copies)
 mirror_repository() {
     local repo_url="$1"
-    local local_path="$2"
+    local local_path_unused="$2"
     local display_name="${3:-$(basename "$repo_url" .git)}"
     local platform="${4:-unknown}"
-    
-    log_message "INFO" "Starting mirror for: $display_name ($platform)"
+
+    log_message "INFO" "Processing (working copy only): $display_name ($platform)"
     print_colored "$BLUE" "🔄 Processing: $display_name"
-    
+
     TOTAL_REPOS=$((TOTAL_REPOS + 1))
-    
-    # First, handle the bare repository (mirror) - same logic as original
-    local mirror_success=false
-    
-    if [[ -d "$local_path" ]]; then
-        log_message "INFO" "Repository exists, performing incremental update: $local_path"
-        cd "$local_path"
-        
-        # Get current commit count for comparison
-        local old_commits=$(git rev-list --all --count 2>/dev/null || echo "0")
-        
-        # Fetch all updates (only downloads differences)
-        local update_result=0
-        log_message "INFO" "Attempting to update: $local_path"
-        
-        if timeout $GIT_UPDATE_TIMEOUT git remote update --prune 2>&1 | tee -a "$LOG_FILE" >/dev/null; then
-            if timeout $GIT_UPDATE_TIMEOUT git fetch --all --prune 2>&1 | tee -a "$LOG_FILE" >/dev/null; then
-                update_result=0
-            else
-                update_result=1
-            fi
-        else
-            update_result=1
-        fi
-        
-        if [[ $update_result -eq 0 ]]; then
-            local new_commits=$(git rev-list --all --count 2>/dev/null || echo "0")
-            local commit_diff=$((new_commits - old_commits))
-            
-            log_message "SUCCESS" "Updated repository: $display_name ($commit_diff new commits)"
-            if [[ $commit_diff -gt 0 ]]; then
-                print_colored "$GREEN" "✅ Updated: $display_name (+$commit_diff commits)"
-                UPDATED_REPOS=$((UPDATED_REPOS + 1))
-            else
-                print_colored "$GREEN" "✅ Up-to-date: $display_name"
-            fi
-            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-            mirror_success=true
-        else
-            log_message "ERROR" "Failed to update repository: $display_name"
-            print_colored "$RED" "❌ Failed to update: $display_name"
-            FAILED_REPOS+=("$display_name (update failed)")
-            FAILED_COUNT=$((FAILED_COUNT + 1))
-        fi
-    else
-        log_message "INFO" "Creating new mirror: $local_path"
-        
-        # Create parent directory if needed
-        mkdir -p "$(dirname "$local_path")"
-        
-        # Clone as bare repository to mirror all branches (full initial sync)
-        local clone_result=0
-        log_message "INFO" "Attempting to clone: $repo_url"
-        
-        # Use extended timeout for large repositories
-        if timeout $GIT_CLONE_TIMEOUT git clone --mirror "$repo_url" "$local_path" 2>&1 | tee -a "$LOG_FILE" >/dev/null; then
-            clone_result=0
-        else
-            clone_result=1
-        fi
-        
-        if [[ $clone_result -eq 0 && -d "$local_path" ]]; then
-            log_message "SUCCESS" "Successfully mirrored: $display_name"
-            print_colored "$GREEN" "✅ New mirror: $display_name"
-            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-            NEW_REPOS=$((NEW_REPOS + 1))
-            mirror_success=true
-            
-            # Log repository information
-            cd "$local_path"
-            local branch_count=$(git branch -r 2>/dev/null | wc -l)
-            local tag_count=$(git tag 2>/dev/null | wc -l)
-            local commit_count=$(git rev-list --all --count 2>/dev/null || echo "0")
-            local size=$(du -sh . 2>/dev/null | cut -f1)
-            
-            log_message "INFO" "Repository $display_name: $commit_count commits, $branch_count branches, $tag_count tags, $size"
-        else
-            log_message "ERROR" "Failed to clone repository: $display_name from $repo_url"
-            print_colored "$RED" "❌ Failed to clone: $display_name"
-            FAILED_REPOS+=("$display_name (clone failed)")
-            FAILED_COUNT=$((FAILED_COUNT + 1))
-            
-            # Clean up failed clone attempt
-            [[ -d "$local_path" ]] && rm -rf "$local_path"
-        fi
+
+    # Derive working copy path from platform and display_name (username/repo)
+    local platform_dir="${platform,,}"
+    local username
+    local repo_name
+    username=$(echo "$display_name" | cut -d'/' -f1)
+    repo_name=$(echo "$display_name" | cut -d'/' -f2)
+    if [[ -z "$repo_name" ]]; then
+        # Fallback for display_name without slash
+        repo_name="$display_name"
+        username="unknown"
     fi
-    
-    # Now handle working copy if mirrors were successful and working copies are enabled
-    if [[ "$mirror_success" == true && "$CREATE_WORKING_COPIES" == true ]]; then
-        # Determine working copy path based on the mirror path
-        local working_copy_path
-        working_copy_path=$(echo "$local_path" | sed "s|$DESTINATION_ROOT|$WORKING_COPIES_ROOT|" | sed 's/\.git$//')
-        
-        create_or_update_working_copy "$local_path" "$working_copy_path" "$display_name"
-    fi
+    local working_copy_path="$WORKING_COPIES_ROOT/$platform_dir/$username/$repo_name"
+
+    sync_working_copy_from_remote "$repo_url" "$working_copy_path" "$display_name"
 }
 
 # ============================================================================
@@ -993,7 +1023,7 @@ main() {
     local dry_run=false
     local verbose=false
     local mirrors_only=false
-    local working_only=false
+    local working_only=true
     
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
@@ -1071,16 +1101,10 @@ main() {
     
     # Handle different modes
     if [[ "$working_only" == true ]]; then
-        print_colored "$YELLOW" "📝 Updating working copies only..."
-        # Find existing mirrors and update their working copies
-        find "$DESTINATION_ROOT" -name "*.git" -type d | while read -r mirror_path; do
-            if [[ -d "$mirror_path" ]]; then
-                local working_copy_path
-                working_copy_path=$(echo "$mirror_path" | sed "s|$DESTINATION_ROOT|$WORKING_COPIES_ROOT|" | sed 's/\.git$//')
-                local display_name=$(basename "$mirror_path" .git)
-                create_or_update_working_copy "$mirror_path" "$working_copy_path" "$display_name"
-            fi
-        done
+        print_colored "$YELLOW" "📝 Updating working copies from remotes..."
+        mirror_github_repos
+        mirror_gitlab_repos
+        mirror_codeberg_repos
     else
         # Mirror repositories from all platforms (this will also create working copies if enabled)
         mirror_github_repos

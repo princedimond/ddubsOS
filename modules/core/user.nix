@@ -1,29 +1,35 @@
-{ pkgs
-, inputs
-, username
-, host
-, profile
-, hmUseGlobalPkgs ? false
-, ...
-}:
-let
+{
+  config,
+  pkgs,
+  inputs,
+  username,
+  host,
+  profile,
+  hmUseGlobalPkgs ? false,
+  ...
+}: let
   vars = import ../../hosts/${host}/variables.nix;
   gitUsername = vars.gitUsername;
   hmUGP = hmUseGlobalPkgs; # from specialArgs, default false
   niriEnable = vars.niriEnable or false;
-in
-{
-  imports = [ inputs.home-manager.nixosModules.home-manager ];
+in {
+  imports = [inputs.home-manager.nixosModules.home-manager];
   home-manager = {
     useUserPackages = true;
     useGlobalPkgs = hmUGP;
     backupFileExtension = "backup";
-    extraSpecialArgs = { inherit inputs username host profile; };
+    extraSpecialArgs = {inherit inputs username host profile;};
     users.${username} = {
       # HM pkgs configuration:
       # With useGlobalPkgs=false, Home Manager uses its own pkgs instance and needs allowUnfree here.
       # If you enable home-manager.useGlobalPkgs=true in the future, remove or disable this to avoid conflicts.
-      nixpkgs.config.allowUnfree = true;
+      nixpkgs = {
+        config.allowUnfree = true;
+        overlays =
+          if hmUGP
+          then []
+          else config.nixpkgs.overlays;
+      };
       imports = [
         ./../home
         inputs.catppuccin.homeModules.catppuccin
@@ -60,9 +66,12 @@ in
       "ollama" # local AI access
       "wheel" # needed for sudo access
       "vboxusers" # needed for Virtual box
+      "seat" # needed for seatd/wlroots compositors (sway, etc.)
+      "incus" # incus user
+      "incus-admin" # incus admin permissions
     ];
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
   };
-  nix.settings.allowed-users = [ "${username}" ];
+  nix.settings.allowed-users = ["${username}"];
 }

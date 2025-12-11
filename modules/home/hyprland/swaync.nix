@@ -1,9 +1,12 @@
-{ config, host, lib, ... }:
-let
-  inherit (import ../../../hosts/${host}/variables.nix) panelChoice;
-  enableSwaync = (panelChoice != "hyprpanel");
-in
 {
+  config,
+  host,
+  lib,
+  ...
+}: let
+  inherit (import ../../../hosts/${host}/variables.nix) panelChoice;
+  enableSwaync = panelChoice != "hyprpanel" && panelChoice != "dms";
+in {
   services.swaync = lib.mkIf enableSwaync {
     enable = true;
     settings = {

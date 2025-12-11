@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   # Export OPENCODE/OLLAMA variables via Home Manager (replaces ad-hoc zsh exports)
   home.sessionVariables = {
     # Only set the Ollama connection; opencode/ollama clients expect full URL
@@ -21,7 +20,7 @@
             baseURL = "http://192.168.40.60:11434";
           };
           models = {
-            "phi3:mini" = { };
+            "phi3:mini" = {};
           };
         };
       };

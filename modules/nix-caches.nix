@@ -1,7 +1,6 @@
-{ ... }:
-{
+{...}: {
   nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = ["nix-command" "flakes"];
     accept-flake-config = true;
     substituters = [
       "https://cache.nixos.org"
@@ -15,4 +14,3 @@
     ];
   };
 }
-

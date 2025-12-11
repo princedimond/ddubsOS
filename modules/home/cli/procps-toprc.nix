@@ -1,5 +1,4 @@
-{ config, ... }:
-let
+{config, ...}: let
   repoToprc = "${config.home.homeDirectory}/ddubsos/modules/home/cli/procps-toprc";
   homeToprc = "${config.home.homeDirectory}/.config/procps/toprc";
 in {
@@ -8,7 +7,7 @@ in {
   # - If the repo copy exists and the live file does not, copy repo -> live (first seed)
   # - If both exist, do nothing (keep ~/.config/procps/toprc editable by top)
   home.activation = {
-    seedProcpsToprcRepo = config.lib.dag.entryAfter [ "writeBoundary" ] ''
+    seedProcpsToprcRepo = config.lib.dag.entryAfter ["writeBoundary"] ''
       if [ -f "${homeToprc}" ] && [ ! -f "${repoToprc}" ]; then
         echo "[toprc] Seeding repo from ${homeToprc} -> ${repoToprc}"
         mkdir -p "$(dirname "${repoToprc}")"
@@ -16,7 +15,7 @@ in {
       fi
     '';
 
-    seedProcpsToprcHome = config.lib.dag.entryAfter [ "seedProcpsToprcRepo" ] ''
+    seedProcpsToprcHome = config.lib.dag.entryAfter ["seedProcpsToprcRepo"] ''
       if [ ! -f "${homeToprc}" ] && [ -f "${repoToprc}" ]; then
         echo "[toprc] Installing to home from repo ${repoToprc} -> ${homeToprc}"
         mkdir -p "$(dirname "${homeToprc}")"

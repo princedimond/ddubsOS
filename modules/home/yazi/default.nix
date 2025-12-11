@@ -1,14 +1,13 @@
-{ pkgs
-, lib
-, ...
-}:
-let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   settings = import ./yazi.nix;
   keymap = import ./keymap.nix;
   #theme = import ./theme.nix;
-in
-{
-  home.file.".config/yazi/theme.toml" = lib.mkForce { source = ./theme.toml; };
+in {
+  home.file.".config/yazi/theme.toml" = lib.mkForce {source = ./theme.toml;};
 
   programs.yazi = {
     enable = true;

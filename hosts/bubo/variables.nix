@@ -5,38 +5,49 @@
 
   # Hyprland Settings
 
-  # Panel Choice - set to "hyprpanel" or "waybar"
+  # Set to true if you want to build Hyprland from source instead of using nixpkgs version
+  enableHyprlandSource = false;
+
+  # Panel Choice - set to "hyprpanel", "waybar", or "noctalia"
   panelChoice = "hyprpanel";
 
   # Glances Server - set to true to enable glances web server
   enableGlances = false;
 
-  # Desktop Environment Options - set to true to enable
+  # GUI Environment Options - set to true to enable
   gnomeEnable = false;
   bspwmEnable = false;
-  dwmEnable = false;
-  wayfireEnable = false;
+  i3Enable = true;
+  dwmEnable = true;
+  wayfireEnable = true;
   cosmicEnable = false;
-  niriEnable = false;
-
-  # Window manager options
-  enableNiri = false;
+  niriEnable = true;
+  enableSway = false;
+  enableMangowc = true;
+  oxwmEnable = true;
 
   # Editor Options - set to true to enable
-  enableEvilhelix = false;
-  enableVscode = false;
+  # Enabling Nixvim disables NVF automatically.
+  enableNixvim = true;
+  enableEvilhelix = true;
+  enableVscode = true;
+  enableAntiGravity = false;
   enableMicro = false;
-  enableZed = false;
+  enableZed = true;
 
   # Terminal Options - set to true to enable
-  enableAlacritty = false;
-  enableTmux = false;
-  enablePtyxis = false;
+  enableAlacritty = true;
+  enableTmux = true;
+  enablePtyxis = true;
   enableWezterm = true;
+  enableRio = true;
   enableTwin = true;
 
   # OBS Studio
   enableObs = false;
+
+  # Containers
+  enableIncus = false;
 
   # Development Environment Options - set to true to enable
   enableDevEnv = false;
@@ -49,10 +60,13 @@
   enableOpencode = false;
 
   #Zen Browser beta.
-  enableZenBrowser = false;
+  enableZenBrowser = true;
+
+  # Ladybird browser (unstable)
+  enableLadybird = false;
 
   # Vicinae Launcher - set to true to enable
-  enableVicinae = true;
+  enableVicinae = false;
   # Vicinae profile - options: "minimal", "standard", "developer", "power-user"
   vicinaeProfile = "minimal";
 
@@ -65,6 +79,12 @@
   keyboardLayout = "us";
   consoleKeyMap = "us";
 
+  # Shell choice (per-host overrideable)
+  shellChoice = "zsh"; # options: "zsh" | "bash" | "fish" | "nushell"
+
+  # wlroots VM quirks for compositors (Sway, etc.)
+  wlrVmQuirks = false;
+
   # For hybrid support (Intel/NVIDIA Prime or AMD/NVIDIA)
   intelID = "PCI:1:0:0";
   amdgpuID = "PCI:5:0:0"; # placeholder; update per-host
@@ -72,6 +92,10 @@
 
   # Enable NFS
   enableNFS = true;
+
+  # Folding@home (per-host)
+  enableFoldingAtHome = false;
+  foldingTeamId = 1066966; # PewDiePie team
 
   # Enable Printing Support
   printEnable = true;
@@ -102,18 +126,21 @@
   #waybarChoice = ../../modules/home/waybar/waybar-ddubs.nix;
   #waybarChoice = ../../modules/home/waybar/waybar-tony.nix;
   #waybarChoice = ../../modules/home/waybar/waybar-old-ddubsos.nix;
+  #waybarChoice = ../../modules/home/waybar/waybar-pctrade-catppuccin.nix;
   #waybarChoice = ../../modules/home/waybar/waybar-jak-catppuccin.nix;
   #waybarChoice = ../../modules/home/waybar/waybar-jak-ml4w-modern.nix;
   #waybarChoice = ../../modules/home/waybar/waybar-jwt-catppuccin.nix;
   #waybarChoice = ../../modules/home/waybar/waybar-jwt-transparent.nix;
   #waybarChoice = ../../modules/home/waybar/waybar-jwt-ultradark.nix;
+  #waybarChoice = ../../modules/home/waybar/waybar-TheBlackDon.nix;
   # ##  Oglo not finished yet, needs more work
   #AwaybarChoice = ../../modules/home/waybar/waybar-jak-oglo-simple.nix;
 
   # Set Starship prompt
   # Comment out the current choice and uncomment the one you want
-  starshipChoice = ../../modules/home/cli/starship.nix;
+  #starshipChoice = ../../modules/home/cli/starship.nix;
   #starshipChoice = ../../modules/home/cli/starship-1.nix;
+  starshipChoice = ../../modules/home/cli/starship-catppuccin.nix;
   #starshipChoice = ../../modules/home/cli/starship-rbmcg.nix;
   #starshipChoice = ../../modules/home/cli/starship-pC.nix;
 
@@ -123,12 +150,24 @@
   # animations-end4.nix (end-4 project)
   # animations-end-slide.nix (end-4 mod'd to work with hyprtrails)
   # animations-dynamic.nix (ml4w project)
-  animChoice = ../../modules/home/hyprland/animations-end-slide.nix;
-  #animChoice = ../../modules/home/hyprland/animations-end4.nix;
+  # animations-hyde-optimized.nix (hyde optimized)
+  # animations-ml4w-classic.nix (ml4w classic)
+  # animations-mahaveer-me-1.nix (mahaveer me-1)
+  # animations-mahaveer-me-2.nix (mahaveer me-2)
+  # animations-ml4w-fast.nix (ml4w fast)
+  # animations-ml4w-high.nix (ml4w high)
+  #animChoice = ../../modules/home/hyprland/animations-end-slide.nix;
+  animChoice = ../../modules/home/hyprland/animations-end4.nix;
   #animChoice = ../../modules/home/hyprland/animations-def.nix;
   #animChoice = ../../modules/home/hyprland/animations-dynamic.nix;
   # Moving does really weird things with window resize be warned
   #animChoice = ../../modules/home/hyprland/animations-moving.nix;
+  #animChoice = ../../modules/home/hyprland/animations-hyde-optimized.nix;
+  #animChoice = ../../modules/home/hyprland/animations-ml4w-classic.nix;
+  #animChoice = ../../modules/home/hyprland/animations-mahaveer-me-1.nix;
+  #animChoice = ../../modules/home/hyprland/animations-mahaveer-me-2.nix;
+  #animChoice = ../../modules/home/hyprland/animations-ml4w-fast.nix;
+  #animChoice = ../../modules/home/hyprland/animations-ml4w-high.nix;
 
   # Set network hostId if required (needed for zfs)
   # Otherwise leave as-is
@@ -146,6 +185,6 @@
   ];
 
   extraMonitorSettings = "
-    # monitor = HDMI-A-1,1920x1080@75,auto,1
+     monitor = HDMI-A-1,1920x1080@75,auto,1
   ";
 }

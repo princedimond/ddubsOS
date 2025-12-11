@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 pkgs.writeTextFile {
   name = "ff1";
   executable = true;
@@ -24,6 +24,7 @@ pkgs.writeTextFile {
       *zsh*) shell="${pkgs.zsh}/bin/zsh" ;;
       *bash*) shell="${pkgs.bash}/bin/bash" ;;
       *fish*) shell="${pkgs.fish}/bin/fish" ;;
+      *nu*|*nushell*) shell="${pkgs.nushell}/bin/nu" ;;
       *) shell="$(command -v "$parent_name" 2>/dev/null || true)" ;;
     esac
 

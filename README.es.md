@@ -1,33 +1,33 @@
 [English](./README.md) | Español
 
-<div align="center">
+# ddubsOS 
 
-# ddubsOS -- v2.5
-
-Fecha: 09/10/25
+Fecha del documento: 25 de noviembre de 2025
 
 **ddubsOS** es un fork de **ZaneyOS**. Esta es la configuración que uso a diario
 en mis sistemas: torres, portátiles y máquinas virtuales.
 
-📣 Nuevo: ¡La wiki de ddubsOS ya está disponible!
+> 📣 ¡La wiki de ddubsOS está disponible (Inglés/Español)!
 
-- Visita la wiki (Inglés/Español): https://github.com/dwilliam62/ddubsos-wiki
-- Índice de chuletas:
-  https://github.com/dwilliam62/ddubsos-wiki/blob/main/Cheatsheets.md
+- 🌐 Wiki: https://gitlab.com/dwilliam62/ddubsos/-/wikis/home
+- 📘 Biblioteca de chuletas: cheatsheets/README.es.md | [English](cheatsheets/README.md)
+- ❓ FAQ: FAQ.es.md | FAQ.md
+- 🤝 Contribuir: CONTRIBUTING.es.md | CONTRIBUTING.md
+- 📏 Código de conducta: CODE_OF_CONDUCT.es.md | CODE_OF_CONDUCT.md
 
-## Funciones y adiciones
+## ✨ Funciones y adiciones
 
 He añadido muchos paquetes y funciones que no están en ZaneyOS. A algunos les
 puede parecer cargado, pero con este fork estoy aprendiendo a hacer que
-**NixOS** haga lo que quiero. También predetermino `Hyprpanel` en lugar de
-`waybar`. Pero los archivos de configuración de waybar siguen ahí y puedes
-desactivar Hyprpanel en favor de waybar.
+**NixOS** haga lo que quiero.
+
+La barra predeterminada es `waybar`. `Hyprpanel` está disponible y puedes habilitarlo si lo prefieres.
 
 - IMPORTANTE: Nueva [biblioteca de chuletas](cheatsheets/README.md):
   documentación centralizada y legible para herramientas y aspectos de ddubsOS.
 - IMPORTANTE: [FAQ](FAQ.md): respuestas y consejos completos.
 
-### Herramientas instaladas y mejoras
+## 🧰 Herramientas instaladas y mejoras
 
 - **Gestor de ventanas:** Plugins de Hyprland, scratchpad de pyprland, Wayfire
 - **Entorno de escritorio:** GNOME y BSPWM ## Actualmente deshabilitado, en
@@ -36,24 +36,22 @@ desactivar Hyprpanel en favor de waybar.
   último con plugins y LSPs instalados
 - **Terminales:** Kitty, WezTerm, Ghostty, Foot; todos configurados y con tema
 - **Shell:** ZSH por defecto, BASH y Fish
-- **Fondos de pantalla:** Tengo unos 500 MB de fondos
+- **Fondos de pantalla:** Tengo unos ~400 MB de fondos (WebP)
 
-### Configuraciones modulares
+## 🧩 Configuración modular
 
-Busqué que la configuración fuera **modular**. Hay un **archivo de configuración
-de Nix** para paquetes que requieren configuraciones personalizadas, incluyendo:
+Esta configuración está pensada para ser **modular**. Módulos dedicados de Nix
+proporcionan configuraciones personalizadas para paquetes como:
 
-- vscode, helix, Fish, foot, kitty, wezterm, Ghostty y más
+- VS Code, Helix, Fish, Foot, Kitty, WezTerm, Ghostty y más
 
-Este proyecto evoluciona mientras sigo refinando mi configuración. Hasta que
-cree una rama estable, esta config cambiará (¿romperá?) a menudo. 🚀
+Este proyecto sigue evolucionando mientras refino mi configuración. Hasta que
+haya una rama estable, las cosas pueden cambiar (o romperse) a menudo. 🚀
 
-Siéntete libre de hacer un fork y adaptarlo. O quizá te guste más la
-configuración más ligera de ZaneyOS.
+Siéntete libre de hacer un fork y adaptarlo. Si prefieres algo más ligero,
+ZaneyOS puede ser mejor para ti.
 
-<img align="center" width="80%" src="img/ddubsos-waybar-ss-1.png" />
-
-</div>
+<p align="center"><img width="80%" src="img/ddubsos-waybar-ss-1.png" /></p>
 
 <details>
 <summary><h2>Más capturas de pantalla</h2></summary>
@@ -99,13 +97,22 @@ configuración más ligera de ZaneyOS.
 
 </details>
 
-### Wiki
+## 📚 Documentación
 
-La wiki de ddubsOS está disponible (Inglés/Español):
+- Wiki: [ddubsOS Wiki](https://gitlab.com/dwilliam62/ddubsos/-/wikis/home)
+- Biblioteca de chuletas: [Español](cheatsheets/README.es.md) | [English](cheatsheets/README.md)
+- README: Español | [English](./README.md)
+- Biblioteca de chuletas: [Español](cheatsheets/README.es.md) | [English](cheatsheets/README.md)
+- FAQ: [Español](FAQ.es.md) | [English](FAQ.md)
+- Contribuir: [Español](CONTRIBUTING.es.md) | [English](CONTRIBUTING.md)
+- Código de conducta: [Español](CODE_OF_CONDUCT.es.md) | [English](CODE_OF_CONDUCT.md)
+- Licencia: [English](LICENSE.md)
+- devenv-usage: [English](docs/devenv-usage.md) | [Español](docs/devenv-usage.es.md)
+- openwebui-ollama-setup: [English](docs/openwebui-ollama-setup.md) | [Español](docs/openwebui-ollama-setup.es.md)
+- project-guide: [English](docs/project-guide.md) | [Español](docs/project-guide.es.md)
+- zcli: [English](docs/zcli.md) | [Español](docs/zcli.es.md)
 
-- https://github.com/dwilliam62/ddubsos-wiki
-
-### Novedades en la rama de refactorización (ddubos-refactor)
+### 🆕 Agregar host en flake.nix
 
 - Salidas de flake por host junto con las salidas por perfil
   - Compilar por host (preferido):
@@ -135,7 +142,7 @@ La wiki de ddubsOS está disponible (Inglés/Español):
 - Debes estar en NixOS, versión 23.11+ (se recomienda 25.05+).
 - Se espera que la carpeta `ddubsos` (este repo) esté en tu directorio home.
 - Debes haber instalado NixOS con particionado **GPT** y arranque **UEFI**.
-- ** Se requiere partición /boot de mínimo 500 MB. **
+- ** Se requiere partición /boot de mínimo 1 GB. **
 - Se soporta systemd-boot.
 - Para GRUB tendrás que buscar una guía. ☺️
 - Editar manualmente tus archivos específicos del host.
@@ -162,11 +169,7 @@ La wiki de ddubsOS está disponible (Inglés/Español):
 - Estructura de archivos fácil de entender y configuración simple pero
   abarcadora.
 
-<div align="center">
-
-Hazte un favor y [lee la wiki](https://zaney.org/wiki/zaneyos-2.3/).
-
-</div>
+## 📖 Hazte un favor — lee las [FAQ](FAQ.es.md) y la [Wiki](https://gitlab.com/dwilliam62/ddubsos/-/wikis/home)
 
 #### 📦 ¿Cómo instalar paquetes?
 
@@ -184,7 +187,7 @@ Hazte un favor y [lee la wiki](https://zaney.org/wiki/zaneyos-2.3/).
 - Contáctanos en [Discord](https://discord.gg/2cRdBs8) para una respuesta
   potencialmente más rápida.
 
-- No olvides revisar el [FAQ](https://zaney.org/wiki/zaneyos-2.3/faq)
+- No olvides revisar el [FAQ](FAQ.es.md)
 
 # Atajos de Hyprland
 
@@ -194,6 +197,7 @@ Abajo están los atajos de Hyprland, formateados para consulta rápida.
 
 - `$modifier + Return` → Lanzar `terminal`
 - `$modifier + Shift + Return` → Lanzar `rofi-launcher`
+- `$modifier + Tab` → Alternar `Quickshell Overview` (visor de espacios de trabajo con vistas en vivo)
 - `$modifier + Shift + W` → Abrir `Selector de fondos`
 - `$modifier + Shift + A` → Abrir `Menú de fondos animados`
 - `$modifier + Alt + W` → Abrir `wallsetter`
@@ -288,7 +292,7 @@ Luego:
 ![ddubsOS Install Script Command](img/install-script.jpg)
 
 ```
-sh <(curl -L https://gitlab.com/dwilliam62/ddubsos/-/raw/bae85cf9eded4a2b7096fad78ea7bcafca514846/install-ddubsos.sh)
+sh <(curl -L https://gitlab.com/dwilliam62/ddubsos/-/raw/main/install-ddubsos.sh)
 ```
 
 #### El proceso de instalación se verá así:
@@ -346,8 +350,8 @@ nixos-generate-config --show-hardware-config > hosts/<tu-hostname>/hardware.nix
    con lo que pusiste:
 
 ```
-NIX_CONFIG="experimental-features = nix-command flakes" 
-sudo nixos-rebuild switch --flake .#profile 
+NIX_CONFIG="experimental-features = nix-command flakes"
+sudo nixos-rebuild switch --flake .#profile
     - (`profile` es tu GPU: amd, intel, nvidia, nvidia-laptop, vm)
 ```
 
@@ -362,7 +366,7 @@ Gracias por toda su ayuda
 
 - Zaney https://gitlab.com/zaney
 - Jakoolit https://github.com/jakoolit
-- Justaguylinux https://github.com/drewgrif
+- Justaguylinux https://codeberg.org/justaguylinux
 - Jerry Starke https://github.com/JerrySM64
 - Redbeardymcgee
 - iynaix

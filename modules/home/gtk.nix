@@ -1,8 +1,4 @@
-{
-  pkgs,
-  ...
-}:
-{
+{pkgs, ...}: {
   gtk = {
     iconTheme = {
       name = "candy-icons";

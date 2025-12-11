@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 pkgs.writeShellScriptBin "swap_layout" ''
   #  hyprctl getoption general:layout | grep "str: master" && hyprctl keyword general:layout dwindle || hyprctl keyword general:layout master
 

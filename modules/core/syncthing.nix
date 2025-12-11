@@ -1,4 +1,4 @@
-{ username, ... }: {
+{username, ...}: {
   # This is a carry over from ZaneyOS
   # In the future I may remove this
   # I never found it useful

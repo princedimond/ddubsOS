@@ -1,7 +1,15 @@
 [English](./zcli.md) | Español
 
-# Utilidad de Línea de Comandos de ddubsOS (zcli) - Versión 1.1.0
+# Utilidad de Línea de Comandos de ddubsOS (zcli) - Versión 1.2.0
 zcli es una herramienta práctica para realizar tareas comunes de mantenimiento en tu sistema ddubsOS con un solo comando. A continuación, se presenta una guía detallada sobre su uso y comandos.
+
+## Novedades en la versión 1.2.0
+
+- Selección de panel ampliada: panelChoice ahora soporta hyprpanel | waybar | dms | noctalia.
+  - Establécelo con: `zcli settings set panelChoice <hyprpanel|waybar|dms|noctalia>`.
+  - Inicio de Hyprland actualizado para lanzar el panel seleccionado; Noctalia se ejecuta con `qs -c noctalia-shell`.
+- Integración de Noctalia Shell: la configuración de QuickShell se enlaza en `~/.config/quickshell/noctalia-shell` cuando se selecciona.
+- Pistas de ajustes actualizadas para incluir las nuevas opciones de panel.
 
 ## Novedades en la versión 1.1.0
 
@@ -38,6 +46,9 @@ zcli settings --list-bools
 # Establecer navegador y terminal
 zcli settings set browser google-chrome-stable
 zcli settings set terminal kitty
+
+# Establecer panel (hyprpanel | waybar | dms | noctalia)
+zcli settings set panelChoice noctalia
 
 # Establecer atributos booleanos (acepta true/false/on/off/yes/no/1/0)
 zcli settings set gnomeEnable true
@@ -93,6 +104,7 @@ Aquí tienes una tabla de referencia rápida para todos los comandos, seguida de
 | trim        | ✂️   | Recorta los sistemas de archivos para mejorar el rendimiento de los SSD y optimizar el almacenamiento.                                                                                    | `zcli trim`                             |
 || update      | 🔄   | Actualiza el flake y reconstruye el sistema. Ahora ofrece un aviso interactivo para preparar (staging) cambios antes de compilar.                      | `zcli update`                           |
 || update-host | 🏠   | Establece automáticamente el host y el perfil en tu archivo `flake.nix` según el sistema actual. Detecta el tipo de GPU o solicita la entrada si es necesario. | `zcli update-host [hostname] [profile]` |
+|| update-warp | ⚡   | Actualiza el Warp Terminal (actual) "vendorizado" en este repositorio a la última versión; recalcula el SRI y actualiza versions.json. Opción --commit para auto-commit. | `zcli update-warp [--commit]` |
 || stage       | ✅   | Prepara (staging) cambios de forma interactiva (o usa --all para preparar todo) sin reconstruir.                                                        | `zcli stage`, `zcli stage --all`        |
 
 ## Descripciones Detalladas de los Comandos
@@ -110,6 +122,12 @@ Aquí tienes una tabla de referencia rápida para todos los comandos, seguida de
 - **🔄 update**: Agiliza las actualizaciones comprobando posibles problemas con Home Manager, luego actualiza el flake y reconstruye el sistema. Esto combina las actualizaciones del flake y las reconstrucciones en un solo paso eficiente.
 
 - **🏠 update-host**: Simplifica la gestión de múltiples hosts actualizando automáticamente el `hostname` y el `profile` en tu archivo `~/ddubsos/flake.nix`. Intenta detectar tu tipo de GPU; si falla, se te pedirá que introduzcas los detalles manualmente.
+
+- **⚡ update-warp**: Actualiza el empaquetado de Warp Terminal (actual) "vendorizado" dentro de este repositorio.
+  - Sube a la última versión de Warp siguiendo las redirecciones de descarga.
+  - Recalcula los hashes SRI y actualiza pkgs/warp-terminal-current/versions.json.
+  - Opción `--commit` realizará automáticamente el commit del archivo versions.
+  - Reconstruye después con `zcli rebuild`.
 
 ## Notas de Emacs
 
@@ -175,4 +193,4 @@ Estas opciones proporcionan flexibilidad y control sobre las operaciones del sis
 ## Notas Adicionales
 
 - **¿Por qué usar zcli?** Esta utilidad ahorra tiempo en tareas rutinarias, reduciendo la necesidad de múltiples comandos o ediciones manuales.
-- **Versión y Compatibilidad:** Asegúrate de estar utilizando la última versión (1.1.0 según el código fuente). Para cualquier problema, genera un informe de diagnóstico con `zcli diag` y consulta los registros de tu sistema.
+- **Versión y Compatibilidad:** Asegúrate de estar utilizando la última versión (1.2.0 según el código fuente). Para cualquier problema, genera un informe de diagnóstico con `zcli diag` y consulta los registros de tu sistema.

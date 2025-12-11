@@ -11,7 +11,6 @@
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8="
-      "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
     ];
   };
 
@@ -21,16 +20,36 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    # Not using for warp-terminal
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
-    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-    nvf.url = "github:notashelf/nvf";
-    stylix.url = "github:danth/stylix";
+    # was using for warp-terminal
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nvf = {
+      url = "github:notashelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # Checking nixvim to see if it's better
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    stylix = {
+      url = "github:danth/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-flatpak.url = "github:gmodena/nix-flatpak?ref=latest";
-    garuda.url = "gitlab:garuda-linux/garuda-nix-subsystem/stable";
 
-    quickshell = {
-      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
+    # Google Antigravity (IDE helper)
+    antigravity-nix = {
+      url = "github:jacopone/antigravity-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    mangowc = {
+      url = "github:DreamMaoMao/mangowc";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -38,20 +57,26 @@
       type = "github";
       owner = "iynaix";
       repo = "wfetch";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    agsv1 = {
+      url = "github:aylur/ags/v1.9.0";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
+    };
+
+    # Current AGS (for projects requiring latest, e.g., tpanel)
     ags = {
-      type = "github";
-      owner = "aylur";
-      repo = "ags";
-      ref = "v1";
+      url = "github:aylur/ags";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Source for hyprpanel until nixplg available
+    # Source for hyprpanel
     hyprpanel = {
       url = "github:jas-singhfsu/hyprpanel";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
     catppuccin = {
       url = "github:catppuccin/nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -78,131 +103,146 @@
     # Add support for specific hardware
     # Go here for list of supported nixos-hardware
     #  https://github.com/NixOS/nixos-hardware
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    #nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    # Vicinae - High-performance native launcher
-    vicinae = {
-      url = "github:vicinaehq/vicinae";
+    oxwm = {
+      url = "github:tonybanters/oxwm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Current Warp Terminal - bleeding edge version
-    warp-terminal-current = {
-      url = "github:dwilliam62/war-terminal/dev";
+    # awww wallpaper setter
+    awww = {
+      url = "git+https://codeberg.org/LGFae/awww";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Nix User Repository (NUR)
-    nur = {
-      url = "github:nix-community/NUR";
+    # Hyprland from source (track main)
+    hyprland = {
+      url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
   };
 
-  outputs =
-    {
-      nixpkgs,
-      nix-flatpak,
-      home-manager,
-      garuda,
-      chaotic,
-      nixos-hardware,
-      ...
-    }@inputs:
-    let
-      system = "x86_64-linux";
-      systems = [ "x86_64-linux" ];
-      forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f (import nixpkgs { inherit system; }));
-      pkgsStable = import inputs.nixpkgs-stable {
-        inherit system;
-        config.allowUnfree = true;
+  outputs = {
+    nixpkgs,
+    mangowc,
+    home-manager,
+    nix-flatpak,
+    nixvim,
+    oxwm,
+    hyprland,
+    ...
+  } @ inputs: let
+    system = "x86_64-linux";
+    systems = ["x86_64-linux"];
+    forAllSystems = f: nixpkgs.lib.genAttrs systems (sys: f (import nixpkgs {system = sys;}));
+    pkgsStable = import inputs.nixpkgs-stable {
+      system = system;
+      config.allowUnfree = true;
+    };
+    # Back-compat defaults used by legacy profile-named outputs
+    host = "PD-5CG84633PQ";
+    username = "princedimond";
+    profile = "intel";
+    # Toggle: make Home Manager share global pkgs (set to true to enable)
+    # DO NOT ENABLE at this time!!
+    hmUseGlobalPkgs = false;
+
+    # Legacy: build by GPU profile name (kept for compatibility)
+    mkNixosConfig = gpuProfile:
+      nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs username host;
+          inherit profile hmUseGlobalPkgs;
+          stablePkgs = pkgsStable;
+        };
+        modules = [
+          (
+            {...}: {
+              nixpkgs.hostPlatform = system;
+              nixpkgs.config = {
+                allowUnfree = true;
+              };
+            }
+          )
+          ./modules/nix-caches.nix
+          ./modules/core/overlays.nix
+          ./modules/core/niri-session.nix
+          ./modules/core/i3-session.nix
+          inputs.mangowc.nixosModules.mango
+          ./modules/core/mangowc-session.nix
+          ./modules/core/oxwm-session.nix
+          ./profiles/${gpuProfile}
+          ./modules/home/suckless/dwm-session.nix
+          inputs.catppuccin.nixosModules.catppuccin
+          nix-flatpak.nixosModules.nix-flatpak
+          oxwm.nixosModules.default
+          hyprland.nixosModules.default
+        ];
       };
-      # Back-compat defaults used by legacy profile-named outputs
-      host = "PD-5CG84633PQ";
-      username = "princedimond";
-      profile = "intel";
-      # Toggle: make Home Manager share global pkgs (set to true to enable)
-      # DO NOT ENABLE at this time!!
-      hmUseGlobalPkgs = false;
 
-      # Legacy: build by GPU profile name (kept for compatibility)
-      mkNixosConfig =
-        gpuProfile:
-        nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = {
-            inherit inputs username host;
-            inherit profile hmUseGlobalPkgs;
-            stablePkgs = pkgsStable;
-          };
-          modules = [
-            (
-              { ... }:
-              {
-                nixpkgs.config = {
-                  allowUnfree = true;
-                };
-              }
-            )
-            ./modules/nix-caches.nix
-            # had one for python that fails to build still
-            # Saving this as template for future overlays
-            ./modules/core/overlays.nix
-            ./modules/core/niri-session.nix
-            ./profiles/${gpuProfile}
-            ./modules/home/suckless/dwm-session.nix
-            inputs.catppuccin.nixosModules.catppuccin
-            nix-flatpak.nixosModules.nix-flatpak
-          ];
+    # New: build by host name (preferred going forward)
+    hostsDir = ./hosts;
+    hostsAttr = builtins.readDir hostsDir;
+    hostNames = builtins.attrNames (
+      nixpkgs.lib.filterAttrs (name: type: type == "directory") hostsAttr
+    );
+
+    # GPU/profile selection for host-based configs.
+    # We treat the flake-level `profile` (set by installer / zcli update-host)
+    # as the single source of truth. All host-based configs built from this
+    # flake use that profile unless an explicit gpuProfile is passed.
+    #
+    # Rationale:
+    # - install-ddubsos.sh and `zcli update-host <host> <profile>` always set
+    #   the global `profile` correctly at install / host-switch time.
+    # - Having a hardcoded fallback like "amd" causes VMs and hybrid
+    #   systems to pick the wrong driver stack (amdgpu in a virtio VM, etc.),
+    #   which is exactly why Xorg was failing with "no screens found" and why
+    #   smartd was incorrectly enabled on the vm profile.
+    defaultProfileFor = hostName: profile;
+
+    mkHostConfig = {
+      hostName,
+      gpuProfile ? defaultProfileFor hostName,
+    }:
+      nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          inherit inputs username hmUseGlobalPkgs;
+          host = hostName;
+          profile = gpuProfile;
+          stablePkgs = pkgsStable;
         };
+        modules = [
+          (
+            {...}: {
+              nixpkgs.hostPlatform = system;
+              nixpkgs.config = {
+                allowUnfree = true;
+              };
+            }
+          )
+          ./modules/nix-caches.nix
+          ./modules/core/overlays.nix
+          ./modules/core/niri-session.nix
+          ./modules/core/i3-session.nix
+          inputs.mangowc.nixosModules.mango
+          ./modules/core/mangowc-session.nix
+          ./modules/core/oxwm-session.nix
+          ./profiles/${gpuProfile}
+          ./modules/home/suckless/dwm-session.nix
+          inputs.catppuccin.nixosModules.catppuccin
+          nix-flatpak.nixosModules.nix-flatpak
+          oxwm.nixosModules.default
+          hyprland.nixosModules.default
+        ];
+      };
 
-      # New: build by host name (preferred going forward)
-      hostsDir = ./hosts;
-      hostsAttr = builtins.readDir hostsDir;
-      hostNames = builtins.attrNames (
-        nixpkgs.lib.filterAttrs (name: type: type == "directory") hostsAttr
-      );
-
-      defaultProfileFor = hostName: "amd"; # simple default; can be refined per-host later
-
-      mkHostConfig =
-        {
-          hostName,
-          gpuProfile ? defaultProfileFor hostName,
-        }:
-        nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = {
-            inherit inputs username hmUseGlobalPkgs;
-            host = hostName;
-            profile = gpuProfile;
-            stablePkgs = pkgsStable;
-          };
-          modules = [
-            (
-              { ... }:
-              {
-                nixpkgs.config = {
-                  allowUnfree = true;
-                };
-              }
-            )
-            ./modules/nix-caches.nix
-            ./modules/core/overlays.nix
-            ./modules/core/niri-session.nix
-            ./profiles/${gpuProfile}
-            ./modules/home/suckless/dwm-session.nix
-            inputs.catppuccin.nixosModules.catppuccin
-            nix-flatpak.nixosModules.nix-flatpak
-          ];
-        };
-
-      nixosByHost = nixpkgs.lib.genAttrs hostNames (hn: mkHostConfig { hostName = hn; });
-    in
-    {
-      # Transitional: keep legacy profile-named configs and add host-named configs
-      nixosConfigurations = {
+    nixosByHost = nixpkgs.lib.genAttrs hostNames (hn: mkHostConfig {hostName = hn;});
+  in {
+    # Transitional: keep legacy profile-named configs and add host-named configs
+    nixosConfigurations =
+      {
         amd = mkNixosConfig "amd";
         nvidia = mkNixosConfig "nvidia";
         nvidia-laptop = mkNixosConfig "nvidia-laptop";
@@ -212,27 +252,34 @@
       }
       // nixosByHost;
 
-      # Formatter and basic checks
-      formatter = forAllSystems (pkgs: pkgs.alejandra);
-      checks = forAllSystems (pkgs: {
-        formatting = pkgs.runCommand "formatting" { buildInputs = [ pkgs.alejandra ]; } ''
-          alejandra --check .
-          touch $out
-        '';
-      });
-
-      # Expose selected stable packages as flake outputs for convenience
-      packages = nixpkgs.lib.genAttrs systems (
-        system:
-        let
-          stable = import inputs.nixpkgs-stable {
-            inherit system;
-            config.allowUnfree = true;
-          };
-        in
-        {
-          warp-terminal-stable = stable.warp-terminal;
+    # Formatter and basic checks
+    formatter = forAllSystems (
+      pkgs:
+        pkgs.writeShellApplication {
+          name = "fmt";
+          runtimeInputs = [pkgs.alejandra];
+          text = ''exec alejandra -q .'';
         }
-      );
-    };
+    );
+    checks = forAllSystems (pkgs: {
+      formatting = pkgs.runCommand "formatting" {buildInputs = [pkgs.alejandra];} ''
+        alejandra --check .
+        touch $out
+      '';
+    });
+
+    # Expose selected packages as flake outputs for convenience
+    packages = nixpkgs.lib.genAttrs systems (
+      sys: let
+        pkgs = import nixpkgs {
+          system = sys;
+          config.allowUnfree = true;
+        };
+      in {
+        warp-terminal-current = pkgs.callPackage ./pkgs/warp-terminal-current/package.nix {
+          waylandSupport = true;
+        };
+      }
+    );
+  };
 }

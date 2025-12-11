@@ -3,8 +3,8 @@
     audacity
     nodejs
     assaultcube
-    openarena
     nvtopPackages.full
+    onlyoffice-desktopeditors
   ];
 
   environment.variables = {

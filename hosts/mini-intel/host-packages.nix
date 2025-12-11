@@ -1,12 +1,9 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
-    kdePackages.kdenlive
+    #kdePackages.kdenlive
     assaultcube
-    nvtopPackages.intel
-    libreoffice-fresh
     handbrake
-    openarena
+    onlyoffice-desktopeditors
     nvtopPackages.intel
   ];
 }

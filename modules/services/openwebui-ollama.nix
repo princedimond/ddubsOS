@@ -1,37 +1,39 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cfg = config.services.openwebui-ollama;
 in {
   options.services.openwebui-ollama = {
     enable = mkEnableOption "OpenWebUI with Ollama";
-    
+
     openwebuiPort = mkOption {
       type = types.port;
       default = 3000;
       description = "Port for OpenWebUI web interface";
     };
-    
+
     ollamaPort = mkOption {
       type = types.port;
       default = 11434;
       description = "Port for Ollama API";
     };
-    
+
     dataDir = mkOption {
       type = types.str;
       default = "/var/lib/openwebui-ollama";
       description = "Directory to store data";
     };
-    
+
     user = mkOption {
       type = types.str;
       default = "openwebui";
       description = "User to run the services as";
     };
-    
+
     group = mkOption {
       type = types.str;
       default = "openwebui";
@@ -44,10 +46,10 @@ in {
     virtualisation.docker = {
       enable = true;
     };
-    
+
     # Enable NVIDIA Container Toolkit for GPU access in Docker
     hardware.nvidia-container-toolkit.enable = true;
-    
+
     # Enable graphics support including 32-bit support libraries
     hardware.graphics = {
       enable32Bit = true;
@@ -58,7 +60,7 @@ in {
     users.users.${cfg.user} = {
       isSystemUser = true;
       group = cfg.group;
-      extraGroups = [ "docker" ];
+      extraGroups = ["docker"];
       home = cfg.dataDir;
       createHome = true;
     };
@@ -75,10 +77,10 @@ in {
     # Ollama service
     systemd.services.ollama-docker = {
       description = "Ollama Docker Container";
-      after = [ "docker.service" "network-online.target" ];
-      wants = [ "network-online.target" ];
-      wantedBy = [ "multi-user.target" ];
-      
+      after = ["docker.service" "network-online.target"];
+      wants = ["network-online.target"];
+      wantedBy = ["multi-user.target"];
+
       serviceConfig = {
         Type = "simple";
         User = cfg.user;
@@ -86,7 +88,7 @@ in {
         Restart = "on-failure";
         RestartSec = "5s";
         TimeoutStartSec = "300s";
-        
+
         ExecStartPre = [
           # Stop and remove any existing container
           "-${pkgs.docker}/bin/docker stop ollama"
@@ -94,16 +96,16 @@ in {
           # Pull the latest image
           "${pkgs.docker}/bin/docker pull ollama/ollama:latest"
         ];
-        
-        ExecStart = ''${pkgs.docker}/bin/docker run \
-          --rm \
-          --name ollama \
-          --privileged \
-          --device nvidia.com/gpu=all \
-          -v ${cfg.dataDir}/ollama:/root/.ollama \
-          -p ${toString cfg.ollamaPort}:11434 \
-          ollama/ollama:latest'';
-          
+
+        ExecStart = ''          ${pkgs.docker}/bin/docker run \
+                    --rm \
+                    --name ollama \
+                    --privileged \
+                    --device nvidia.com/gpu=all \
+                    -v ${cfg.dataDir}/ollama:/root/.ollama \
+                    -p ${toString cfg.ollamaPort}:11434 \
+                    ollama/ollama:latest'';
+
         ExecStop = "${pkgs.docker}/bin/docker stop ollama";
       };
     };
@@ -111,11 +113,11 @@ in {
     # OpenWebUI service
     systemd.services.openwebui-docker = {
       description = "OpenWebUI Docker Container";
-      after = [ "docker.service" "network-online.target" "ollama-docker.service" ];
-      wants = [ "network-online.target" ];
-      requires = [ "ollama-docker.service" ];
-      wantedBy = [ "multi-user.target" ];
-      
+      after = ["docker.service" "network-online.target" "ollama-docker.service"];
+      wants = ["network-online.target"];
+      requires = ["ollama-docker.service"];
+      wantedBy = ["multi-user.target"];
+
       serviceConfig = {
         Type = "simple";
         User = cfg.user;
@@ -123,7 +125,7 @@ in {
         Restart = "on-failure";
         RestartSec = "5s";
         TimeoutStartSec = "300s";
-        
+
         ExecStartPre = [
           # Stop and remove any existing container
           "-${pkgs.docker}/bin/docker stop openwebui"
@@ -131,25 +133,25 @@ in {
           # Pull the latest image
           "${pkgs.docker}/bin/docker pull ghcr.io/open-webui/open-webui:main"
         ];
-        
-        ExecStart = ''${pkgs.docker}/bin/docker run \
-          --rm \
-          --name openwebui \
-          --privileged \
-          -v ${cfg.dataDir}/openwebui:/app/backend/data \
-          -e OLLAMA_BASE_URL=http://ollama:11434 \
-          -p ${toString cfg.openwebuiPort}:8080 \
-          --link ollama:ollama \
-          --add-host=host.docker.internal:host-gateway \
-          ghcr.io/open-webui/open-webui:main'';
-          
+
+        ExecStart = ''          ${pkgs.docker}/bin/docker run \
+                    --rm \
+                    --name openwebui \
+                    --privileged \
+                    -v ${cfg.dataDir}/openwebui:/app/backend/data \
+                    -e OLLAMA_BASE_URL=http://ollama:11434 \
+                    -p ${toString cfg.openwebuiPort}:8080 \
+                    --link ollama:ollama \
+                    --add-host=host.docker.internal:host-gateway \
+                    ghcr.io/open-webui/open-webui:main'';
+
         ExecStop = "${pkgs.docker}/bin/docker stop openwebui";
       };
     };
 
     # Open firewall ports
     networking.firewall = {
-      allowedTCPPorts = [ cfg.openwebuiPort cfg.ollamaPort ];
+      allowedTCPPorts = [cfg.openwebuiPort cfg.ollamaPort];
     };
 
     # Add some useful environment for the user
@@ -159,15 +161,15 @@ in {
       # Add the management script
       (pkgs.writeShellApplication {
         name = "ollama-webui-manager";
-        
+
         runtimeInputs = with pkgs; [
-          systemd        # for systemctl
-          docker         # for docker commands
-          curl           # for API testing
-          coreutils      # for basic utilities (du, cut, etc.)
-          gnugrep        # for grep
+          systemd # for systemctl
+          docker # for docker commands
+          curl # for API testing
+          coreutils # for basic utilities (du, cut, etc.)
+          gnugrep # for grep
         ];
-        
+
         text = ''
           # OpenWebUI + Ollama Container Management Script
           # Part of ddubsOS - AI/LLM Management Tools
@@ -260,63 +262,63 @@ in {
           start_services() {
               print_info "Starting OpenWebUI + Ollama services..."
               check_sudo
-              
+
               if sudo systemctl start "$OLLAMA_SERVICE"; then
                   print_success "Ollama service started"
               else
                   print_error "Failed to start Ollama service"
                   return 1
               fi
-              
+
               sleep 2
-              
+
               if sudo systemctl start "$OPENWEBUI_SERVICE"; then
                   print_success "OpenWebUI service started"
               else
                   print_error "Failed to start OpenWebUI service"
                   return 1
               fi
-              
+
               print_success "All services started successfully"
           }
 
           stop_services() {
               print_info "Stopping OpenWebUI + Ollama services..."
               check_sudo
-              
+
               if sudo systemctl stop "$OPENWEBUI_SERVICE"; then
                   print_success "OpenWebUI service stopped"
               else
                   print_warning "OpenWebUI service may already be stopped"
               fi
-              
+
               if sudo systemctl stop "$OLLAMA_SERVICE"; then
                   print_success "Ollama service stopped"
               else
                   print_warning "Ollama service may already be stopped"
               fi
-              
+
               print_success "All services stopped"
           }
 
           restart_services() {
               print_info "Restarting OpenWebUI + Ollama services..."
               check_sudo
-              
+
               sudo systemctl restart "$OLLAMA_SERVICE"
               print_success "Ollama service restarted"
-              
+
               sleep 2
-              
+
               sudo systemctl restart "$OPENWEBUI_SERVICE"
               print_success "OpenWebUI service restarted"
-              
+
               print_success "All services restarted successfully"
           }
 
           show_logs() {
               local service=''${1:-"both"}
-              
+
               case $service in
                   "ollama"|"o")
                       print_info "Showing Ollama logs (Ctrl+C to exit)..."
@@ -355,7 +357,7 @@ in {
                   echo "Example: $0 pull llama3.2:1b"
                   return 1
               fi
-              
+
               print_info "Pulling model: $model"
               if docker exec -it "$OLLAMA_CONTAINER" ollama pull "$model"; then
                   print_success "Model $model pulled successfully"
@@ -372,7 +374,7 @@ in {
                   echo "Usage: $0 remove <model_name>"
                   return 1
               fi
-              
+
               print_warning "This will permanently remove the model: $model"
               read -p "Are you sure? (y/N): " -n 1 -r
               echo
@@ -390,7 +392,7 @@ in {
 
           test_connection() {
               print_info "Testing connections..."
-              
+
               # Test Ollama API
               if curl -s "http://localhost:$OLLAMA_PORT/api/version" > /dev/null; then
                   local version
@@ -399,7 +401,7 @@ in {
               else
                   print_error "Ollama API not responding"
               fi
-              
+
               # Test OpenWebUI
               if curl -s -I "http://localhost:$OPENWEBUI_PORT" | head -1 | grep -q "200 OK"; then
                   print_success "OpenWebUI responding"
@@ -441,7 +443,7 @@ in {
           # Main script logic
           main() {
               check_root
-              
+
               case "''${1:-help}" in
                   "status"|"s")
                       show_status
@@ -484,7 +486,7 @@ in {
           # Run main function with all arguments
           main "$@"
         '';
-        
+
         meta = with pkgs.lib; {
           description = "Management script for OpenWebUI and Ollama containers";
           license = licenses.mit;

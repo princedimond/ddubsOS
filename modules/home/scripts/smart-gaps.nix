@@ -1,9 +1,9 @@
-{ pkgs, ... }:
+{pkgs, ...}:
 pkgs.writeShellApplication {
   name = "smart-gaps";
   # Runtime dependencies for Hyprland smart gaps functionality
   runtimeInputs = with pkgs; [
-    jq        # JSON parsing
+    jq # JSON parsing
     libnotify # notify-send
   ];
   text = ''
@@ -15,7 +15,7 @@ pkgs.writeShellApplication {
 
     # Configuration - you can customize these values
     SMART_GAPS_IN=0
-    SMART_GAPS_OUT=0  
+    SMART_GAPS_OUT=0
     SMART_ROUNDING=0
     SMART_BORDER_SIZE=0
     NOTIFICATION_TIMEOUT=1500
@@ -25,7 +25,7 @@ pkgs.writeShellApplication {
     usage() {
       cat <<'EOF'
     Usage: smart-gaps [OPTIONS]
-    
+
     Toggle smart gaps for the current Hyprland workspace.
     When enabled, removes gaps, rounding, and borders for a cleaner look.
     When disabled, restores default Hyprland settings.
@@ -40,7 +40,7 @@ pkgs.writeShellApplication {
 
     Environment:
       SMART_GAPS_IN      Override default inner gaps (default: 0)
-      SMART_GAPS_OUT     Override default outer gaps (default: 0) 
+      SMART_GAPS_OUT     Override default outer gaps (default: 0)
       SMART_ROUNDING     Override default rounding (default: 0)
       SMART_BORDER_SIZE  Override default border size (default: 0)
     EOF
@@ -65,7 +65,7 @@ pkgs.writeShellApplication {
           ;;
         --gaps-out)
           [[ $# -ge 2 ]] || { echo "Missing value for $1" >&2; exit 2; }
-          SMART_GAPS_OUT="$2" 
+          SMART_GAPS_OUT="$2"
           shift 2
           ;;
         --rounding)
@@ -132,11 +132,11 @@ pkgs.writeShellApplication {
       local current_gaps_in
       local current_gaps_out
       local current_rounding
-      
+
       current_gaps_in=$("$HYPRCTL_PATH" getoption general:gaps_in | grep "custom type:" | awk '{print $3}')
       current_gaps_out=$("$HYPRCTL_PATH" getoption general:gaps_out | grep "custom type:" | awk '{print $3}')
       current_rounding=$("$HYPRCTL_PATH" getoption decoration:rounding | grep "int:" | awk '{print $2}')
-      
+
       # Smart gaps is active if current values match our smart gaps settings
       [[ "$current_gaps_in" == "$SMART_GAPS_IN" ]] && \
       [[ "$current_gaps_out" == "$SMART_GAPS_OUT" ]] && \
@@ -147,7 +147,7 @@ pkgs.writeShellApplication {
     # Function to apply smart gaps
     apply_smart_gaps() {
       local workspace_id="$1"
-      
+
       echo "Applying smart gaps to workspace $workspace_id..." >&2
 
       # Store current values before applying smart gaps
@@ -156,13 +156,13 @@ pkgs.writeShellApplication {
       current_gaps_out=$("$HYPRCTL_PATH" getoption general:gaps_out | grep "custom type:" | awk '{print $3}')
       current_rounding=$("$HYPRCTL_PATH" getoption decoration:rounding | grep "int:" | awk '{print $2}')
       current_border=$("$HYPRCTL_PATH" getoption general:border_size | grep "int:" | awk '{print $2}')
-      
+
       # Store original values in a temp file for restoration
       echo "$current_gaps_in $current_gaps_out $current_rounding $current_border" > "/tmp/smart-gaps-original-$workspace_id"
 
       # Apply smart gaps settings directly
       "$HYPRCTL_PATH" keyword general:gaps_in "$SMART_GAPS_IN" >/dev/null
-      "$HYPRCTL_PATH" keyword general:gaps_out "$SMART_GAPS_OUT" >/dev/null  
+      "$HYPRCTL_PATH" keyword general:gaps_out "$SMART_GAPS_OUT" >/dev/null
       "$HYPRCTL_PATH" keyword decoration:rounding "$SMART_ROUNDING" >/dev/null
       "$HYPRCTL_PATH" keyword general:border_size "$SMART_BORDER_SIZE" >/dev/null
 
@@ -173,7 +173,7 @@ pkgs.writeShellApplication {
     # Function to remove smart gaps (restore defaults)
     remove_smart_gaps() {
       local workspace_id="$1"
-      
+
       echo "Removing smart gaps from workspace $workspace_id..." >&2
 
       # Try to restore from saved values first
@@ -183,12 +183,12 @@ pkgs.writeShellApplication {
         original_values=$(cat "$restore_file")
         local orig_gaps_in orig_gaps_out orig_rounding orig_border
         read -r orig_gaps_in orig_gaps_out orig_rounding orig_border <<< "$original_values"
-        
+
         "$HYPRCTL_PATH" keyword general:gaps_in "$orig_gaps_in" >/dev/null
         "$HYPRCTL_PATH" keyword general:gaps_out "$orig_gaps_out" >/dev/null
         "$HYPRCTL_PATH" keyword decoration:rounding "$orig_rounding" >/dev/null
         "$HYPRCTL_PATH" keyword general:border_size "$orig_border" >/dev/null
-        
+
         # Clean up temp file
         rm -f "$restore_file"
       else
@@ -205,7 +205,7 @@ pkgs.writeShellApplication {
       # Get current workspace
       local workspace_id
       workspace_id=$(get_workspace_id)
-      
+
       echo "Current workspace: $workspace_id" >&2
 
       # Check current state and toggle
@@ -213,7 +213,7 @@ pkgs.writeShellApplication {
         echo "Smart gaps are currently active, disabling..." >&2
         remove_smart_gaps "$workspace_id"
       else
-        echo "Smart gaps are not active, enabling..." >&2  
+        echo "Smart gaps are not active, enabling..." >&2
         apply_smart_gaps "$workspace_id"
       fi
     }

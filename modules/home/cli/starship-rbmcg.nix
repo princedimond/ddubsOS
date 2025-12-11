@@ -1,11 +1,10 @@
-{ config
-, lib
-, ...
-}:
-let
-  accent = "#${config.lib.stylix.colors.base0D}";
-in
 {
+  config,
+  lib,
+  ...
+}: let
+  accent = "#${config.lib.stylix.colors.base0D}";
+in {
   programs.starship = {
     enable = true;
     enableTransience = true;

@@ -3,9 +3,6 @@
     kdePackages.kdenlive
     assaultcube
     nvtopPackages.amd
-    libreoffice-fresh
-    lmstudio
-    openarena
-    ollama
+    onlyoffice-desktopeditors
   ];
 }

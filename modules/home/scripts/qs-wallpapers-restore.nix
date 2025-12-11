@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 pkgs.writeShellScriptBin "qs-wallpapers-restore" ''
   #!/usr/bin/env bash
   set -euo pipefail
@@ -23,6 +23,11 @@ pkgs.writeShellScriptBin "qs-wallpapers-restore" ''
   if [ -z "''${PATH_J:-}" ] || [ ! -f "$PATH_J" ]; then
     log "No valid saved wallpaper path; exiting"
     exit 0
+  fi
+
+  # Update hyprlock wallpaper link if tool is available
+  if command -v hyprlock-update-wallpaper-link >/dev/null 2>&1; then
+    hyprlock-update-wallpaper-link >/dev/null 2>&1 || true
   fi
 
   # Order: recorded backend first, then swww -> hyprpaper -> mpvpaper -> waypaper
@@ -72,8 +77,16 @@ pkgs.writeShellScriptBin "qs-wallpapers-restore" ''
         ${pkgs.coreutils}/bin/sleep 0.1
       done
     fi
-    log "swww img --resize fill $PATH_J"
-    ${pkgs.swww}/bin/swww img --resize fill "$PATH_J"
+    # Robust resize: use explicit WALLPAPER_RESIZE if provided; otherwise try fill -> fit -> crop
+    if [ -n "''${WALLPAPER_RESIZE:-}" ]; then
+      log "swww img --resize ''${WALLPAPER_RESIZE} $PATH_J"
+      ${pkgs.swww}/bin/swww img --resize "''${WALLPAPER_RESIZE}" "$PATH_J"
+    else
+      log "Trying swww resize modes: fill -> fit -> crop"
+      ${pkgs.swww}/bin/swww img --resize fill "$PATH_J" || \
+      ${pkgs.swww}/bin/swww img --resize fit  "$PATH_J" || \
+      ${pkgs.swww}/bin/swww img --resize crop "$PATH_J"
+    fi
   }
 
   start_hyprpaper() {

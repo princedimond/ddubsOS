@@ -1,8 +1,6 @@
-{ host, ... }:
-let
+{host, ...}: let
   inherit (import ../../hosts/${host}/variables.nix) consoleKeyMap;
-in
-{
+in {
   nix = {
     settings = {
       download-buffer-size = 250000000;
@@ -11,9 +9,8 @@ in
         "nix-command"
         "flakes"
       ];
-      allowed-users = [ "@wheel" ];
-      trusted-users = [ "@wheel" ];
-      #build-dir = "/var/tmp";
+      allowed-users = ["@wheel"];
+      trusted-users = ["@wheel"];
     };
   };
   time.timeZone = "America/Chicago";
@@ -33,7 +30,7 @@ in
   # Note to future self. Find all these and change to ddubsOS
   environment.variables = {
     NIXOS_OZONE_WL = "1";
-    DDUBSOS_VERSION = "2.5.8";
+    DDUBSOS_VERSION = "2.7.3-next";
     DDUBSOS = "true";
   };
 

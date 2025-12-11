@@ -1,6 +1,20 @@
-{ pkgs, ... }:
 {
-  prefer-no-csd = true;
+  pkgs,
+  lib ? pkgs.lib,
+  ...
+}: let
+  binds = import ./bindings.nix {};
+in rec {
+  # KDL: hotkey-overlay { skip-at-startup }
+  hotkeyOverlay = {
+    skipAtStartup = true;
+  };
+
+  # KDL: prefer-no-csd
+  preferNoCsd = true;
+
+  # KDL: screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+  screenshotPath = "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png";
 
   environment = {
     MOZ_ENABLE_WAYLAND = "1";
@@ -21,39 +35,129 @@
   };
 
   input = {
-    keyboard.xkb.layout = "us";
+    keyboard = {
+      xkb.layout = "us";
+    };
     touchpad = {
       tap = true;
       dwt = true;
-      accel-speed = 0.4;
-      accel-profile = "flat";
-      scroll-method = "two-finger";
-      tap-button-map = "left-right-middle";
-      scroll-factor = 0.7;
+      accelSpeed = 0.4;
+      accelProfile = "flat";
+      scrollMethod = "two-finger";
+      tapButtonMap = "left-right-middle";
+      scrollFactor = 0.7;
     };
-    focus-follows-mouse.enable = true;
+    focusFollowsMouse = true;
   };
 
-  overview.zoom = 0.65;
+  overview = {
+    zoom = 0.65;
+    backdropColor = "transparent";
+  };
+
+  outputs = [
+    {
+      name = "eDP-1";
+      mode = "1920x1080@60.000";
+      scale = 1;
+    }
+    {
+      name = "Virtual-1";
+      mode = "1920x1080@60.000";
+      scale = 1;
+    }
+    {
+      name = "HDMI-A-1";
+      mode = "1920x1080@60.000";
+      scale = 1;
+    }
+  ];
 
   layout = {
     gaps = 4;
-    background-color = "transparent";
-    default-column-width.proportion = 0.75;
+    backgroundColor = "transparent";
+    defaultColumnWidth = {proportion = 0.75;};
+    focusRing = {enable = false;};
     border = {
       width = 4;
-      active-color = "#ffc87f";
-      inactive-color = "#505050";
+      activeColor = "#ffc87f";
+      inactiveColor = "#505050";
     };
     shadow = {
       enable = true;
       softness = 30;
       spread = 5;
-      offset = { x = 0; y = 5; };
+      offset = {
+        x = 0;
+        y = 5;
+      };
       color = "#000000";
     };
-    struts = { left = 10; right = 10; top = 10; bottom = 10; };
+    struts = {
+      left = 10;
+      right = 10;
+      top = 10;
+      bottom = 10;
+    };
   };
+
+  cursor = {
+    xcursorTheme = "Pop";
+    xcursorSize = 24;
+    hideWhenTyping = true;
+    hideAfterInactiveMs = 5000;
+  };
+
+  # Switch events
+  switchEvents = [
+    {
+      event = "lid-close";
+      spawn = ["swaylock"];
+    }
+  ];
+
+  # Animations block retained as text for fidelity
+  animationsText = ''
+    animations {
+      workspace-switch {
+        spring damping-ratio=1.0 stiffness=1000 epsilon=0.0001
+      }
+
+      window-open {
+        duration-ms 150
+        curve "ease-out-quad"
+      }
+
+      window-close {
+        duration-ms 150
+        curve "ease-out-quad"
+      }
+
+      horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+      }
+
+      window-movement {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+      }
+
+      window-resize {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+      }
+
+      config-notification-open-close {
+        spring damping-ratio=0.6 stiffness=1000 epsilon=0.001
+      }
+
+      screenshot-ui-open {
+        duration-ms 200
+        curve "ease-out-quad"
+      }
+    }
+  '';
+
+  # Binds block moved to a dedicated module for reuse
+  bindsText = binds.bindsText;
 
   workspaces = {
     "Browsers" = {};
@@ -63,4 +167,3 @@
     "MUS" = {};
   };
 }
-

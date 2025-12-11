@@ -1,5 +1,20 @@
-{ profile, pkgs, lib, ... }:
 {
+  profile,
+  pkgs,
+  lib,
+  host,
+  ...
+}: let
+  vars = import ../../hosts/${host}/variables.nix;
+  enableFAH =
+    if builtins.hasAttr "enableFoldingAtHome" vars
+    then vars.enableFoldingAtHome
+    else false;
+  teamId =
+    if builtins.hasAttr "foldingTeamId" vars
+    then vars.foldingTeamId
+    else 1066966;
+in {
   # Services to start
 
   # Move builds from tmpfs to /var/tmp
@@ -28,6 +43,7 @@
   };
 
   services = {
+    seatd.enable = true;
     gpm = {
       enable = true;
       # Configure the protocol only; the module uses /dev/input/mice by default.
@@ -39,7 +55,7 @@
     fstrim.enable = true; # SSD Optimizer
     gvfs.enable = true; # For Mounting USB & More
     udisks2.enable = true; # Disk management/automount backend
-    udev.packages = [ pkgs.libmtp ]; # MTP udev rules for user access
+    udev.packages = [pkgs.libmtp]; # MTP udev rules for user access
     envfs.enable = true; # For better FHS compatibility
     openssh = {
       enable = true; # Enable SSH
@@ -48,12 +64,18 @@
         PasswordAuthentication = true;
         KbdInteractiveAuthentication = true;
       };
-      ports = [ 22 ];
+      ports = [22];
     };
     blueman.enable = true; # Bluetooth Support
     tumbler.enable = true; # Image/video preview
     gnome.gnome-keyring.enable = true;
     power-profiles-daemon.enable = true;
+
+    # Folding@home (optional per host)
+    foldingathome = lib.mkIf enableFAH {
+      enable = true;
+      team = teamId;
+    };
 
     logind = {
       settings.Login = {
@@ -63,7 +85,10 @@
     };
 
     smartd = {
-      enable = if profile == "vm" then false else true;
+      enable =
+        if profile == "vm"
+        then false
+        else true;
       autodetect = true;
     };
     pipewire = {

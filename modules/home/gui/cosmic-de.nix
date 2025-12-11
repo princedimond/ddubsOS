@@ -1,8 +1,7 @@
 # Author: Don Williams (aka ddubs)
 # Created: 2025-08-27
 # Project: git@gitlab.com:dwilliam62/ddubsos
-
-{ pkgs, ... }: {
+{pkgs, ...}: {
   # COSMIC user-level module
   # System enablement is handled in modules/core/xserver.nix via cosmicEnable.
   # This module installs commonly used COSMIC apps for the user.
@@ -35,4 +34,3 @@
     xdg-desktop-portal-cosmic
   ];
 }
-

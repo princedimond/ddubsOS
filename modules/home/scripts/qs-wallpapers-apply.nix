@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 pkgs.writeShellScriptBin "qs-wallpapers-apply" ''
   #!/usr/bin/env bash
   set -euo pipefail
@@ -17,7 +17,15 @@ pkgs.writeShellScriptBin "qs-wallpapers-apply" ''
     esac
   done
 
-  BACKEND="''${WALLPAPER_BACKEND:-mpvpaper}"
+  BACKEND="''${WALLPAPER_BACKEND:-}"
+  # Auto-detect sensible default backend per compositor when not provided via env
+  if [ -z "''${BACKEND:-}" ]; then
+    if [ "''${XDG_SESSION_DESKTOP:-}" = "Niri" ] || [ "''${XDG_CURRENT_DESKTOP:-}" = "Niri" ] || command -v niri >/dev/null 2>&1; then
+      BACKEND="swww"
+    else
+      BACKEND="mpvpaper"
+    fi
+  fi
 
   if [ $SHELL_ONLY -eq 1 ]; then
     log "Shell-only perf run"
@@ -67,6 +75,11 @@ pkgs.writeShellScriptBin "qs-wallpapers-apply" ''
   ${pkgs.coreutils}/bin/printf '%s\n' "$sel" > "$tmp_txt"
   ${pkgs.coreutils}/bin/mv -f "$tmp_txt" "$STATE_FILE_TXT"
 
+  # Update hyprlock wallpaper link if tool is available
+  if command -v hyprlock-update-wallpaper-link >/dev/null 2>&1; then
+    hyprlock-update-wallpaper-link >/dev/null 2>&1 || true
+  fi
+
   case "$BACKEND" in
     mpvpaper)
       # Stop other wallpaper daemons to avoid conflicts
@@ -109,9 +122,25 @@ pkgs.writeShellScriptBin "qs-wallpapers-apply" ''
           ${pkgs.coreutils}/bin/sleep 0.1
         done
       fi
-      # Use resize=fill so smaller images cover the screen (preserving aspect, cropping if needed)
-      log "Running: swww img --resize fill $sel"
-      exec ${pkgs.swww}/bin/swww img --resize fill "$sel"
+      # Stop hyprpaper as well to avoid any conflict with layer surfaces
+      ${pkgs.procps}/bin/pkill -x hyprpaper >/dev/null 2>&1 || true
+
+      # Robust resize: if WALLPAPER_RESIZE is set, use it; otherwise try fill -> fit -> crop
+      run_swww_img() {
+        if [ -n "''${WALLPAPER_RESIZE:-}" ]; then
+          log "swww img --resize ''${WALLPAPER_RESIZE} $sel"
+          ${pkgs.swww}/bin/swww img --resize "''${WALLPAPER_RESIZE}" "$sel"
+          return $?
+        fi
+        log "Trying swww resize modes: fill -> fit -> crop"
+        ${pkgs.swww}/bin/swww img --resize fill "$sel" || \
+        ${pkgs.swww}/bin/swww img --resize fit  "$sel" || \
+        ${pkgs.swww}/bin/swww img --resize crop "$sel"
+      }
+
+      # Niri: generic apply has proven to work more reliably than per-output here
+      run_swww_img
+      exit $?
       ;;
 
     hyprpaper)

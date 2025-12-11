@@ -40,9 +40,7 @@ input {
    }
 
    // Enable focus follows mouse
-   focus-follows-mouse {
-      enable
-   }
+   focus-follows-mouse
 
    mouse {}
 }
@@ -102,8 +100,10 @@ spawn-at-startup "blueman-applet"
 spawn-at-startup "udiskie"
 spawn-at-startup "start-polkit-agent"
 spawn-at-startup "swww-daemon"
-spawn-at-startup "swww" "img" "/home/dwilliams/Pictures/Wallpapers/astralbed.webp" "--transition-type" "any" "--transition-fps" "60" "--transition-duration" "1.0"
-spawn-at-startup "waybar"
+spawn-at-startup "dms" "run"
+// spawn-at-startup "waybar-niri"
+// Restore last wallpaper selection (after bar starts)
+spawn-at-startup "waypaper" "--restore"
 
 switch-events {
    lid-close {spawn "swaylock";}
@@ -299,6 +299,13 @@ window-rule {
 window-rule {
    match app-id=r#"zen$"# title="^Picture-in-Picture$"
    open-floating true
+}
+
+// Ensure Rofi dialogs (e.g., power menu) are floating and compact
+window-rule {
+   match app-id=r#"(?i)^rofi$"#
+   open-floating true
+   default-column-width { proportion 0.3; }
 }
 
 window-rule {

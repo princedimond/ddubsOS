@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   # Enable plugins at build time
   dconf.settings = {
     "org/gnome/shell" = {

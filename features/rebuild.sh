@@ -83,22 +83,27 @@ _maybe_prompt_stage() {
 	done
 }
 
+
 _rebuild_run() {
 	local mode="$1"
 	shift
 	local extra_args
 	extra_args=$(parse_nh_args "$@") || return 1
 
+	# Use the actual system hostname for host-based builds (matches flake host)
+	local current_host
+	current_host="$($HOSTNAME_BIN)"
+
 	case "$mode" in
 	switch)
-		echo "Starting NixOS rebuild for host: $($HOSTNAME_BIN)"
+		echo "Starting NixOS rebuild for host: $current_host"
 		;;
 	boot)
-		echo "Starting NixOS rebuild (boot) for host: $($HOSTNAME_BIN)"
+		echo "Starting NixOS rebuild (boot) for host: $current_host"
 		echo "Note: Configuration will be activated on next reboot"
 		;;
 	update)
-		echo "Updating flake and rebuilding system for host: $($HOSTNAME_BIN)"
+		echo "Updating flake and rebuilding system for host: $current_host"
 		;;
 	esac
 
@@ -108,13 +113,13 @@ _rebuild_run() {
 	local cmd
 	case "$mode" in
 	switch)
-		cmd="nh os switch --hostname '$PROFILE' $extra_args$accept_flags"
+		cmd="nh os switch --hostname '$current_host' $extra_args$accept_flags"
 		;;
 	boot)
-		cmd="nh os boot --hostname '$PROFILE' $extra_args$accept_flags"
+		cmd="nh os boot --hostname '$current_host' $extra_args$accept_flags"
 		;;
 	update)
-		cmd="nh os switch --hostname '$PROFILE' --update $extra_args$accept_flags"
+		cmd="nh os switch --hostname '$current_host' --update $extra_args$accept_flags"
 		;;
 	esac
 

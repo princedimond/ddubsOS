@@ -2,8 +2,7 @@
   pkgs,
   lib,
   ...
-}:
-{
+}: {
   programs.bat = {
     enable = true;
     config = {
@@ -18,7 +17,7 @@
     extraPackages = with pkgs.bat-extras; [
       batman
       batpipe
-      #batgrep
+      #batgrep   # Fails to build 10-20-25
     ];
   };
   home.sessionVariables = {

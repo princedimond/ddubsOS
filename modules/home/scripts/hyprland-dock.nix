@@ -1,5 +1,5 @@
 # ~/ddubsos/modules/home/scripts/hyprland-dock.nix
-{ pkgs }:
+{pkgs}:
 pkgs.writeShellScriptBin "dock" ''
 
   # Change to #!/usr/bin for non NixOS systems

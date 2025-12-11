@@ -8,21 +8,19 @@
   username,
   host,
   ...
-}:
-let
+}: let
   inherit (import ../../hosts/${host}/variables.nix) vicinaeProfile;
-in
-{
+in {
   # Import the upstream Home Manager module
-  imports = [ inputs.vicinae.homeManagerModules.default ];
+  imports = [inputs.vicinae.homeManagerModules.default];
 
   # Configure based on profile from variables
   services.vicinae = {
     enable = true;
-    package = inputs.vicinae.packages.${pkgs.system}.default;
+    package = inputs.vicinae.packages.${pkgs.stdenv.hostPlatform.system}.default;
     autoStart = true;
     useLayerShell = true;
-    
+
     # Profile-based settings
     settings = lib.mkMerge [
       # Base settings for all profiles
@@ -31,9 +29,9 @@ in
         window = {
           csd = true;
           opacity = 0.95;
-          rounding = 16;  # Rounded corners for modern look
+          rounding = 16; # Rounded corners for modern look
         };
-        
+
         # Disable unwanted default items
         builtins = {
           # Disable store/marketplace features
@@ -41,49 +39,49 @@ in
             enabled = false;
             showInRootSearch = false;
           };
-          
+
           # Disable documentation links
           documentation = {
             enabled = false;
             showInRootSearch = false;
           };
-          
+
           # Disable sponsor/funding related items
           sponsor = {
             enabled = false;
             showInRootSearch = false;
           };
-          
+
           # Disable theme browser/manager if not needed
           themeManager = {
             enabled = false;
             showInRootSearch = false;
           };
-          
+
           # Disable extension store browser
           extensionStore = {
             enabled = false;
             showInRootSearch = false;
           };
-          
+
           # Keep useful builtins enabled
           applications = {
             enabled = true;
             showInRootSearch = true;
           };
-          
+
           system = {
             enabled = true;
             showInRootSearch = true;
           };
         };
-        
+
         # Configure root search to be cleaner
         rootSearch = {
           # Hide built-in items we don't want
           hiddenBuiltins = [
             "store"
-            "documentation" 
+            "documentation"
             "sponsor"
             "themeManager"
             "extensionStore"
@@ -92,7 +90,7 @@ in
             "get-help"
             "report-bug"
           ];
-          
+
           # Show only relevant items
           enabledBuiltins = [
             "applications"
@@ -103,14 +101,14 @@ in
           ];
         };
       }
-      
+
       # Minimal profile
       (lib.mkIf (vicinaeProfile == "minimal") {
         rootSearch.searchFiles = false;
         clipboardHistory.enabled = false;
         extensions.raycast.enabled = false;
       })
-      
+
       # Standard profile (default)
       (lib.mkIf (vicinaeProfile == "standard") {
         rootSearch.searchFiles = true;
@@ -120,7 +118,7 @@ in
         };
         extensions.raycast.enabled = false;
       })
-      
+
       # Developer profile
       (lib.mkIf (vicinaeProfile == "developer") {
         rootSearch.searchFiles = true;
@@ -135,8 +133,8 @@ in
         searchDelay = 50; # Faster response
         maxResults = 20;
       })
-      
-      # Power user profile  
+
+      # Power user profile
       (lib.mkIf (vicinaeProfile == "power-user") {
         rootSearch = {
           searchFiles = true;
@@ -167,7 +165,7 @@ in
         prefetchResults = true;
       })
     ];
-    
+
     # Example ddubsos theme
     themes."ddubsos-theme" = {
       version = "1.0.0";
@@ -189,7 +187,7 @@ in
   };
 
   # Add to user packages for CLI access
-  home.packages = [ inputs.vicinae.packages.${pkgs.system}.default ];
+  home.packages = [inputs.vicinae.packages.${pkgs.stdenv.hostPlatform.system}.default];
 
   # Additional configuration notes:
   # - Some Vicinae settings may require manual adjustment in ~/.config/vicinae/vicinae.json
@@ -200,10 +198,10 @@ in
   xdg.desktopEntries.vicinae = {
     name = "Vicinae";
     comment = "High-performance native launcher";
-    exec = "${lib.getExe inputs.vicinae.packages.${pkgs.system}.default}";
+    exec = "${lib.getExe inputs.vicinae.packages.${pkgs.stdenv.hostPlatform.system}.default}";
     icon = "vicinae";
     type = "Application";
-    categories = [ "Utility" "Accessibility" ];
+    categories = ["Utility" "Accessibility"];
     startupNotify = true;
   };
 }

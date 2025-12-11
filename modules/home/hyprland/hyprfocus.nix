@@ -1,8 +1,8 @@
 # Hyprfocus is a Hyprland plugin for focus animations and effects
-{ pkgs, ... }: {
+{pkgs, ...}: {
   wayland.windowManager.hyprland = {
     # Load the Hyprfocus plugin
-    plugins = [ pkgs.hyprlandPlugins.hyprfocus ];
+    plugins = [pkgs.hyprlandPlugins.hyprfocus];
 
     settings = {
       plugin = {

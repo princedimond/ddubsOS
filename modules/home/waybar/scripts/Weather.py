@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import html
+import subprocess
 from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 
@@ -63,8 +64,11 @@ SESSION = requests.Session()
 SESSION.headers.update({"User-Agent": UA})
 
 # =============== Icon and status mapping ===============
-# Reuse prior icon set for continuity
-WEATHER_ICONS = {
+# Icon style: 'emoji' (colorful), 'nerd' (mono glyphs), or 'gnome' (symbolic names, useful for other bars)
+ICON_STYLE = os.getenv("WEATHER_ICON_STYLE", "emoji").strip().lower()  # emoji|nerd|gnome
+
+# Nerd Font weather glyphs (mono)
+WEATHER_ICONS_NERD = {
     "sunnyDay": "󰖙",
     "clearNight": "󰖔",
     "cloudyFoggyDay": "",
@@ -76,6 +80,80 @@ WEATHER_ICONS = {
     "severe": "",
     "default": "",
 }
+
+# Colored emoji set (renders with system emoji font, gives the "3D" look)
+WEATHER_ICONS_EMOJI = {
+    "sunnyDay": "☀️",
+    "clearNight": "🌙",
+    "cloudyFoggyDay": "⛅️",
+    "cloudyFoggyNight": "☁️🌙",
+    "rainyDay": "🌦️",
+    "rainyNight": "🌧️",
+    "snowyIcyDay": "🌨️",
+    "snowyIcyNight": "❄️🌙",
+    "severe": "⛈️",
+    "default": "🌥️",
+}
+
+# GNOME symbolic icon names (not used directly by Waybar, here for parity)
+WEATHER_ICONS_GNOME = {
+    "sunnyDay": "Sun-symbolic",
+    "clearNight": "Moon-symbolic",
+    "cloudyFoggyDay": "CloudSun-symbolic",
+    "cloudyFoggyNight": "CloudyMoon-symbolic",
+    "rainyDay": "CloudRain-symbolic",
+    "rainyNight": "CloudRain-symbolic",
+    "snowyIcyDay": "CloudSnowfall-symbolic",
+    "snowyIcyNight": "CloudSnowfall-symbolic",
+    "severe": "CloudBolt-symbolic",
+    "default": "Cloud-symbolic",
+}
+
+# Optional: allow disabling automatic fallback via env
+DISABLE_EMOJI_FALLBACK = os.getenv("WEATHER_DISABLE_EMOJI_FALLBACK", "0").lower() in ("1", "true", "yes")
+
+# Basic detection of color emoji font availability via fontconfig (fc-list)
+EMOJI_FONT_CANDIDATES = [
+    "Noto Color Emoji",
+    "Noto Emoji",
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Twitter Color Emoji",
+    "Twemoji",
+    "JoyPixels",
+]
+
+def has_color_emoji_font() -> bool:
+    try:
+        # Quick check: list installed fonts; search for any candidate name
+        proc = subprocess.run(
+            ["fc-list"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=1.5,
+            check=False,
+        )
+        out = proc.stdout or ""
+        out_lower = out.lower()
+        for name in EMOJI_FONT_CANDIDATES:
+            if name.lower() in out_lower:
+                return True
+    except Exception:
+        # If detection fails, don't block emoji; assume not available to be safe on minimal setups
+        return False
+    return False
+
+# Determine the active icon style with fallback from emoji -> nerd when no color emoji fonts are present
+if ICON_STYLE == "emoji" and not DISABLE_EMOJI_FALLBACK and not has_color_emoji_font():
+    ACTIVE_ICON_STYLE = "nerd"
+else:
+    ACTIVE_ICON_STYLE = ICON_STYLE
+
+# Choose active set
+WEATHER_ICONS = (
+    WEATHER_ICONS_EMOJI if ACTIVE_ICON_STYLE == "emoji" else WEATHER_ICONS_NERD if ACTIVE_ICON_STYLE == "nerd" else WEATHER_ICONS_GNOME
+)
 
 WMO_STATUS = {
     0: "Clear sky",
@@ -136,6 +214,38 @@ def esc(s: Optional[str]) -> str:
 def log_debug(msg: str) -> None:
     if DEBUG:
         print(msg, file=sys.stderr)
+
+
+def temp_color(temp_val: Optional[float]) -> str:
+    """Choose a color for the temperature number based on value and unit set."""
+    if not isinstance(temp_val, (int, float)):
+        return "#cdd6f4"  # default text
+    # Work in Fahrenheit for thresholds if imperial, else Celsius
+    t = float(temp_val)
+    if UNITS == "metric":
+        if t <= -5:
+            return "#89dceb"  # sky
+        if t <= 5:
+            return "#74c7ec"  # sapphire
+        if t <= 15:
+            return "#a6e3a1"  # green
+        if t <= 25:
+            return "#f9e2af"  # yellow
+        if t <= 32:
+            return "#fab387"  # peach
+        return "#f38ba8"      # red
+    else:
+        if t <= 25:
+            return "#89dceb"
+        if t <= 41:
+            return "#74c7ec"
+        if t <= 60:
+            return "#a6e3a1"
+        if t <= 77:
+            return "#f9e2af"
+        if t <= 90:
+            return "#fab387"
+        return "#f38ba8"
 
 def ensure_cache_dir() -> None:
     try:
@@ -403,6 +513,7 @@ def build_output(lat: float, lon: float, forecast: Dict[str, Any], aqi: Optional
     temp_val = cur.get("temperature_2m")
     temp_unit = cur_units.get("temperature_2m", "")
     temp_str = f"{int(round(temp_val))}{temp_unit}" if isinstance(temp_val, (int, float)) else "N/A"
+    temp_col = temp_color(temp_val)
 
     feels_val = cur.get("apparent_temperature")
     feels_unit = cur_units.get("apparent_temperature", "")
@@ -500,7 +611,7 @@ def build_output(lat: float, lon: float, forecast: Dict[str, Any], aqi: Optional
         # Escape dynamic text to avoid breaking Pango markup
         tooltip_text = str.format(
             "\t\t{}\t\t\n{}\n{}\n{}\n{}\n\n{}\n{}\n{}{}",
-            f'<span size="xx-large">{esc(temp_str)}</span>',
+            f'<span size="xx-large" foreground="{temp_col}">{esc(temp_str)}</span>',
             f"<big> {icon}</big>",
             f"<b>{esc(status)}</b>",
             esc(location_text),
@@ -526,8 +637,17 @@ def build_output(lat: float, lon: float, forecast: Dict[str, Any], aqi: Optional
             lines.append(hourly_precip)
         tooltip_text = "\n".join([ln for ln in lines if ln])
 
+    # Build main text with colorful icon and colored temp; prefer larger icon if emoji
+    if ACTIVE_ICON_STYLE == "emoji":
+        icon_text = f"<span size=\"x-large\">{icon}</span>"
+    else:
+        # Colorize mono icons subtly
+        icon_text = f"<span foreground=\"{temp_col}\">{icon}</span>"
+
+    temp_text = f"<span foreground=\"{temp_col}\">{esc(temp_str)}</span>"
+
     out_data = {
-        "text": f"{icon}  {temp_str}",
+        "text": f"{icon_text}  {temp_text}",
         "alt": status,
         "tooltip": tooltip_text,
         "class": code_for_class,

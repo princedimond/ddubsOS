@@ -7,15 +7,6 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
-  "context_servers": {
-    "mcp-server-github": {
-      "source": "extension",
-      "enabled": true,
-      "settings": {
-        "github_personal_access_token": "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"
-      }
-    }
-  },
   "inlay_hints": {
     "enabled": true,
     "show_value_hints": true,
@@ -37,21 +28,20 @@
     "show": "auto"
   },
   "telemetry": {
-    "diagnostics": false,
     "metrics": false
   },
   "vim_mode": true,
   "base_keymap": "VSCode",
   "icon_theme": {
-    "mode": "dark",
+    "mode": "system",
     "light": "Catppuccin Mocha",
     "dark": "Catppuccin Mocha"
   },
   "ui_font_size": 16,
   "buffer_font_size": 15,
   "theme": {
-    "mode": "dark",
-    "light": "Catppuccin Mocha",
-    "dark": "Catppuccin Mocha"
+    "mode": "system",
+    "light": "Catppuccin Frappé",
+    "dark": "One Dark"
   }
 }

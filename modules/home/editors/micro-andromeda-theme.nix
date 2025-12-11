@@ -1,6 +1,5 @@
-{ pkgs, ... }:
-{
-  home.packages = [ pkgs.micro ];
+{pkgs, ...}: {
+  home.packages = [pkgs.micro];
 
   # Andromeda theme for micro
   home.file.".config/micro/colorschemes/andromeda.micro".text = ''

@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 pkgs.writeShellScriptBin "qs-vid-wallpapers-apply" ''
   #!/usr/bin/env bash
   set -euo pipefail
@@ -40,6 +40,11 @@ pkgs.writeShellScriptBin "qs-vid-wallpapers-apply" ''
   sel=$(${pkgs.coreutils}/bin/printf "%s\n" "$out" | ${pkgs.gawk}/bin/awk -F'SELECT:' '/SELECT:/{print $2}' | ${pkgs.coreutils}/bin/tail -n1)
   audio=$(${pkgs.coreutils}/bin/printf "%s\n" "$out" | ${pkgs.gawk}/bin/awk -F'AUDIO:' '/AUDIO:/{print $2}' | ${pkgs.coreutils}/bin/tail -n1)
 
+  # Fallback: some picker builds output only the path; if so, treat it as selection
+  if [ -z "''${sel:-}" ] && [ -n "''${out:-}" ] && [ -f "''${out}" ]; then
+    sel="$out"
+  fi
+
   if [ -z "''${sel:-}" ]; then
     log "No selection received; exiting"
     exit 0
@@ -53,6 +58,12 @@ pkgs.writeShellScriptBin "qs-vid-wallpapers-apply" ''
   log "Backend=$BACKEND"
   log "Selected=$sel"
   log "Audio=$audio"
+
+  # Force mpvpaper for video wallpapers
+  if [ "''${BACKEND}" != "mpvpaper" ]; then
+    log "Forcing BACKEND=mpvpaper for video wallpapers (was: $BACKEND)"
+    BACKEND="mpvpaper"
+  fi
 
   case "$BACKEND" in
     mpvpaper)

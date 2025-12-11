@@ -16,6 +16,7 @@ Saved in modules/home/waybar/:
 - waybar-dwm2.nix
 - waybar-nekodyke.nix
 - Jerry-waybar.nix
+- waybar-TheBlackDon.nix
 
 
 ## Where you select your Waybar

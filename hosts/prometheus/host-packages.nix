@@ -1,12 +1,11 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     kdePackages.kdenlive
     #urbanterror
     #unvanquished
     #xonotic
     assaultcube
-    openarena
+    onlyoffice-desktopeditors
     nvtopPackages.full
   ];
 

@@ -4,8 +4,7 @@
   config,
   ...
 }:
-with lib;
-let
+with lib; let
   c = config.lib.stylix.colors;
   # Install helper scripts and provide an inline Waybar CAVA script like in Catppuccin config
   scriptsDir = ./scripts;
@@ -60,8 +59,7 @@ let
 
     exec cava -p "$config_file" | sed -u "$dict"
   '';
-in
-{
+in {
   # Ensure bundled Waybar scripts are installed under ~/.config/waybar/scripts
   home.file = builtins.listToAttrs (
     map (name: {
@@ -70,7 +68,8 @@ in
         source = "${scriptsDir}/${name}";
         executable = true;
       };
-    }) scripts
+    })
+    scripts
   );
   programs.waybar = {
     enable = true;
@@ -135,7 +134,7 @@ in
           "critical-threshold" = 82;
           "format-critical" = "{temperatureC}°C {icon}";
           format = "{temperatureC}°C {icon}";
-          "format-icons" = [ "󰈸" ];
+          "format-icons" = ["󰈸"];
           "on-click-right" = "$HOME/.config/hypr/scripts/WaybarScripts.sh --nvtop";
         };
 
@@ -341,8 +340,7 @@ in
           "on-scroll-down" = "$HOME/.config/hypr/scripts/Volume.sh --dec";
           "smooth-scrolling-threshold" = 1;
           tooltip = true;
-          "tooltip-format" =
-            "{status_icon} {dynamic}\nLeft Click: previous\nMid Click: Pause\nRight Click: Next";
+          "tooltip-format" = "{status_icon} {dynamic}\nLeft Click: previous\nMid Click: Pause\nRight Click: Next";
           "player-icons" = {
             chromium = "";
             default = "";
@@ -434,7 +432,7 @@ in
               "󰕾"
               ""
             ];
-            "ignored-sinks" = [ "Easy Effects Sink" ];
+            "ignored-sinks" = ["Easy Effects Sink"];
           };
           "scroll-step" = 5.0;
           "on-click" = "$HOME/.config/hypr/scripts/Volume.sh --toggle";
@@ -529,8 +527,7 @@ in
           "on-click-right" = "$HOME/.config/hypr/UserScripts/WallpaperRandom.sh";
           "on-click-middle" = "$HOME/.config/hypr/scripts/WaybarStyles.sh";
           tooltip = true;
-          "tooltip-format" =
-            "Left Click: Wallpaper Menu\nMiddle Click: Random wallpaper\nRight Click: Waybar Styles Menu";
+          "tooltip-format" = "Left Click: Wallpaper Menu\nMiddle Click: Random wallpaper\nRight Click: Waybar Styles Menu";
         };
 
         "custom/hypridle" = {
@@ -560,12 +557,12 @@ in
 
         "custom/menu" = {
           format = "  ";
-          "on-click" = "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window";
+          # "on-click" = "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window";
+          "on-click" = "launch-nwg-menu";
           "on-click-middle" = "$HOME/.config/hypr/UserScripts/WallpaperSelect.sh";
           "on-click-right" = "$HOME/.config/hypr/scripts/WaybarLayout.sh";
           tooltip = true;
-          "tooltip-format" =
-            "Left Click: Rofi Menu\nMiddle Click: Wallpaper Menu\nRight Click: Waybar Layout Menu";
+          "tooltip-format" = "Left Click: Rofi Menu\nMiddle Click: Wallpaper Menu\nRight Click: Waybar Layout Menu";
         };
 
         "custom/cava_mviz" = {
@@ -773,28 +770,30 @@ in
           "window-rewrite" = {
             "title<.*amazon.*>" = " ";
             "title<.*reddit.*>" = " ";
+            "title<.*[Hh]elium.*>" = " ";
 
             "class<firefox|org.mozilla.firefox|librewolf|floorp|mercury-browser|[Cc]achy-browser>" = " ";
             "class<zen>" = "󰰷 ";
             "class<waterfox|waterfox-bin>" = " ";
             "class<microsoft-edge>" = " ";
             "class<Chromium|Thorium|[Cc]hrome>" = " ";
+            "class<helium>" = " ";
             "class<brave-browser>" = "🦁 ";
             "class<tor browser>" = " ";
             "class<firefox-developer-edition>" = "🦊 ";
 
             "class<kitty|konsole>" = " ";
             "class<kitty-dropterm>" = " ";
-            "class<com.mitchellh.ghostty>" = " ";
+            "class<com.mitchellh.ghostty>" = " 󰊠";
             "class<org.wezfurlong.wezterm>" = " ";
-            "class<Warp|warp|dev.warp.Warp|warp-terminal>" = " ";
+            "class<Warp|warp|dev.warp.Warp|warp-terminal>" = "󰰭 ";
 
             "class<[Tt]hunderbird|[Tt]hunderbird-esr>" = " ";
             "class<eu.betterbird.Betterbird>" = " ";
             "title<.*gmail.*>" = "󰊫 ";
 
             "class<[Tt]elegram-desktop|org.telegram.desktop|io.github.tdesktop_x64.TDesktop>" = " ";
-            "class<discord|[Ww]ebcord|Vesktop>" = " ";
+            "class<discord|discord-canary|[Ww]ebcord|[Vv]esktop|com.discordapp.Discord|dev.vencord.Vesktop>" = " ";
             "title<.*whatsapp.*>" = " ";
             "title<.*zapzap.*>" = " ";
             "title<.*messenger.*>" = " ";
@@ -814,8 +813,13 @@ in
             "title<.*Picture-in-Picture.*>" = " ";
             "title<.*youtube.*>" = " ";
             "class<vlc>" = "󰕼 ";
-            "title<.*cmus.*>" = " ";
-            "class<[Ss]potify>" = " ";
+            "class<[Kk]denlive|org.kde.kdenlive>" = "🎬 ";
+            "title<.*Kdenlive.*>" = "🎬 ";
+
+            "class<[Bb]ox[Bb]uddy|io.github.dvlv.boxbuddy|io.github.dvlv.BoxBuddy>" = " ";
+            "title<.*BoxBuddy.*>" = " ";
+
+            # qs-* apps
             "class<Plex>" = "󰚺 ";
 
             "class<virt-manager>" = " ";
@@ -825,7 +829,7 @@ in
             "title<virtualbox>" = "💽 ";
             "class<remmina|org.remmina.Remmina>" = "🖥️ ";
 
-            "class<VSCode|code-url-handler|code-oss|codium|codium-url-handler|VSCodium>" = "󰨞 ";
+            "class<VSCode|code|code-url-handler|code-oss|codium|codium-url-handler|VSCodium>" = "󰨞 ";
             "class<dev.zed.Zed>" = "󰵁";
             "class<codeblocks>" = "󰅩 ";
             "title<.*github.*>" = " ";
@@ -836,6 +840,7 @@ in
             "title<.*nvim ~.*>" = " ";
             "title<.*vim.*>" = " ";
             "title<.*nvim.*>" = " ";
+            "title<.*Discord.*>" = " ";
             "title<.*figma.*>" = " ";
             "title<.*jira.*>" = " ";
             "class<jetbrains-idea>" = " ";
@@ -854,6 +859,12 @@ in
             "class<org.pipewire.Helvum>" = "󰓃";
             "class<localsend>" = "";
             "class<PrusaSlicer|UltiMaker-Cura|OrcaSlicer>" = "󰹛";
+
+            "class<io.github.kolunmi.Bazaar>" = " ";
+            "title<^Bazaar$>" = " ";
+
+            "class<com.gabm.satty>" = " ";
+            "title<^satty$>" = " ";
 
             # qs-* apps
             "title<Hyprland Keybinds>" = " ";

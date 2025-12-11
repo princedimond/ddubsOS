@@ -3,8 +3,7 @@
   lib,
   modulesPath,
   ...
-}:
-{
+}: {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
@@ -18,9 +17,9 @@
       "usb_storage"
       "sd_mod"
     ];
-    initrd.kernelModules = [ ];
-    kernelModules = [ "kvm-intel" ];
-    extraModulePackages = [ ];
+    initrd.kernelModules = [];
+    kernelModules = ["kvm-intel"];
+    extraModulePackages = [];
     kernelParams = [
       #"video=HDMI-A-1:e" # Enable HDMI-A-1
       #"video=eDP-1:d" # Disable laptop display (eDP-1)  #disable when docked
@@ -56,7 +55,7 @@
   };
 
   swapDevices = [
-    { device = "/dev/disk/by-uuid/11d22209-f01c-4293-9529-e81705e81138"; }
+    {device = "/dev/disk/by-uuid/11d22209-f01c-4293-9529-e81705e81138";}
   ];
 
   networking.useDHCP = lib.mkDefault true;

@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 pkgs.writeShellScriptBin "snapshot.sh" ''
   #!/usr/bin/env bash
 
@@ -7,7 +7,7 @@ pkgs.writeShellScriptBin "snapshot.sh" ''
   outputPath="$outputDir/$outputFile"
   mkdir -p "$outputDir"
 
-  mode=${1:-area}
+  mode=''${1:-area}
 
   case "$mode" in
   active)

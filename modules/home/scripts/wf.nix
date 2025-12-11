@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 pkgs.writeShellScriptBin "wf" ''
     #!/usr/bin/env bash
     # Wfetch Randomizer / Selector
@@ -6,7 +6,7 @@ pkgs.writeShellScriptBin "wf" ''
     # Author: Don Williams
     # Revision History
     #==============================================================
-    # v0.3      2025-08-21        removed challenge flags where set is unknown 
+    # v0.3      2025-08-21        removed challenge flags where set is unknown
     # v0.2      2025-08-21        Add --help, selection by number/name, avoid repeats
     # v0.1      5-15-2025         Initial release
 

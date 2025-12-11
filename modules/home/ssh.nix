@@ -1,10 +1,12 @@
-{ lib, host, ... }:
-let
-  # Enable ssh-agent only on selected hosts by prefix
-  agentHosts = [ "ixas" "mini-intel" "prometheus" ];
-  enableAgent = lib.any (prefix: lib.hasPrefix prefix host) agentHosts;
-in
 {
+  lib,
+  host,
+  ...
+}: let
+  # Enable ssh-agent only on selected hosts by prefix
+  agentHosts = ["ixas" "mini-intel" "prometheus"];
+  enableAgent = lib.any (prefix: lib.hasPrefix prefix host) agentHosts;
+in {
   programs.ssh = {
     enable = true;
     startAgent = enableAgent;

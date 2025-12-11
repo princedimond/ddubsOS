@@ -1,5 +1,8 @@
 # Eza is a ls replacement
-{
+{pkgs, ...}: {
+  # Ensure Nushell is installed so `nu` is available even when not the selected shell
+  home.packages = with pkgs; [nushell];
+
   programs.eza = {
     enable = true;
     icons = "auto";

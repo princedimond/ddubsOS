@@ -1,0 +1,14 @@
+include ~/.config/sway/config_cuerdos
+
+# Background image
+#output * bg /usr/share/backgrounds/cessna/Sway_Standard-Edition.png fill
+
+# Hotkeys help
+#exec_always --no-startup-id conky
+
+# Welcome autostart
+# exec --no-startup-id python3 /usr/share/welcome_cuerd/welcome.py
+
+#Screenshot to clipboard
+
+include ~/.config/sway/keyboard_config

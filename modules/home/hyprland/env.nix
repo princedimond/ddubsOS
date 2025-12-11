@@ -1,5 +1,4 @@
-{ host, ... }:
-let
+{host, ...}: let
   _hostVars = import ../../../hosts/${host}/variables.nix;
 in {
   wayland.windowManager.hyprland.settings = {

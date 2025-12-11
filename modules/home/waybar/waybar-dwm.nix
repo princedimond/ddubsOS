@@ -2,13 +2,11 @@
   config,
   pkgs,
   ...
-}:
-let
+}: let
   scriptsDir = ./scripts;
   scripts = builtins.attrNames (builtins.readDir scriptsDir);
-in
-{
-  home.packages = with pkgs; [ waybar ];
+in {
+  home.packages = with pkgs; [waybar];
 
   home.file = builtins.listToAttrs (
     map (name: {
@@ -17,7 +15,8 @@ in
         source = "${scriptsDir}/${name}";
         executable = true;
       };
-    }) scripts
+    })
+    scripts
   );
 
   programs.waybar = {
@@ -30,7 +29,7 @@ in
           "hyprland/workspaces"
           "hyprland/window"
         ];
-        "modules-center" = [ "clock" "custom/weather" ];
+        "modules-center" = ["clock" "custom/weather"];
         "modules-right" = [
           "tray"
           "cpu"
@@ -49,7 +48,9 @@ in
           format = "";
           tooltip = true;
           "tooltip-format" = "App menu";
-          "on-click" = "rofi -show drun";
+          # "on-click" = "rofi -show drun";
+          "on-click" = "launch-nwg-menu";
+          "on-click-right" = "nwg-drawer -mr 225 -ml 225 -mt 200 -mb 200 -is 48 --spacing 15";
         };
         clock = {
           format = "<span foreground='#282828'> </span><span>{:%I:%M %a %d}</span>";
@@ -160,7 +161,7 @@ in
         };
         "custom/weather" = {
           "return-type" = "json";
-exec = "~/.config/waybar/scripts/Weather.py";
+          exec = "sh -lc 'WEATHER_ICON_STYLE=emoji WEATHER_TOOLTIP_MARKUP=1 ~/.config/waybar/scripts/Weather.py'";
           interval = 600;
           tooltip = true;
         };
@@ -192,7 +193,7 @@ exec = "~/.config/waybar/scripts/Weather.py";
           "tooltip-format" = "{title}";
           "on-click" = "activate";
           "on-click-middle" = "close";
-          "ignore-list" = [ "Alacritty" ];
+          "ignore-list" = ["Alacritty"];
           "app_ids-mapping" = {
             firefoxdeveloperedition = "firefox-developer-edition";
           };

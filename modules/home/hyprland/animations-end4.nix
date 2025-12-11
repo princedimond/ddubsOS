@@ -1,10 +1,8 @@
-{ host, ... }:
-let
+{host, ...}: let
   inherit
     (import ../../../hosts/${host}/variables.nix)
     ;
-in
-{
+in {
   wayland.windowManager.hyprland.settings = {
     # Name: END-4
     # Credit: END-4 project https://github.com/end-4/dots-hyprland

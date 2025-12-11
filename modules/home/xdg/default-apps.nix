@@ -1,20 +1,21 @@
-{ host, lib, ... }:
-let
+{
+  host,
+  lib,
+  ...
+}: let
   # Import per-host variables
   vars = import ../../../hosts/${host}/variables.nix;
 
   # Use the per-host browser when set; default to google-chrome-stable
   browserKey = vars.browser or "google-chrome-stable";
   zenEnabled = vars.enableZenBrowser or false;
+  ladybirdEnabled = vars.enableLadybird or false;
 
   # Map browser key -> desktop entry ID
   browserDesktop = {
     # Google Chrome
     "google-chrome" = "google-chrome.desktop";
     "google-chrome-stable" = "google-chrome.desktop";
-
-    # Microsoft Edge
-    "microsoft-edge" = "microsoft-edge.desktop";
 
     # Firefox family
     "firefox" = "firefox.desktop";
@@ -31,16 +32,14 @@ let
     # Zen browser
     "zen" = "zen.desktop";
     "zen-browser" = "zen.desktop";
+
+    # Ladybird browser (verify desktop id on your system)
+    "ladybird" = "ladybird.desktop";
   };
 
   desktopId = browserDesktop.${browserKey} or null;
-  isZen = builtins.elem browserKey [
-    "zen"
-    "zen-browser"
-  ];
-
-in
-{
+  isZen = builtins.elem browserKey ["zen" "zen-browser"];
+in {
   assertions = [
     {
       assertion = desktopId != null;
@@ -50,16 +49,20 @@ in
       assertion = (!isZen) || zenEnabled;
       message = "browser='${browserKey}' requires enableZenBrowser = true in hosts/${host}/variables.nix so Zen is installed.";
     }
+    {
+      assertion = (browserKey != "ladybird") || ladybirdEnabled;
+      message = "browser='ladybird' requires enableLadybird = true in hosts/${host}/variables.nix so Ladybird is installed.";
+    }
   ];
 
   # Declaratively manage default handlers so apps (Discord, etc.) open the chosen browser
   xdg.mimeApps = {
     enable = true;
     defaultApplications = lib.mkIf (desktopId != null) {
-      "x-scheme-handler/http" = [ desktopId ];
-      "x-scheme-handler/https" = [ desktopId ];
-      "text/html" = [ desktopId ];
-      "application/xhtml+xml" = [ desktopId ];
+      "x-scheme-handler/http" = [desktopId];
+      "x-scheme-handler/https" = [desktopId];
+      "text/html" = [desktopId];
+      "application/xhtml+xml" = [desktopId];
     };
   };
 }

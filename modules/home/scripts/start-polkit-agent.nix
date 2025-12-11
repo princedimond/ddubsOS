@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 # Start gnome polkit needed for niri and waybar
 pkgs.writeShellScriptBin "start-polkit-agent" ''
   #!/usr/bin/env bash

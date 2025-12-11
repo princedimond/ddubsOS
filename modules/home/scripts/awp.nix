@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{pkgs, ...}:
 pkgs.writeShellApplication {
   name = "awp";
   # Provide jq and procps (pgrep) at runtime; mpvpaper is intentionally not

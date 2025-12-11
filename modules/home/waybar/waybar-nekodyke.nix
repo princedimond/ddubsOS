@@ -1,325 +1,327 @@
-{ pkgs
-, lib
-, host
-, config
-, ...
-}:
-let
+{
+  pkgs,
+  lib,
+  host,
+  config,
+  ...
+}: let
   betterTransition = "all 0.3s cubic-bezier(.55,-0.68,.48,1.682)";
   inherit (import ../../../hosts/${host}/variables.nix) clock24h;
   scriptsDir = ./scripts;
   scripts = builtins.attrNames (builtins.readDir scriptsDir);
 in
-with lib; {
-  home.file = builtins.listToAttrs (map
-    (name: {
-      name = ".config/waybar/scripts/" + name;
-      value = {
-        source = "${scriptsDir}/${name}";
-        executable = true;
-      };
-    })
-    scripts);
-  # Configure & Theme Waybar
-  programs.waybar = {
-    enable = true;
-    package = pkgs.waybar;
-    settings = [
-      {
-        layer = "top";
-        position = "top";
-        margin-top = 6;
-        margin-left = 6;
-        margin-right = 6;
-        modules-center = [ "hyprland/workspaces" "custom/weather" ];
-        modules-left = [
-          "custom/startmenu"
-          "cpu"
-          "memory"
-          "temperature"
-          "disk"
-          "hyprland/window"
-          "idle_inhibitor"
-        ];
-        modules-right = [
-          "pulseaudio"
-          "battery"
-          "custom/hyprbindings"
-          "custom/notification"
-          "clock"
-          "tray"
-          "custom/power"
-        ];
-
-        "hyprland/workspaces" = {
-          format = "{name}";
-          format-icons = {
-            default = " ";
-            active = " ";
-            urgent = " ";
-          };
-          on-scroll-up = "hyprctl dispatch workspace e+1";
-          on-scroll-down = "hyprctl dispatch workspace e-1";
+  with lib; {
+    home.file = builtins.listToAttrs (map
+      (name: {
+        name = ".config/waybar/scripts/" + name;
+        value = {
+          source = "${scriptsDir}/${name}";
+          executable = true;
         };
-        "pulseaudio/slider" = {
-          min = 0;
-          max = 100;
-          orientation = "horizontal";
-        };
-        "temperature" = {
-          format = " {temperatureC}°C ";
-        };
-        "clock" = {
-          format =
-            if clock24h == true
-            then '' {:L%H:%M}''
-            else '' {:L%I:%M %p}'';
-          tooltip = true;
-          tooltip-format = "<big>{:%A, %d.%B %Y }</big>\n<tt><small>{calendar}</small></tt>";
-        };
-        "hyprland/window" = {
-          max-length = 22;
-          separate-outputs = false;
-          rewrite = {
-            "" = " 🙈 No Windows? ";
-          };
-        };
-        "memory" = {
-          interval = 5;
-          icon-size = 20;
-          format = " {}%";
-          tooltip = true;
-        };
-        "cpu" = {
-          interval = 5;
-          format = " {usage:2}%";
-          tooltip = true;
-        };
-        "disk" = {
-          format = "󱛟 {free}";
-          tooltip = true;
-        };
-        "network" = {
-          format-icons = [
-            "󰤯"
-            "󰤟"
-            "󰤢"
-            "󰤥"
-            "󰤨"
+      })
+      scripts);
+    # Configure & Theme Waybar
+    programs.waybar = {
+      enable = true;
+      package = pkgs.waybar;
+      settings = [
+        {
+          layer = "top";
+          position = "top";
+          margin-top = 6;
+          margin-left = 6;
+          margin-right = 6;
+          modules-center = ["hyprland/workspaces" "custom/weather"];
+          modules-left = [
+            "custom/startmenu"
+            "cpu"
+            "memory"
+            "temperature"
+            "disk"
+            "hyprland/window"
+            "idle_inhibitor"
           ];
-          format-ethernet = " {bandwidthDownOctets}";
-          format-wifi = "{icon} {signalStrength}%";
-          format-disconnected = "󰤮";
-          tooltip = false;
-        };
-        "tray" = {
-          spacing = 12;
-        };
-        "pulseaudio" = {
-          format = "{icon} {volume}% {format_source}";
-          format-bluetooth = "{volume}% {icon} {format_source}";
-          format-bluetooth-muted = " {icon} {format_source}";
-          format-muted = " {format_source}";
-          format-source = " {volume}%";
-          format-source-muted = "";
-          format-icons = {
-            headphone = "";
-            hands-free = "";
-            headset = "";
-            phone = "";
-            portable = "";
-            car = "";
-            default = [
-              ""
-              ""
-              ""
+          modules-right = [
+            "pulseaudio"
+            "battery"
+            "custom/hyprbindings"
+            "custom/notification"
+            "clock"
+            "tray"
+            "custom/power"
+          ];
+
+          "hyprland/workspaces" = {
+            format = "{name}";
+            format-icons = {
+              default = " ";
+              active = " ";
+              urgent = " ";
+            };
+            on-scroll-up = "hyprctl dispatch workspace e+1";
+            on-scroll-down = "hyprctl dispatch workspace e-1";
+          };
+          "pulseaudio/slider" = {
+            min = 0;
+            max = 100;
+            orientation = "horizontal";
+          };
+          "temperature" = {
+            format = " {temperatureC}°C ";
+          };
+          "clock" = {
+            format =
+              if clock24h == true
+              then '' {:L%H:%M}''
+              else '' {:L%I:%M %p}'';
+            tooltip = true;
+            tooltip-format = "<big>{:%A, %d.%B %Y }</big>\n<tt><small>{calendar}</small></tt>";
+          };
+          "hyprland/window" = {
+            max-length = 22;
+            separate-outputs = false;
+            rewrite = {
+              "" = " 🙈 No Windows? ";
+            };
+          };
+          "memory" = {
+            interval = 5;
+            icon-size = 20;
+            format = " {}%";
+            tooltip = true;
+          };
+          "cpu" = {
+            interval = 5;
+            format = " {usage:2}%";
+            tooltip = true;
+          };
+          "disk" = {
+            format = "󱛟 {free}";
+            tooltip = true;
+          };
+          "network" = {
+            format-icons = [
+              "󰤯"
+              "󰤟"
+              "󰤢"
+              "󰤥"
+              "󰤨"
             ];
+            format-ethernet = " {bandwidthDownOctets}";
+            format-wifi = "{icon} {signalStrength}%";
+            format-disconnected = "󰤮";
+            tooltip = false;
           };
-          on-click = "sleep 0.1 && pavucontrol";
-          scroll-step = 2;
-        };
-        "custom/power" = {
-          tooltip = true;
-          "tooltip-format" = "Power menu: Left-click for QS logout, Right-click for rofi power menu";
-          format = " ⏻ ";
-          "on-click" = "qs-wlogout";
-          "on-click-right" = "~/.config/waybar/scripts/power-menu.sh";
-        };
-        "custom/startmenu" = {
-          tooltip = true;
-          "tooltip-format" = "App menu";
-          format = "";
-          on-click = "rofi -show drun";
-        };
-        "custom/hyprbindings" = {
-          tooltip = false;
-          format = "󱕴";
-          on-click = "sleep 0.1 && list-keybinds";
-        };
-        "idle_inhibitor" = {
-          format = "{icon}";
-          format-icons = {
-            activated = " ";
-            deactivated = " ";
+          "tray" = {
+            spacing = 12;
           };
-          tooltip = "true";
-        };
-        "custom/notification" = {
-          tooltip = false;
-          format = "{icon} {}";
-          format-icons = {
-            notification = "<span foreground='red'><sup></sup></span>";
-            none = "";
-            dnd-notification = "<span foreground='red'><sup></sup></span>";
-            dnd-none = "";
-            inhibited-notification = "<span foreground='red'><sup></sup></span>";
-            inhibited-none = "";
-            dnd-inhibited-notification = "<span foreground='red'><sup></sup></span>";
-            dnd-inhibited-none = "";
+          "pulseaudio" = {
+            format = "{icon} {volume}% {format_source}";
+            format-bluetooth = "{volume}% {icon} {format_source}";
+            format-bluetooth-muted = " {icon} {format_source}";
+            format-muted = " {format_source}";
+            format-source = " {volume}%";
+            format-source-muted = "";
+            format-icons = {
+              headphone = "";
+              hands-free = "";
+              headset = "";
+              phone = "";
+              portable = "";
+              car = "";
+              default = [
+                ""
+                ""
+                ""
+              ];
+            };
+            on-click = "sleep 0.1 && pavucontrol";
+            scroll-step = 2;
           };
-          return-type = "json";
-          exec-if = "which swaync-client";
-          exec = "swaync-client -swb";
-          on-click = "sleep 0.1 && task-waybar";
-          escape = true;
-        };
-        "custom/weather" = {
-          return-type = "json";
-exec = "~/.config/waybar/scripts/Weather.py";
-          interval = 600;
-          tooltip = true;
-        };
-        "battery" = {
-          states = {
-            warning = 30;
-            critical = 15;
+          "custom/power" = {
+            tooltip = true;
+            "tooltip-format" = "Power menu: Left-click for QS logout, Right-click for rofi power menu";
+            format = " ⏻ ";
+            "on-click" = "qs-wlogout";
+            "on-click-right" = "~/.config/waybar/scripts/power-menu.sh";
           };
-          format = "{icon} {capacity}%";
-          format-charging = "󰂄 {capacity}%";
-          format-plugged = "󱘖 {capacity}%";
-          format-icons = [
-            "󰁺"
-            "󰁻"
-            "󰁼"
-            "󰁽"
-            "󰁾"
-            "󰁿"
-            "󰂀"
-            "󰂁"
-            "󰂂"
-            "󰁹"
-          ];
-          on-click = "";
-          tooltip = false;
-        };
-      }
-    ];
-    style = concatStrings [
-      ''
-        * {
-          font-family: JetBrainsMono Nerd Font Mono;
-          font-size: 18px;
-          border-radius: 0px;
-          border: none;
-          min-height: 0px;
-          margin: 0px;
+          "custom/startmenu" = {
+            tooltip = true;
+            "tooltip-format" = "App menu";
+            format = "";
+            # on-click = "rofi -show drun";
+            on-click = "launch-nwg-menu";
+            "on-click-right" = "nwg-drawer -mr 225 -ml 225 -mt 200 -mb 200 -is 48 --spacing 15";
+          };
+          "custom/hyprbindings" = {
+            tooltip = false;
+            format = "󱕴";
+            on-click = "sleep 0.1 && list-keybinds";
+          };
+          "idle_inhibitor" = {
+            format = "{icon}";
+            format-icons = {
+              activated = " ";
+              deactivated = " ";
+            };
+            tooltip = "true";
+          };
+          "custom/notification" = {
+            tooltip = false;
+            format = "{icon} {}";
+            format-icons = {
+              notification = "<span foreground='red'><sup></sup></span>";
+              none = "";
+              dnd-notification = "<span foreground='red'><sup></sup></span>";
+              dnd-none = "";
+              inhibited-notification = "<span foreground='red'><sup></sup></span>";
+              inhibited-none = "";
+              dnd-inhibited-notification = "<span foreground='red'><sup></sup></span>";
+              dnd-inhibited-none = "";
+            };
+            return-type = "json";
+            exec-if = "which swaync-client";
+            exec = "swaync-client -swb";
+            on-click = "sleep 0.1 && task-waybar";
+            escape = true;
+          };
+          "custom/weather" = {
+            return-type = "json";
+            exec = "sh -lc 'WEATHER_ICON_STYLE=emoji WEATHER_TOOLTIP_MARKUP=1 ~/.config/waybar/scripts/Weather.py'";
+            interval = 600;
+            tooltip = true;
+          };
+          "battery" = {
+            states = {
+              warning = 30;
+              critical = 15;
+            };
+            format = "{icon} {capacity}%";
+            format-charging = "󰂄 {capacity}%";
+            format-plugged = "󱘖 {capacity}%";
+            format-icons = [
+              "󰁺"
+              "󰁻"
+              "󰁼"
+              "󰁽"
+              "󰁾"
+              "󰁿"
+              "󰂀"
+              "󰂁"
+              "󰂂"
+              "󰁹"
+            ];
+            on-click = "";
+            tooltip = false;
+          };
         }
-        window#waybar {
-          background: #${config.lib.stylix.colors.base00};
-          padding: 2px;
-          border-radius: 4px;
-        }
-        #workspaces {
-          color: #${config.lib.stylix.colors.base00};
-          background: #${config.lib.stylix.colors.base00};
-          border: 2px solid #${config.lib.stylix.colors.base0B};
-          margin: 2px 4px;
-          padding: 5px 5px;
-          border-radius: 4px;
-        }
-        #workspaces button {
-          font-weight: bold;
-          padding: 0px 5px;
-          margin: 0px 3px;
-          border-radius: 16px;
-          color: #${config.lib.stylix.colors.base0B};
-          background: #${config.lib.stylix.colors.base00};
+      ];
+      style = concatStrings [
+        ''
+          * {
+            font-family: JetBrainsMono Nerd Font Mono;
+            font-size: 18px;
+            border-radius: 0px;
+            border: none;
+            min-height: 0px;
+            margin: 0px;
+          }
+          window#waybar {
+            background: #${config.lib.stylix.colors.base00};
+            padding: 2px;
+            border-radius: 4px;
+          }
+          #workspaces {
+            color: #${config.lib.stylix.colors.base00};
+            background: #${config.lib.stylix.colors.base00};
+            border: 2px solid #${config.lib.stylix.colors.base0B};
+            margin: 2px 4px;
+            padding: 5px 5px;
+            border-radius: 4px;
+          }
+          #workspaces button {
+            font-weight: bold;
+            padding: 0px 5px;
+            margin: 0px 3px;
+            border-radius: 16px;
+            color: #${config.lib.stylix.colors.base0B};
+            background: #${config.lib.stylix.colors.base00};
 
-        }
-        #workspaces button.active {
-          font-weight: bold;
-          padding: 0px 5px;
-          margin: 0px 3px;
-          border-radius: 4px;
-          color: #${config.lib.stylix.colors.base00};
-          background: #${config.lib.stylix.colors.base0B};
-          transition: ${betterTransition};
-          opacity: 1.0;
-          min-width: 40px;
-        }
-        #workspaces button:hover {
-          font-weight: bold;
-          border-radius: 4px;
-          color: #${config.lib.stylix.colors.base00};
-          background: #${config.lib.stylix.colors.base0B};
-          opacity: 0.8;
-        }
-        tooltip {
-          background: #${config.lib.stylix.colors.base00};
-          border: 1px solid #${config.lib.stylix.colors.base08};
-          border-radius: 12px;
-        }
-        tooltip label {
-          color: #${config.lib.stylix.colors.base08};
-        }
-        #window, #pulseaudio, #temperature, #cpu, #memory, #idle_inhibitor, #disk {
-          font-weight: bold;
-          margin: 2px 0px;
-          margin-right: 7px;
-          padding: 0px 18px;
-          background: #${config.lib.stylix.colors.base00};
-          color: #${config.lib.stylix.colors.base0B};
-          border: 2px solid #${config.lib.stylix.colors.base0B};
-          border-radius: 4px;
-        }
-        #idle_inhibitor {
-        font-size: 28px;
-        }
-        #custom-startmenu {
-          color: #${config.lib.stylix.colors.base00};
-          background: #${config.lib.stylix.colors.base0B};
-          font-size: 22px;
-          padding: 0px 5px 0px 5px;
-          border-radius: 4px;
-          padding: 0px 8px;
-          margin: 0px;
-          margin-right:7px;
+          }
+          #workspaces button.active {
+            font-weight: bold;
+            padding: 0px 5px;
+            margin: 0px 3px;
+            border-radius: 4px;
+            color: #${config.lib.stylix.colors.base00};
+            background: #${config.lib.stylix.colors.base0B};
+            transition: ${betterTransition};
+            opacity: 1.0;
+            min-width: 40px;
+          }
+          #workspaces button:hover {
+            font-weight: bold;
+            border-radius: 4px;
+            color: #${config.lib.stylix.colors.base00};
+            background: #${config.lib.stylix.colors.base0B};
+            opacity: 0.8;
+          }
+          tooltip {
+            background: #${config.lib.stylix.colors.base00};
+            border: 1px solid #${config.lib.stylix.colors.base08};
+            border-radius: 12px;
+          }
+          tooltip label {
+            color: #${config.lib.stylix.colors.base08};
+          }
+          #window, #pulseaudio, #temperature, #cpu, #memory, #idle_inhibitor, #disk {
+            font-weight: bold;
+            margin: 2px 0px;
+            margin-right: 7px;
+            padding: 0px 18px;
+            background: #${config.lib.stylix.colors.base00};
+            color: #${config.lib.stylix.colors.base0B};
+            border: 2px solid #${config.lib.stylix.colors.base0B};
+            border-radius: 4px;
+          }
+          #idle_inhibitor {
+          font-size: 28px;
+          }
+          #custom-startmenu {
+            color: #${config.lib.stylix.colors.base00};
+            background: #${config.lib.stylix.colors.base0B};
+            font-size: 22px;
+            padding: 0px 5px 0px 5px;
+            border-radius: 4px;
+            padding: 0px 8px;
+            margin: 0px;
+            margin-right:7px;
 
-        }
-        #custom-hyprbindings, #network, #battery,
-        #custom-notification, #clock, #custom-exit {
-          /* font-weight: bold; */
-          font-size: 20px;
-          background: #${config.lib.stylix.colors.base00};
-          color: #${config.lib.stylix.colors.base0B};
-          margin: 2px 0px;
-          margin-right: 7px;
-          border: 2px solid #${config.lib.stylix.colors.base0B};
-          border-radius: 4px;
-          padding: 0px 12px;
-        }
-        #tray{
-          font-weight: bold;
-          font-size: 16px;
-          margin: 0px;
-          background: #${config.lib.stylix.colors.base0B};
-          color: #${config.lib.stylix.colors.base00};
-          border: 2px solid #${config.lib.stylix.colors.base0B};
-          padding: 0px 18px;
-          margin: 0px 0px;
-          border-radius: 4px;
-        }
-      ''
-    ];
-  };
-}
+          }
+          #custom-hyprbindings, #network, #battery,
+          #custom-notification, #clock, #custom-exit {
+            /* font-weight: bold; */
+            font-size: 20px;
+            background: #${config.lib.stylix.colors.base00};
+            color: #${config.lib.stylix.colors.base0B};
+            margin: 2px 0px;
+            margin-right: 7px;
+            border: 2px solid #${config.lib.stylix.colors.base0B};
+            border-radius: 4px;
+            padding: 0px 12px;
+          }
+          #tray{
+            font-weight: bold;
+            font-size: 16px;
+            margin: 0px;
+            background: #${config.lib.stylix.colors.base0B};
+            color: #${config.lib.stylix.colors.base00};
+            border: 2px solid #${config.lib.stylix.colors.base0B};
+            padding: 0px 18px;
+            margin: 0px 0px;
+            border-radius: 4px;
+          }
+        ''
+      ];
+    };
+  }

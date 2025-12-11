@@ -3,18 +3,19 @@
   config,
   ...
 }:
-with lib;
-let
+with lib; let
   cfg = config.vm.guest-services;
-in
-{
+in {
   options.vm.guest-services = {
     enable = mkEnableOption "Enable Virtual Machine Guest Services";
   };
 
   config = mkIf cfg.enable {
-    services.qemuGuest.enable = true;
-    services.spice-vdagentd.enable = true;
-    services.spice-webdavd.enable = false;
+    services = {
+      qemuGuest.enable = true;
+      spice-vdagentd.enable = true;
+      spice-webdavd.enable = true;
+      spice-autorandr.enable = true;
+    };
   };
 }

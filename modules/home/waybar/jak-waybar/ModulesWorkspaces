@@ -184,12 +184,14 @@
 	"window-rewrite": {		
 		"title<.*amazon.*>": " ",
 		"title<.*reddit.*>": " ",
+		"title<.*[Hh]elium.*>": " ",
 
 		"class<firefox|org.mozilla.firefox|librewolf|floorp|mercury-browser|[Cc]achy-browser>": " ",
 		"class<zen>": "󰰷 ",
 		"class<waterfox|waterfox-bin>": " ",
 		"class<microsoft-edge>": " ",
 		"class<Chromium|Thorium|[Cc]hrome>": " ",
+		"class<helium>": " ",
 		"class<brave-browser>": "🦁 ",
 		"class<tor browser>": " ",
 		"class<firefox-developer-edition>": "🦊 ",
@@ -227,6 +229,8 @@
 		"title<.*Picture-in-Picture.*>": " ",
 		"title<.*youtube.*>": " ",
 		"class<vlc>": "󰕼 ",
+		"class<[Kk]denlive|org.kde.kdenlive>": "🎬 ",
+		"title<.*Kdenlive.*>": "🎬 ",
 		"title<.*cmus.*>": " ",
 		"class<[Ss]potify>": " ",
 
@@ -237,7 +241,7 @@
 		"title<virtualbox>": "💽 ",
 		"class<remmina|org.remmina.Remmina>": "🖥️ ",
 
-		"class<VSCode|code-url-handler|code-oss|codium|codium-url-handler|VSCodium>": "󰨞 ",
+		"class<VSCode|code|code-url-handler|code-oss|codium|codium-url-handler|VSCodium>": "󰨞 ",
     "class<dev.zed.Zed>": "󰵁",
 		"class<codeblocks>": "󰅩 ",
 		"title<.*github.*>": " ",
@@ -264,8 +268,17 @@
 		"class<emulator>": "📱 ",
 		"class<android-studio>": " ",
    	"class<org.pipewire.Helvum>": "󰓃",
-    "class<localsend>":"",
-		"class<PrusaSlicer|UltiMaker-Cura|OrcaSlicer>": "󰹛",
+		"class<localsend>":"",
+        "class<PrusaSlicer|UltiMaker-Cura|OrcaSlicer>": "󰹛",
+
+        "class<io.github.kolunmi.Bazaar>": " ",
+        "title<^Bazaar$>": " ",
+
+        "class<com.gabm.satty>": " ",
+        "title<^satty$>": " ",
+
+        "class<[Bb]ox[Bb]uddy|io.github.dvlv.boxbuddy|io.github.dvlv.BoxBuddy>": " ",
+        "title<.*BoxBuddy.*>": " ",
 
         // qs-* apps
         "title<Hyprland Keybinds>": " ",

@@ -1,7 +1,7 @@
 # Hyprexpo is a hyprland plugin that provides a workspaces overview alt + space
-{ pkgs, ... }: {
+{pkgs, ...}: {
   wayland.windowManager.hyprland = {
-    plugins = [ pkgs.hyprlandPlugins.hyprexpo ];
+    plugins = [pkgs.hyprlandPlugins.hyprexpo];
     settings = {
       plugin = {
         hyprexpo = {

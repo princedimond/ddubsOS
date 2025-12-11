@@ -1,14 +1,14 @@
-{ pkgs
-, host
-, ...
-}:
-let
-  inherit (import ../../hosts/${host}/variables.nix) stylixImage;
-in
 {
+  pkgs,
+  host,
+  ...
+}: let
+  inherit (import ../../hosts/${host}/variables.nix) stylixImage;
+in {
   # Styling Options
   stylix = {
     enable = true;
+    enableReleaseChecks = false;
     image = stylixImage;
 
     # You can set the colortheme manually using base16 colors

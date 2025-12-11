@@ -1,8 +1,9 @@
-{ config
-, lib
-, modulesPath
-, pkgs
-, # Still keep pkgs here as it's a standard argument, even if not directly used in this snippet anymore
+{
+  config,
+  lib,
+  modulesPath,
+  pkgs,
+  # Still keep pkgs here as it's a standard argument, even if not directly used in this snippet anymore
   ...
 }: {
   imports = [
@@ -10,12 +11,12 @@
   ];
 
   boot = {
-    initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usb_storage" "usbhid" "sd_mod" ];
-    initrd.kernelModules = [ ];
-    kernelModules = [ "kvm-amd" ];
-    extraModulePackages = [ ];
+    initrd.availableKernelModules = ["nvme" "xhci_pci" "thunderbolt" "usb_storage" "usbhid" "sd_mod"];
+    initrd.kernelModules = [];
+    kernelModules = ["kvm-amd"];
+    extraModulePackages = [];
     # Reduce swapping
-    kernel.sysctl."vm.swappiness" = "10";
+    kernel.sysctl."vm.swappiness" = "5";
   };
 
   fileSystems = {
@@ -27,18 +28,18 @@
     "/boot" = {
       device = "/dev/disk/by-uuid/C635-4F52";
       fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
+      options = ["fmask=0077" "dmask=0077"];
     };
 
     "/mnt/nas" = {
       device = "192.168.40.11:/volume1/DiskStation54TB";
       fsType = "nfs";
-      options = [ "rw" "soft" "tcp" "bg" "_netdev" ];
+      options = ["rw" "soft" "tcp" "bg" "_netdev"];
     };
   };
 
   swapDevices = [
-    { device = "/dev/disk/by-uuid/326ac53b-df5e-4c85-8c81-a9f911a52cb1"; }
+    {device = "/dev/disk/by-uuid/326ac53b-df5e-4c85-8c81-a9f911a52cb1";}
   ];
 
   # Configure the Firewall to trust the bridge

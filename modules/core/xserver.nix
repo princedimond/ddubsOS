@@ -1,14 +1,15 @@
-{ host, ... }:
-let
+{host, ...}: let
   inherit (import ../../hosts/${host}/variables.nix) keyboardLayout gnomeEnable cosmicEnable bspwmEnable;
-in
-{
+in {
   # Enable desktops only when requested via host variables
   services.desktopManager.gnome.enable = gnomeEnable;
   services.desktopManager.cosmic.enable = cosmicEnable;
   # Explicitly do not enable cosmic-greeter; SDDM is our DM
   services.displayManager.cosmic-greeter.enable = false;
   services.displayManager.defaultSession = "hyprland";
+
+  # Provide Xwayland for X11 apps/sessions under Wayland
+  programs.xwayland.enable = true;
 
   services = {
     xserver = {

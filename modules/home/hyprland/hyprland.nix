@@ -2,15 +2,14 @@
   host,
   config,
   pkgs,
+  inputs,
   ...
-}:
-let
-  inherit (import ../../../hosts/${host}/variables.nix)
-    extraMonitorSettings
-    keyboardLayout
-    ;
-in
-{
+}: let
+  vars = import ../../../hosts/${host}/variables.nix;
+  extraMonitorSettings = vars.extraMonitorSettings;
+  keyboardLayout = vars.keyboardLayout;
+  enableHyprlandSource = vars.enableHyprlandSource or false;
+in {
   home.packages = with pkgs; [
     swww
     grim
@@ -23,8 +22,6 @@ in
     swappy
     ydotool
     hyprpolkitagent
-    hyprland-qtutils # needed for banners and ANR
-    hyprland-qt-support
     hyprland-protocols
     hyprpicker
     hyprpaper
@@ -46,11 +43,14 @@ in
   };
   wayland.windowManager.hyprland = {
     enable = true;
-    package = pkgs.hyprland;
+    package =
+      if enableHyprlandSource
+      then inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland
+      else pkgs.hyprland;
     systemd = {
       enable = true;
       enableXdgAutostart = true;
-      variables = [ "--all" ];
+      variables = ["--all"];
     };
     xwayland = {
       enable = true;
@@ -77,12 +77,11 @@ in
       general = {
         "$modifier" = "SUPER";
         layout = "dwindle";
-        gaps_in = 6;
-        gaps_out = 8;
+        gaps_in = 4;
+        gaps_out = 4;
         border_size = 2;
         resize_on_border = true;
-        "col.active_border" =
-          "rgb(${config.lib.stylix.colors.base08}) rgb(${config.lib.stylix.colors.base0C}) 45deg";
+        "col.active_border" = "rgb(${config.lib.stylix.colors.base08}) rgb(${config.lib.stylix.colors.base0C}) 45deg";
         "col.inactive_border" = "rgb(${config.lib.stylix.colors.base01})";
       };
 

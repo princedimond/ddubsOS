@@ -1,13 +1,12 @@
-{ lib
-, pkgs
-, config
-, ...
-}:
-let
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}: let
   scriptsDir = ./scripts;
   scripts = builtins.attrNames (builtins.readDir scriptsDir);
-in
-{
+in {
   home.file = builtins.listToAttrs (map
     (name: {
       name = ".config/waybar/scripts/" + name;
@@ -72,11 +71,11 @@ in
           on-scroll-up = "hyprctl dispatch workspace -1";
           on-scroll-down = "hyprctl dispatch workspace +1";
           persistent-workspaces = {
-            "1" = [ ];
-            "2" = [ ];
-            "3" = [ ];
-            "4" = [ ];
-            "5" = [ ];
+            "1" = [];
+            "2" = [];
+            "3" = [];
+            "4" = [];
+            "5" = [];
           };
         };
 
@@ -127,7 +126,9 @@ in
           format = "";
           tooltip = true;
           "tooltip-format" = "App menu";
-          on-click = "rofi -show drun";
+          # on-click = "rofi -show drun";
+          on-click = "launch-nwg-menu";
+          "on-click-right" = "nwg-drawer -mr 225 -ml 225 -mt 200 -mb 200 -is 48 --spacing 15";
         };
 
         "custom/temperature" = {
@@ -178,7 +179,7 @@ in
 
         "custom/weather" = {
           "return-type" = "json";
-exec = "~/.config/waybar/scripts/Weather.py";
+          exec = "sh -lc 'WEATHER_ICON_STYLE=emoji WEATHER_TOOLTIP_MARKUP=1 ~/.config/waybar/scripts/Weather.py'";
           interval = 600;
           tooltip = true;
         };
@@ -260,7 +261,7 @@ exec = "~/.config/waybar/scripts/Weather.py";
           format = "{icon} {volume}%";
           "format-muted" = "󰝟 {volume}%";
           "format-icons" = {
-            default = [ "󰕿" "󰖀" "󰕾" ];
+            default = ["󰕿" "󰖀" "󰕾"];
             headphone = "󰋋";
             headset = "󰋋";
           };
@@ -274,7 +275,7 @@ exec = "~/.config/waybar/scripts/Weather.py";
 
         backlight = {
           format = "{icon} {percent}%";
-          "format-icons" = [ "" "" "" "" "" "" "" "" "" ];
+          "format-icons" = ["" "" "" "" "" "" "" "" ""];
           tooltip = false;
           "on-scroll-up" = "~/.config/waybar/scripts/brightness-control.sh -o i";
           "on-scroll-down" = "~/.config/waybar/scripts/brightness-control.sh -o d";
@@ -288,7 +289,7 @@ exec = "~/.config/waybar/scripts/Weather.py";
             critical = 10;
           };
           format = "{icon} {capacity}%";
-          "format-icons" = [ "󰂎" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+          "format-icons" = ["󰂎" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
           "format-charging" = " {capacity}%";
           "tooltip-format" = "Discharging: {time}";
           "tooltip-format-charging" = "Charging: {time}";

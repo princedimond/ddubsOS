@@ -1,4 +1,5 @@
-{ host,
+{
+  host,
   config,
   pkgs,
   ...

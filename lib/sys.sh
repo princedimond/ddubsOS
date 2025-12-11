@@ -10,13 +10,29 @@ handle_backups() {
 	fi
 
 	echo "Checking for backup files to remove..."
+	shopt -s nullglob
 	for file_path in "${BACKUP_FILES[@]}"; do
-		local full_path="$HOME/$file_path"
-		if [ -f "$full_path" ]; then
-			echo "Removing stale backup file: $full_path"
-			"$RM" "$full_path"
-		fi
+		local pattern
+		case "$file_path" in
+			"~/"*)
+				pattern="${file_path/#\~/$HOME}"
+				;;
+			/*)
+				pattern="$file_path"
+				;;
+			*)
+				pattern="$HOME/$file_path"
+				;;
+		esac
+
+		for full_path in $pattern; do
+			if [ -e "$full_path" ]; then
+				echo "Removing stale backup file: $full_path"
+				"$RM" -f -- "$full_path"
+			fi
+		done
 	done
+	shopt -u nullglob
 }
 
 # detect_gpu_profile: infer GPU profile from lspci output

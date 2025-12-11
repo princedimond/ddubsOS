@@ -1,4 +1,4 @@
-{ ... }: {
+{...}: {
   home.file.".config/rofi/legacy.config.rasi".text = ''
     @theme "/dev/null"
 
@@ -98,6 +98,5 @@
     textbox { padding: 6px; margin: 20px 0 0 20px; text-color: @acc; background-color: @bg; }
   '';
 
-  home.file.".config/rofi/legacy-rofi.jpg".source = ../../../../legacy-rofi.jpg;
+  home.file.".config/rofi/legacy-rofi.jpg".source = ./legacy-rofi.jpg;
 }
-

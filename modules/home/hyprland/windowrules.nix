@@ -1,23 +1,22 @@
-{ host, ... }:
-let
+{host, ...}: let
   hostVars = import ../../../hosts/${host}/variables.nix;
   extraMonitorSettings = hostVars.extraMonitorSettings or "";
-  hyprMonitorsV2 = hostVars.hyprMonitorsV2 or [ ];
+  hyprMonitorsV2 = hostVars.hyprMonitorsV2 or [];
   monitorLines = builtins.concatStringsSep "\n" (
-    map (
+    map
+    (
       m:
-      if (m.enabled or true) then
-        "monitor = ${m.output},${(m.mode or "preferred")},${(m.position or "auto")},${toString (m.scale or 1)}"
-      else
-        "monitor = ${m.output},disable"
-    ) hyprMonitorsV2
+        if (m.enabled or true)
+        then "monitor = ${m.output},${(m.mode or "preferred")},${(m.position or "auto")},${toString (m.scale or 1)}"
+        else "monitor = ${m.output},disable"
+    )
+    hyprMonitorsV2
   );
-in
-{
+in {
   wayland.windowManager.hyprland = {
     settings = {
       windowrule = [
-        #"noblur, xwayland:1" # Helps prevent odd borders/shadows for xwayland apps
+        "noblur, xwayland:1" # Helps prevent odd borders/shadows for xwayland apps
         # downside it can impact other xwayland apps
         # This rule is a template for a more targeted approach
         "noblur, class:^(\bresolve\b)$, xwayland:1" # Window rule for just resolve
@@ -27,6 +26,14 @@ in
         "float, initialTitle:^(emacs-floating)$"
         "size 70% 70%, initialTitle:^(emacs-floating)$"
         "center, initialTitle:^(emacs-floating)$"
+        "float, title:^(BoxBuddy)$"
+        "size 70% 70%, title:^(BoxBuddy)$"
+        "center, title:^(BoxBuddy)$"
+        "float, title:^(it.mijorus.gearlever)$"
+        "center, title:^(it.mijorus.gearlever)$"
+        "float, class:^(io.github.kolunmi.Bazaar)$"
+        "size 70% 70%, class:^(io.github.kolunmi.Bazaar)$"
+        "center, class:^(io.github.kolunmi.Bazaar)$"
         "content none, class:mpv" # prevents black screen whem maximizing
         "content none, class:mpv" # prevents black screen whem maximizing
         "tag +file-manager, class:^([Tt]hunar|org.gnome.Nautilus|[Pp]cmanfm-qt)$"
@@ -75,28 +82,19 @@ in
         "center, class:^(org\\.qt-project\\.qml)$, title:^(Video Wallpapers)$"
         "float, class:^(org\\.qt-project\\.qml)$, title:^(qs-wlogout)$"
         "center, class:^(org\\.qt-project\\.qml)$, title:^(qs-wlogout)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(Hyprland Keybinds)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(Niri Keybinds)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(BSPWM Keybinds)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(DWM Keybinds)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(Emacs Leader Keybinds)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(Kitty Configuration)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(WezTerm Configuration)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(Yazi Configuration)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(Cheatsheets Viewer)$"
-        "float, class:^(org\\.qt-project\\.qml)$, title:^(Documentation Viewer)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(Hyprland Keybinds)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(Niri Keybinds)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(BSPWM Keybinds)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(DWM Keybinds)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(Emacs Leader Keybinds)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(Kitty Configuration)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(WezTerm Configuration)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(Yazi Configuration)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(Cheatsheets Viewer)$"
-        "center, class:^(org\\.qt-project\\.qml)$, title:^(Documentation Viewer)$"
+        "float, class:^(org\\.qt-project\\.qml)$, title:^(Panels)$"
+        "center, class:^(org\\.qt-project\\.qml)$, title:^(Panels)$"
+        "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Panels)$"
+        "noblur, class:^(org\\.qt-project\\.qml)$, title:^(Panels)$"
+        "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Panels)$"
+        # qs-keybinds floating viewer
+        "float, title:^(Hyprland Keybinds|Niri Keybinds|BSPWM Keybinds|i3 Keybinds|Sway Keybinds|DWM Keybinds|Emacs Leader Keybinds|Kitty Configuration|WezTerm Configuration|Ghostty Configuration|Yazi Configuration|Cheatsheets Viewer|Documentation Viewer)$"
+        "center, title:^(Hyprland Keybinds|Niri Keybinds|BSPWM Keybinds|i3 Keybinds|Sway Keybinds|DWM Keybinds|Emacs Leader Keybinds|Kitty Configuration|WezTerm Configuration|Ghostty Configuration|Yazi Configuration|Cheatsheets Viewer|Documentation Viewer)$"
+        "size 55% 66%, title:^(Hyprland Keybinds|Niri Keybinds|BSPWM Keybinds|i3 Keybinds|Sway Keybinds|DWM Keybinds|Emacs Leader Keybinds|Kitty Configuration|WezTerm Configuration|Ghostty Configuration|Yazi Configuration|Cheatsheets Viewer|Documentation Viewer)$"
         "float, title:^(Picture-in-Picture)$"
         "float, class:^(com.github.rafostar.Clapper)$"
+        "float, class:^(io.github.zingytomato.netpeek)$"
+        "center, class:^(io.github.zingytomato.netpeek)$"
         "float, title:^(Authentication Required)$"
         "float, class:(codium|codium-url-handler|VSCodium), title:negative:(.*codium.*|.*VSCodium.*)"
         "float, class:^(com.heroicgameslauncher.hgl)$, title:negative:(Heroic Games Launcher)"
@@ -155,19 +153,25 @@ in
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(Hyprland Keybinds)$"
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(Niri Keybinds)$"
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(BSPWM Keybinds)$"
+        "noborder, class:^(org\\.qt-project\\.qml)$, title:^(i3 Keybinds)$"
+        "noborder, class:^(org\\.qt-project\\.qml)$, title:^(Sway Keybinds)$"
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(DWM Keybinds)$"
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(Emacs Leader Keybinds)$"
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(Kitty Configuration)$"
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(WezTerm Configuration)$"
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(Yazi Configuration)$"
+        "noborder, class:^(org\\.qt-project\\.qml)$, title:^(Ghostty Configuration)$"
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(Cheatsheets Viewer)$"
         "noborder, class:^(org\\.qt-project\\.qml)$, title:^(Documentation Viewer)$"
         "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Hyprland Keybinds)$"
         "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Niri Keybinds)$"
+        "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(i3 Keybinds)$"
+        "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Sway Keybinds)$"
         "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Emacs Leader Keybinds)$"
         "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Kitty Configuration)$"
         "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(WezTerm Configuration)$"
         "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Yazi Configuration)$"
+        "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Ghostty Configuration)$"
         "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Cheatsheets Viewer)$"
         "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(Documentation Viewer)$"
         "noshadow, class:^(org\\.qt-project\\.qml)$, title:^(BSPWM Keybinds)$"
@@ -175,28 +179,33 @@ in
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Hyprland Keybinds)$"
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Niri Keybinds)$"
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(BSPWM Keybinds)$"
+        "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(i3 Keybinds)$"
+        "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Sway Keybinds)$"
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(DWM Keybinds)$"
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Emacs Leader Keybinds)$"
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Kitty Configuration)$"
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(WezTerm Configuration)$"
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Yazi Configuration)$"
+        "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Ghostty Configuration)$"
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Cheatsheets Viewer)$"
         "rounding 12, class:^(org\\.qt-project\\.qml)$, title:^(Documentation Viewer)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(Hyprland Keybinds)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(Niri Keybinds)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(BSPWM Keybinds)$"
+        "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(i3 Keybinds)$"
+        "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(Sway Keybinds)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(DWM Keybinds)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(Emacs Leader Keybinds)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(Kitty Configuration)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(WezTerm Configuration)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(Yazi Configuration)$"
+        "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(Ghostty Configuration)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(Cheatsheets Viewer)$"
         "opacity 0.95 0.95, class:^(org\\.qt-project\\.qml)$, title:^(Documentation Viewer)$"
 
         # Bright blue border for fullscreen windows
         "bordercolor rgb(0080FF), fullscreen:1"
       ];
-
     };
 
     extraConfig = ''

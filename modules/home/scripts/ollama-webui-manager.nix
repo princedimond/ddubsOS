@@ -1,16 +1,15 @@
-{ pkgs }:
-
+{pkgs}:
 pkgs.writeShellApplication {
   name = "ollama-webui-manager";
-  
+
   runtimeInputs = with pkgs; [
-    systemd        # for systemctl
-    docker         # for docker commands
-    curl           # for API testing
-    coreutils      # for basic utilities (du, cut, etc.)
-    gnugrep        # for grep
+    systemd # for systemctl
+    docker # for docker commands
+    curl # for API testing
+    coreutils # for basic utilities (du, cut, etc.)
+    gnugrep # for grep
   ];
-  
+
   text = ''
     # OpenWebUI + Ollama Container Management Script
     # Part of ddubsOS - AI/LLM Management Tools
@@ -118,63 +117,63 @@ pkgs.writeShellApplication {
     start_services() {
         print_info "Starting OpenWebUI + Ollama services..."
         check_sudo
-        
+
         if sudo systemctl start "$OLLAMA_SERVICE"; then
             print_success "Ollama service started"
         else
             print_error "Failed to start Ollama service"
             return 1
         fi
-        
+
         sleep 2
-        
+
         if sudo systemctl start "$OPENWEBUI_SERVICE"; then
             print_success "OpenWebUI service started"
         else
             print_error "Failed to start OpenWebUI service"
             return 1
         fi
-        
+
         print_success "All services started successfully"
     }
 
     stop_services() {
         print_info "Stopping OpenWebUI + Ollama services..."
         check_sudo
-        
+
         if sudo systemctl stop "$OPENWEBUI_SERVICE"; then
             print_success "OpenWebUI service stopped"
         else
             print_warning "OpenWebUI service may already be stopped"
         fi
-        
+
         if sudo systemctl stop "$OLLAMA_SERVICE"; then
             print_success "Ollama service stopped"
         else
             print_warning "Ollama service may already be stopped"
         fi
-        
+
         print_success "All services stopped"
     }
 
     restart_services() {
         print_info "Restarting OpenWebUI + Ollama services..."
         check_sudo
-        
+
         sudo systemctl restart "$OLLAMA_SERVICE"
         print_success "Ollama service restarted"
-        
+
         sleep 2
-        
+
         sudo systemctl restart "$OPENWEBUI_SERVICE"
         print_success "OpenWebUI service restarted"
-        
+
         print_success "All services restarted successfully"
     }
 
     show_logs() {
         local service=''${1:-"both"}
-        
+
         case $service in
             "ollama"|"o")
                 print_info "Showing Ollama logs (Ctrl+C to exit)..."
@@ -213,7 +212,7 @@ pkgs.writeShellApplication {
             echo "Example: $0 pull llama2"
             return 1
         fi
-        
+
         print_info "Pulling model: $model"
         if docker exec -it "$OLLAMA_CONTAINER" ollama pull "$model"; then
             print_success "Model $model pulled successfully"
@@ -230,7 +229,7 @@ pkgs.writeShellApplication {
             echo "Usage: $0 remove <model_name>"
             return 1
         fi
-        
+
         print_warning "This will permanently remove the model: $model"
         read -p "Are you sure? (y/N): " -n 1 -r
         echo
@@ -248,7 +247,7 @@ pkgs.writeShellApplication {
 
     test_connection() {
         print_info "Testing connections..."
-        
+
         # Test Ollama API
         if curl -s "http://localhost:$OLLAMA_PORT/api/version" > /dev/null; then
             local version
@@ -257,7 +256,7 @@ pkgs.writeShellApplication {
         else
             print_error "Ollama API not responding"
         fi
-        
+
         # Test OpenWebUI
         if curl -s -I "http://localhost:$OPENWEBUI_PORT" | head -1 | grep -q "200 OK"; then
             print_success "OpenWebUI responding"
@@ -299,7 +298,7 @@ pkgs.writeShellApplication {
     # Main script logic
     main() {
         check_root
-        
+
         case "''${1:-help}" in
             "status"|"s")
                 show_status
@@ -342,7 +341,7 @@ pkgs.writeShellApplication {
     # Run main function with all arguments
     main "$@"
   '';
-  
+
   meta = with pkgs.lib; {
     description = "Management script for OpenWebUI and Ollama containers";
     license = licenses.mit;

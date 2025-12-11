@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   services = {
     flatpak = {
       enable = true;
@@ -13,9 +12,11 @@
         "it.mijorus.gearlever" # Manage AppImages
         "io.github.freedoom.Phase1" # classic doom
         "io.github.freedoom.Phase2" # classic doom
+        "io.github.kolunmi.Bazaar" # Bazaar flatpak software store
         #"io.github.dvlv.boxbuddyrs" #GUI for distrobox but I use native package
         "com.github.k4zmu2a.spacecadetpinball"
         "de.schmidhuberj.tubefeeder" # watch YT videos
+        "de.haeckerfelix.Shortwave" # Internet Radio
         # If you prefer the native OBS, comment this out
         # and set `enableObs=true;` in your hosts `variables.nix` file
         # Note the flatpak is the officialy support package

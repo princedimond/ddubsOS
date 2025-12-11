@@ -1,13 +1,12 @@
 # starship is a minimal, fast, and extremely customizable prompt for any shell!
-{ config
-, lib
-, ...
-}:
-let
+{
+  config,
+  lib,
+  ...
+}: let
   accent = "#${config.lib.stylix.colors.base0D}";
   background-alt = "#${config.lib.stylix.colors.base01}";
-in
-{
+in {
   programs.starship = {
     enable = true;
     settings = {
@@ -22,7 +21,7 @@ in
         "\n"
         "$character"
       ];
-      directory = { style = accent; };
+      directory = {style = accent;};
 
       character = {
         success_symbol = "[❯](${accent})";

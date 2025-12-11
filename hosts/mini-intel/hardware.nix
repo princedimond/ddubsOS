@@ -13,7 +13,7 @@
     initrd.kernelModules = [];
     kernelModules = ["kvm-intel"];
     extraModulePackages = [];
-    kernel.sysctl."vm.swappiness" = "10";
+    kernel.sysctl."vm.swappiness" = "5";
   };
 
   fileSystems = {
@@ -31,6 +31,18 @@
       fsType = "nfs";
       options = ["rw" "soft" "bg" "tcp" "_netdev"];
     };
+    #    "/mnt/12TB-JBOD" = {
+    #     device = "UUID=50ACDA75ACDA5556";
+    #     fsType = "btrfs";
+    #     neededForBoot = false;
+    #     options = ["subvol=@12TB-JBOD" "compress=zstd" "nofail" "x-systemd.automount" "x-systemd.device-timeout=5s"];
+    #   };
+    #   "/mnt/12TB-JBOD/.snapshots" = {
+    #     device = "UUID=50ACDA75ACDA5556";
+    #     fsType = "btrfs";
+    #     neededForBoot = false;
+    #     options = ["subvol=@snapshots" "compress=zstd" "nofail" "x-systemd.automount" "x-systemd.device-timeout=5s"];
+    #   };
   };
 
   swapDevices = [

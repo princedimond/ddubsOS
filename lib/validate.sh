@@ -93,7 +93,7 @@ maybe_warn_kitty_absent() {
 # Boolean attributes supported by zcli settings set <attr> <value>
 # Keep this as the single source of truth; other modules should call list_bool_attrs
 BOOL_ATTRS=(
-	"gnomeEnable" "bspwmEnable" "dwmEnable" "wayfireEnable" "cosmicEnable"
+	"gnomeEnable" "bspwmEnable" "i3Enable" "swayEnable" "dwmEnable" "wayfireEnable" "cosmicEnable"
 	"enableEvilhelix" "enableVscode" "enableMicro" "enableAlacritty" "enableTmux" "enablePtyxis" "enableWezterm" "enableGhostty"
 	"enableDevEnv" "sddmWaylandEnable" "enableOpencode" "enableObs" "clock24h" "enableNFS" "printEnable" "thunarEnable"
 	"enableGlances"

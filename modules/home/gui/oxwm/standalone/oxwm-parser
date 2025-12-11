@@ -1,0 +1,527 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# oxwm-parser: Show OxWM keybindings in a rofi menu or print them in a table.
+#
+# Dependencies: bash, awk (or gawk), lua, rofi
+#
+# Environment variables:
+#   OXWM_ROFI_WIDTH_PCT  - rofi window width in % (default: 45)
+#   OXWM_ROFI_LINES      - number of visible rows (default: 15)
+#   OXWM_ROFI_THEME      - rofi theme path; if set, uses `-theme`
+#   OXWM_ROFI_FONT       - monospaced font, e.g. "JetBrainsMono Nerd Font 11"
+#   OXWM_COL_GAP_PX      - gap between keybind and description in px (default: 10)
+#   OXWM_CHAR_PX         - approximate char width in px (default: 7)
+#   OXWM_EXTRA_SPACES    - extra spaces after gap (default: 5)
+#
+# Usage:
+#   oxwm-parser           # rofi menu
+#   oxwm-parser --print   # print aligned table
+#   oxwm-parser --help    # show this help
+#
+# To use a custom rofi menu/theme, point OXWM_ROFI_THEME at your .rasi or
+# config file, e.g.:
+#   OXWM_ROFI_THEME="$HOME/.config/rofi/oxwm-keybinds.rasi" oxwm-parser
+
+print_help() {
+  cat <<'EOF'
+oxwm-parser - OxWM keybinding helper
+
+Usage:
+  oxwm-parser [--print]
+  oxwm-parser [-h|--help]
+
+Options:
+  --print        Print an aligned table of keybindings to stdout instead of
+                 launching rofi.
+  -h, --help     Show this help text and exit.
+
+Rofi/menu configuration:
+  By default, oxwm-parser launches a rofi dmenu listing all parsed keybindings.
+  You can control its appearance with these environment variables:
+
+    OXWM_ROFI_WIDTH_PCT   Percent of screen width used by the rofi window
+                          (default: 45).
+    OXWM_ROFI_LINES       Number of visible rows (listview lines) (default: 15).
+    OXWM_ROFI_THEME       Path to a rofi theme or config file. If set, it is
+                          passed as:  rofi -theme "$OXWM_ROFI_THEME".
+    OXWM_ROFI_FONT        Monospaced font used by rofi (default: "monospace 11").
+
+  Example with a custom theme:
+
+    OXWM_ROFI_THEME="$HOME/.config/rofi/oxwm-keybinds.rasi" \
+      OXWM_ROFI_WIDTH_PCT=55 OXWM_ROFI_LINES=20 oxwm-parser
+
+Alignment and spacing controls:
+
+    OXWM_COL_GAP_PX       Approximate pixel gap between keybind column and
+                          description column (default: 10).
+    OXWM_CHAR_PX          Approximate character width in pixels used to convert
+                          the gap from pixels to spaces (default: 7).
+    OXWM_EXTRA_SPACES     Extra literal spaces appended after the gap
+                          (default: 5).
+
+Config detection:
+  The script looks for OxWM configuration in the following locations:
+
+    $HOME/.config/oxwm/config.lua
+    $HOME/.config/oxwm/config.ron
+
+  It supports:
+    - RON configs with keybindings[] (old and keychord formats)
+    - Lua table-style configs (pre-0.7)
+    - Imperative Lua configs (0.7+), via a stubbed `oxwm` module in Lua.
+
+EOF
+}
+
+# Parse early help flag before doing any work
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  print_help
+  exit 0
+fi
+
+# Dependency checks
+missing=()
+AWK_BIN=""
+
+if command -v gawk >/dev/null 2>&1; then
+  AWK_BIN="gawk"
+elif command -v awk >/dev/null 2>&1; then
+  AWK_BIN="awk"
+else
+  missing+=("awk/gawk")
+fi
+
+# Resolve script directory for bundled theme (works even if called via $PATH)
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd)"
+
+for cmd in lua rofi; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    missing+=("$cmd")
+  fi
+done
+
+if [[ ${#missing[@]} -gt 0 ]]; then
+  echo "oxwm-parser: missing required commands: ${missing[*]}" >&2
+  echo "Please install the missing dependencies (e.g. via your distro package manager)" >&2
+  exit 1
+fi
+
+LUA_CFG="$HOME/.config/oxwm/config.lua"
+RON_CFG="$HOME/.config/oxwm/config.ron"
+
+MODE=""
+if [[ -f "$LUA_CFG" ]]; then
+  MODE="lua"
+elif [[ -f "$RON_CFG" ]]; then
+  MODE="ron"
+else
+  echo "Error: No OxWM config found. Expected one of:
+  $LUA_CFG
+  $RON_CFG" >&2
+  exit 1
+fi
+
+OUT_MODE="menu"
+if [[ "${1:-}" == "--print" || "${1:-}" == "-p" ]]; then
+  OUT_MODE="print"
+  shift || true
+fi
+
+parse_ron() {
+  "$AWK_BIN" '
+    function trim(s){ gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
+    function norm_mod(m){
+      if (m=="Mod4") return "Super";
+      if (m=="Mod1") return "Alt";
+      if (m=="Shift") return "Shift";
+      if (m=="Control" || m=="Ctrl") return "Ctrl";
+      return m;
+    }
+    function norm_key(k){
+      if (k ~ /^Key[0-9]/) return substr(k,4);
+      if (k=="Comma") return ",";
+      if (k=="Period") return ".";
+      return k;
+    }
+    function join(arr, n, sep,  i,s){ s=""; for(i=1;i<=n;i++){ if(i>1) s=s sep; s=s arr[i] } return s }
+    function parse_mods(s, out,   n,i,t,modv){
+      gsub(/\$modkey/, MODKEY, s); gsub(/\$secondary_modkey/, SECMOD, s);
+      n=split(s, t, /[, ]+/);
+      outn=0;
+      for(i=1;i<=n;i++){
+        if(t[i]=="" || t[i]=="[") continue;
+        gsub(/[\[\]]/, "", t[i]);
+        modv=norm_mod(t[i]); if(modv!="") { out[++outn]=modv }
+      }
+      return outn
+    }
+    function parse_arg(buf, m, a, v, mn){
+      if (match(buf, /arg:[ ]*"([^"]+)"/, m)) return m[1];
+      if (match(buf, /arg:[ ]*\[([^\]]+)\]/, a)) {
+        s=a[1]; gsub(/"/, "", s); gsub(/, */, " ", s); return s;
+      }
+      if (match(buf, /arg:[ ]*\$([a-zA-Z_][a-zA-Z0-9_]*)/, v)) {
+        if (v[1]=="terminal" && TERMINAL!="") return TERMINAL; else return "$" v[1];
+      }
+      if (match(buf, /arg:[ ]*([-+]?[0-9]+)/, mn)) return mn[1];
+      return "";
+    }
+    function describe(action, arg){
+      if (action=="Spawn") { if (arg!="") return "Run: " arg; else return "Run" }
+      if (action=="ChangeLayout") { return "Layout: " arg }
+      if (action=="ToggleFullScreen" || action=="ToggleFloating" || action=="ToggleGaps" || action=="Quit" || action=="Restart" || action=="CycleLayout") return "Action: " action
+      if (action=="FocusDirection") {
+        d=arg; name=arg; if (arg=="0") name="Up"; else if (arg=="1") name="Down"; else if (arg=="2") name="Left"; else if (arg=="3") name="Right"; return "Focus: " name }
+      if (action=="SwapDirection") {
+        d=arg; name=arg; if (arg=="0") name="Up"; else if (arg=="1") name="Down"; else if (arg=="2") name="Left"; else if (arg=="3") name="Right"; return "Swap: " name }
+      if (action=="FocusMonitor") { return "Monitor: " arg }
+      if (action=="ViewTag") { return "Workspace: " (arg+1) }
+      if (action=="MoveToTag") { return "Move to workspace: " (arg+1) }
+      if (action=="KillClient") return "Action: KillClient"
+      return "Action: " action ((arg!="")?" " arg:"")
+    }
+    BEGIN { in_kb=0; arr_depth=0; in_item=0; pdepth=0; buf=""; MODKEY=""; SECMOD=""; TERMINAL="" }
+    {
+      raw=$0
+      if (match(raw, /^#DEFINE[ ]+\$modkey[ ]*=[ ]*([A-Za-z0-9_]+)/, m)) MODKEY=m[1]
+      if (match(raw, /^#DEFINE[ ]+\$secondary_modkey[ ]*=[ ]*([A-Za-z0-9_]+)/, m2)) SECMOD=m2[1]
+      if (match(raw, /^#DEFINE[ ]+\$terminal[ ]*=[ ]*"?([A-Za-z0-9._-]+)"?/, mt)) TERMINAL=mt[1]
+
+      line=raw; sub(/\/\/.*$/, "", line)
+      if (!in_kb) {
+        if (line ~ /^[ \t]*keybindings[ ]*:[ ]*\[/) { in_kb=1; arr_depth=1; next }
+      } else {
+        x=line; op = gsub(/\[/, "&", x); y=line; cl = gsub(/\]/, "&", y); arr_depth += op - cl
+        if (!in_item && line ~ /\(/) {
+          in_item=1; buf=""; pdepth=0
+        }
+        if (in_item) {
+          l=line
+          l1=l; o=gsub(/\(/, "&", l1); l2=l; c=gsub(/\)/, "&", l2); pdepth += o - c
+          if (buf!="") buf = buf " " l; else buf = l
+          if (pdepth<=0) {
+            mods_str=""; keytok=""; action=""; arg=""; kb="";
+            if (match(buf, /keys[ ]*:[ ]*\[([^\]]+)\]/, ks)) {
+              items=ks[1];
+              cnt=split(items, segs, /\)[ ,]*/); chordc=0
+              for (i=1;i<=cnt;i++) {
+                seg=segs[i]
+                if (seg ~ /modifiers[ ]*:[ ]*\[/ && seg ~ /key[ ]*:[ ]*[A-Za-z0-9]+/) {
+                  if (match(seg, /modifiers[ ]*:[ ]*\[([^\]]*)\]/, mm)) mods_str=mm[1]; else mods_str=""
+                  if (match(seg, /key[ ]*:[ ]*([A-Za-z0-9]+)/, km)) keytok=km[1]; else keytok=""
+                  delete parts; pc=parse_mods(mods_str, parts); k=norm_key(keytok);
+                  frag=k; if (pc>0 && k!="") frag = join(parts, pc, " + ") " + " k
+                  chord[++chordc]=frag
+                }
+              }
+              if (chordc>0) kb = join(chord, chordc, ", ")
+            } else {
+              if (match(buf, /modifiers[ ]*:[ ]*\[([^\]]*)\]/, mmm)) mods_str=mmm[1];
+              if (match(buf, /key[ ]*:[ ]*([A-Za-z0-9]+)/, kk)) keytok=kk[1];
+              delete parts; pc=parse_mods(mods_str, parts); k=norm_key(keytok);
+              kb=k; if (pc>0 && k!="") kb = join(parts, pc, " + ") " + " k
+            }
+            if (match(buf, /action[ ]*:[ ]*([A-Za-z0-9_]+)/, aa)) action=aa[1]; else action=""
+            arg=parse_arg(buf)
+            desc=describe(action, arg)
+            if (kb!="" || desc!="") printf "%s\t%s\n", kb, desc
+            in_item=0; buf=""
+          }
+        }
+        if (arr_depth<=0) { in_kb=0 }
+      }
+    }
+  ' "$RON_CFG"
+}
+
+parse_lua_imperative() {
+  local luatmp
+  luatmp=$(mktemp)
+  cat > "$luatmp" <<'LUA'
+local entries = {}
+
+local function norm_mod(m)
+  if m == 'Mod4' then return 'Super' end
+  if m == 'Mod1' then return 'Alt' end
+  if m == 'Control' then return 'Ctrl' end
+  return m
+end
+
+local function join_mods(mods)
+  local out = {}
+  for i = 1, #(mods or {}) do out[i] = norm_mod(mods[i]) end
+  return table.concat(out, ' + ')
+end
+
+local function capitalize(s)
+  if type(s) ~= 'string' or s == "" then return "" end
+  local first = s:sub(1, 1)
+  local rest = s:sub(2)
+  return first:upper() .. rest
+end
+
+local function desc_from_action(act)
+  if type(act) == 'table' and act.kind then
+    if act.kind == 'spawn' then
+      local cmd = act.cmd
+      if type(cmd) == 'table' then
+        local parts = {}
+        for i = 1, #cmd do parts[i] = tostring(cmd[i]) end
+        cmd = table.concat(parts, ' ')
+      else
+        cmd = tostring(cmd or "")
+      end
+      return 'Run: ' .. cmd
+    end
+    if act.kind == 'client.kill' then return 'Kill client' end
+    if act.kind == 'client.toggle_fullscreen' then return 'Toggle fullscreen' end
+    if act.kind == 'client.toggle_floating' then return 'Toggle floating' end
+    if act.kind == 'toggle_gaps' or act.kind == 'oxwm.toggle_gaps' then return 'Toggle gaps' end
+    if act.kind == 'layout.set' then return 'Layout: ' .. (act.name or "") end
+    if act.kind == 'layout.cycle' then return 'Cycle layout' end
+    if act.kind == 'tag.view' then return 'Workspace: ' .. ((act.index or 0) + 1) end
+    if act.kind == 'tag.move_to' then return 'Move to workspace: ' .. ((act.index or 0) + 1) end
+    if act.kind == 'client.focus_direction' then return 'Focus: ' .. capitalize(act.dir or "") end
+    if act.kind == 'client.swap_direction' then return 'Swap: ' .. capitalize(act.dir or "") end
+    if act.kind == 'focus_monitor' then
+      local idx = tonumber(act.index or 0) or 0
+      if idx == -1 then return 'Monitor: previous' end
+      if idx == 1 then return 'Monitor: next' end
+      return 'Monitor: ' .. tostring(idx)
+    end
+    if act.kind == 'quit' then return 'Quit OxWM' end
+    if act.kind == 'restart' then return 'Restart OxWM' end
+    if act.kind == 'recompile' then return 'Recompile OxWM' end
+    if act.kind == 'show_keybinds' then return 'Show keybind overlay' end
+    if act.kind == 'client.focus_stack' then return 'Focus next/previous in stack' end
+    if act.kind == 'client.exchange' then return 'Exchange clients' end
+  end
+  return 'Action'
+end
+
+local oxwm = {}
+package = package or {}
+package.preload = package.preload or {}
+package.preload['oxwm'] = function() return oxwm end
+
+function oxwm.spawn(cmd) return { kind = 'spawn', cmd = cmd } end
+function oxwm.quit() return { kind = 'quit' } end
+function oxwm.restart() return { kind = 'restart' } end
+function oxwm.recompile() return { kind = 'recompile' } end
+function oxwm.toggle_gaps() return { kind = 'toggle_gaps' } end
+function oxwm.show_keybinds() return { kind = 'show_keybinds' } end
+function oxwm.focus_monitor(idx) return { kind = 'focus_monitor', index = idx } end
+
+oxwm.client = {}
+function oxwm.client.kill() return { kind = 'client.kill' } end
+function oxwm.client.toggle_fullscreen() return { kind = 'client.toggle_fullscreen' } end
+function oxwm.client.toggle_floating() return { kind = 'client.toggle_floating' } end
+function oxwm.client.focus_direction(dir) return { kind = 'client.focus_direction', dir = dir } end
+function oxwm.client.swap_direction(dir) return { kind = 'client.swap_direction', dir = dir } end
+function oxwm.client.focus_stack(n) return { kind = 'client.focus_stack', n = n } end
+function oxwm.client.exchange() return { kind = 'client.exchange' } end
+
+oxwm.layout = {}
+function oxwm.layout.cycle() return { kind = 'layout.cycle' } end
+function oxwm.layout.set(name) return { kind = 'layout.set', name = name } end
+
+oxwm.tag = {}
+function oxwm.tag.view(index) return { kind = 'tag.view', index = index } end
+function oxwm.tag.move_to(index) return { kind = 'tag.move_to', index = index } end
+
+oxwm.bar = setmetatable({}, { __index = function() return function() end end })
+oxwm.gaps = setmetatable({}, { __index = function() return function() end end })
+oxwm.border = setmetatable({}, { __index = function() return function() end end })
+
+function oxwm.set_terminal(_) end
+function oxwm.set_modkey(_) end
+function oxwm.set_tags(_) end
+function oxwm.set_layout_symbol(_) end
+function oxwm.autostart(_) end
+
+oxwm.key = {}
+function oxwm.key.bind(mods, key, action)
+  local mods_str = join_mods(mods or {})
+  local kb = key or ""
+  if mods_str ~= "" and kb ~= "" then kb = mods_str .. ' + ' .. kb end
+  local descr = desc_from_action(action)
+  table.insert(entries, { kb = kb, desc = descr })
+end
+
+function oxwm.key.chord(keys, action)
+  local parts = {}
+  for i = 1, #(keys or {}) do
+    local tuple = keys[i] or {}
+    local mods = tuple[1] or {}
+    local key = tuple[2] or ""
+    local mods_str = join_mods(mods)
+    local frag = key
+    if mods_str ~= "" and key ~= "" then frag = mods_str .. ' + ' .. key end
+    table.insert(parts, frag)
+  end
+  local kb = table.concat(parts, ', ')
+  local descr = desc_from_action(action)
+  table.insert(entries, { kb = kb, desc = descr })
+end
+
+setmetatable(oxwm, {
+  __index = function(t, k)
+    local proxy = setmetatable({}, {
+      __index = function() return function() return { kind = 'oxwm.' .. tostring(k) } end end,
+      __call = function() return { kind = 'oxwm.' .. tostring(k) } end,
+    })
+    rawset(t, k, proxy)
+    return proxy
+  end
+})
+
+local cfg = os.getenv('OXWM_CONFIG_PATH')
+local ok = pcall(function() dofile(cfg) end)
+
+for _, e in ipairs(entries) do
+  local kb = e.kb or ""
+  local desc = e.desc or ""
+  if kb ~= "" or desc ~= "" then
+    io.write(kb .. "\t" .. desc .. "\n")
+  end
+end
+LUA
+  OXWM_CONFIG_PATH="$LUA_CFG" lua "$luatmp" || true
+  rm -f "$luatmp"
+}
+
+parse_lua_table() {
+  "$AWK_BIN" '
+    function trim(s){ sub(/^\s+/, "", s); sub(/\s+$/, "", s); return s }
+    BEGIN { inbind=0; block_depth=0; inrow=0; buf=""; last_comment="" }
+    {
+      raw=$0
+      line=raw
+      comment=""
+      if (match(raw, /--[ ]*(.*)$/, cm)) comment=cm[1]
+      gsub(/--.*/, "", line)
+      n_open = gsub(/\{/, "&", line)
+      n_close = gsub(/\}/, "&", line)
+      if (!inbind && match(line, /(keys|keybindings)[ ]*=[ ]*\{/)) {
+        inbind=1
+        block_depth = 1 + (n_open - 1) - n_close
+        next
+      }
+      if (inbind) {
+        prev_bd = block_depth
+        block_depth = block_depth + n_open - n_close
+        if (prev_bd >= 2 || (prev_bd == 1 && n_open > 0)) {
+          if (inrow==0) { inrow=1; buf=""; last_comment="" }
+          l=line; gsub(/^[ \t]+|[ \t]+$/, "", l)
+          if (l != "") buf = buf " " l
+          if (comment!="") last_comment=comment
+        }
+        if ((prev_bd >= 2 || (prev_bd == 1 && n_open > 0)) && block_depth == 1) {
+          mods=""; key=""; desc=""; action=""; argv=""
+          if (match(buf, /(mods|modifiers)[ ]*=[ ]*\{([^}]*)\}/, m)) {
+            mods=m[2]; gsub(/[" ]/, "", mods); gsub(/,/, " + ", mods)
+            gsub(/Mod4/, "Super", mods); gsub(/Mod1/, "Alt", mods); gsub(/Control/, "Ctrl", mods)
+          }
+          if (match(buf, /key[ ]*=[ ]*"([^"]+)"/, k1)) key=k1[1]
+          gsub(/^Comma$/, ",", key); gsub(/^Period$/, ".", key)
+          if (match(buf, /(desc|description)[ ]*=[ ]*"([^"]+)"/, d1)) desc=d1[2]
+          if (match(buf, /action[ ]*=[ ]*"([^"]+)"/, a1)) action=a1[1]
+          if (match(buf, /arg[ ]*=[ ]*"([^"]+)"/, ar1)) argv=ar1[1]
+          else if (match(buf, /arg[ ]*=[ ]*\{([^}]*)\}/, ar2)) { tmp=ar2[1]; gsub(/"/, "", tmp); gsub(/, */, " ", tmp); argv=tmp }
+          kb=key; if (mods!="" && key!="") kb = mods " + " key
+          descr=trim(desc)
+          if (descr=="" && action!="") {
+            descr = "Action: " action
+            if (argv!="") descr = descr " (" argv ")"
+          }
+          if (descr=="" && last_comment!="") descr = trim(last_comment)
+          if (kb != "" || descr != "") {
+            gsub(/\+/, " + ", kb); gsub(/  +/, "", descr)
+            printf "%s\t%s\n", kb, descr
+          }
+          inrow=0; buf=""; last_comment=""
+        }
+        if (block_depth <= 0) { inbind=0 }
+      }
+    }
+  ' "$LUA_CFG"
+}
+
+# Collect entries to a temp file
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+
+if [[ "$MODE" == "lua" ]]; then
+  parse_lua_imperative > "$tmp" || true
+  if [[ ! -s "$tmp" ]]; then
+    parse_lua_table > "$tmp" || true
+  fi
+  if [[ ! -s "$tmp" && -f "$RON_CFG" ]]; then
+    parse_ron > "$tmp" || true
+  fi
+else
+  parse_ron > "$tmp" || true
+fi
+
+if [[ ! -s "$tmp" ]]; then
+  echo "No keybind entries parsed from OxWM config ($MODE)." >&2
+  exit 2
+fi
+
+CHAR_PX="${OXWM_CHAR_PX:-7}"
+GAP_PX="${OXWM_COL_GAP_PX:-10}"
+GAP_SPACES=$(((GAP_PX + CHAR_PX - 1) / CHAR_PX))
+if [ "$GAP_SPACES" -lt 1 ]; then GAP_SPACES=2; fi
+SPACER=$(printf '%*s' "$GAP_SPACES" "")
+ADD_SPACES="${OXWM_EXTRA_SPACES:-5}"
+SPACER="$SPACER$(printf '%*s' "$ADD_SPACES" "")"
+
+if [[ "$OUT_MODE" == "print" ]]; then
+  "$AWK_BIN" -v spacer="$SPACER" -F'\t' '
+    { kb[NR]=$1; desc[NR]=$2; if (length($1) > max) max=length($1) }
+    END {
+      for (i=1; i<=NR; i++) printf "%-*s%s%s\n", max, kb[i], spacer, desc[i]
+    }
+  ' "$tmp"
+else
+  DEFAULT_WIDTH_PCT="45"
+  DEFAULT_LINES="15"
+  DEFAULT_ROFI_FONT="monospace 11"
+
+  # Bundled theme (same directory as this script)
+  BUNDLED_ROFI_THEME="$SCRIPT_DIR/oxwm-keybinds.rasi"
+  # Optional user theme in their config directory (fallback)
+  HOME_ROFI_THEME="$HOME/.config/rofi/oxwm-keybinds.rasi"
+
+  WIDTH_PCT="${OXWM_ROFI_WIDTH_PCT:-$DEFAULT_WIDTH_PCT}"
+  LINES="${OXWM_ROFI_LINES:-$DEFAULT_LINES}"
+  FONT="${OXWM_ROFI_FONT:-$DEFAULT_ROFI_FONT}"
+
+  if [[ -n "${OXWM_ROFI_THEME:-}" ]]; then
+    # Explicit override: treat as a theme file
+    THEME_OPT=( -theme "${OXWM_ROFI_THEME}" )
+  elif [[ -f "$BUNDLED_ROFI_THEME" ]]; then
+    # Use bundled theme from this directory
+    THEME_OPT=( -config "$BUNDLED_ROFI_THEME" )
+  elif [[ -f "$HOME_ROFI_THEME" ]]; then
+    # Fallback to user theme in ~/.config/rofi
+    THEME_OPT=( -config "$HOME_ROFI_THEME" )
+  else
+    THEME_OPT=()
+  fi
+
+  FONT_OPT=( -font "$FONT" )
+
+  THEME_STR="window { width: ${WIDTH_PCT}%; } listview { lines: ${LINES}; columns: 1; }"
+
+  "$AWK_BIN" -v spacer="$SPACER" -F"\t" '
+    { kb[NR]=$1; desc[NR]=$2; if (length($1) > max) max=length($1) }
+    END { for (i=1; i<=NR; i++) printf "%-*s%s%s\n", max, kb[i], spacer, desc[i] }
+  ' "$tmp" |
+  rofi -dmenu -i -p "OxWM Keys" -no-custom \
+       "${THEME_OPT[@]}" "${FONT_OPT[@]}" \
+       -theme-str "$THEME_STR" \
+       -kb-custom-1 "" 2>/dev/null || true
+fi

@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {} }:
+{pkgs ? import <nixpkgs> {}}:
 pkgs.writeShellScriptBin "total-uptime" ''
   set -euo pipefail
 
@@ -143,4 +143,3 @@ pkgs.writeShellScriptBin "total-uptime" ''
     printf "%s\n" "''${since_pretty}"
   fi
 ''
-

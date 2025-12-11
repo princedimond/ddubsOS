@@ -2,4 +2,5 @@
 Name=DWM
 Comment=Dynamic Window Manager
 Exec=dwm
-Type=Application
+TryExec=dwm
+Type=XSession

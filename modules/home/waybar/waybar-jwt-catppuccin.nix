@@ -1,9 +1,4 @@
-{
-  pkgs,
-  ...
-}:
-
-let
+{pkgs, ...}: let
   # Install any helper scripts shipped in modules/home/waybar/scripts into ~/.config/waybar/scripts
   scriptsDir = ./scripts;
   scripts = builtins.attrNames (builtins.readDir scriptsDir);
@@ -99,9 +94,7 @@ let
     mantle = "#181825";
     crust = "#11111b";
   };
-
-in
-{
+in {
   # Ensure bundled Waybar scripts are installed under ~/.config/waybar/scripts
   home.file = builtins.listToAttrs (
     map (name: {
@@ -110,7 +103,8 @@ in
         source = "${scriptsDir}/${name}";
         executable = true;
       };
-    }) scripts
+    })
+    scripts
   );
 
   programs.waybar = {
@@ -164,7 +158,8 @@ in
 
         "custom/menu" = {
           format = "  ";
-          on-click = "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window";
+          # on-click = "pkill rofi || rofi -show drun -modi run,drun,filebrowser,window";
+          on-click = "launch-nwg-menu";
           on-click-middle = "$HOME/.config/hypr/UserScripts/WallpaperSelect.sh";
           on-click-right = "$HOME/.config/hypr/scripts/WaybarLayout.sh";
           tooltip = true;
@@ -204,7 +199,7 @@ in
 
         "custom/weather" = {
           return-type = "json";
-exec = "~/.config/waybar/scripts/Weather.py";
+          exec = "sh -lc 'WEATHER_ICON_STYLE=emoji WEATHER_TOOLTIP_MARKUP=1 ~/.config/waybar/scripts/Weather.py'";
           interval = 600;
           tooltip = true;
         };
@@ -339,455 +334,453 @@ exec = "~/.config/waybar/scripts/Weather.py";
     ];
 
     # Consolidated style (Catppuccin Mocha) with solid background
-    style =
-      let
-        c = catppuccinColors;
-      in
-      ''
-        @define-color rosewater ${c.rosewater};
-        @define-color flamingo  ${c.flamingo};
-        @define-color pink      ${c.pink};
-        @define-color mauve     ${c.mauve};
-        @define-color red       ${c.red};
-        @define-color maroon    ${c.maroon};
-        @define-color peach     ${c.peach};
-        @define-color yellow    ${c.yellow};
-        @define-color green     ${c.green};
-        @define-color teal      ${c.teal};
-        @define-color sky       ${c.sky};
-        @define-color sapphire  ${c.sapphire};
-        @define-color blue      ${c.blue};
-        @define-color lavender  ${c.lavender};
-        @define-color text      ${c.text};
-        @define-color subtext1  ${c.subtext1};
-        @define-color subtext0  ${c.subtext0};
-        @define-color overlay2  ${c.overlay2};
-        @define-color overlay1  ${c.overlay1};
-        @define-color overlay0  ${c.overlay0};
-        @define-color surface2  ${c.surface2};
-        @define-color surface1  ${c.surface1};
-        @define-color surface0  ${c.surface0};
-        @define-color base      ${c.base};
-        @define-color mantle    ${c.mantle};
-        @define-color crust     ${c.crust};
+    style = let
+      c = catppuccinColors;
+    in ''
+      @define-color rosewater ${c.rosewater};
+      @define-color flamingo  ${c.flamingo};
+      @define-color pink      ${c.pink};
+      @define-color mauve     ${c.mauve};
+      @define-color red       ${c.red};
+      @define-color maroon    ${c.maroon};
+      @define-color peach     ${c.peach};
+      @define-color yellow    ${c.yellow};
+      @define-color green     ${c.green};
+      @define-color teal      ${c.teal};
+      @define-color sky       ${c.sky};
+      @define-color sapphire  ${c.sapphire};
+      @define-color blue      ${c.blue};
+      @define-color lavender  ${c.lavender};
+      @define-color text      ${c.text};
+      @define-color subtext1  ${c.subtext1};
+      @define-color subtext0  ${c.subtext0};
+      @define-color overlay2  ${c.overlay2};
+      @define-color overlay1  ${c.overlay1};
+      @define-color overlay0  ${c.overlay0};
+      @define-color surface2  ${c.surface2};
+      @define-color surface1  ${c.surface1};
+      @define-color surface0  ${c.surface0};
+      @define-color base      ${c.base};
+      @define-color mantle    ${c.mantle};
+      @define-color crust     ${c.crust};
 
-        * {
-          font-family: "Hack Nerd Font", "Font Awesome 6 Free", "Font Awesome 6 Brands", monospace;
-          font-weight: 400;
-          font-size: 18px;
-          border-radius: 7px;
-        }
+      * {
+        font-family: "Hack Nerd Font", "Font Awesome 6 Free", "Font Awesome 6 Brands", monospace;
+        font-weight: 400;
+        font-size: 18px;
+        border-radius: 7px;
+      }
 
-        window#waybar {
-          background-color: @base;
-          color: #ffffff;
-          border-radius: 0px;
-          transition-property: background-color;
-          transition-duration: 0.5s;
-        }
+      window#waybar {
+        background-color: @base;
+        color: #ffffff;
+        border-radius: 0px;
+        transition-property: background-color;
+        transition-duration: 0.5s;
+      }
 
-        /* Override white color for idle_inhibitor specifically */
-        window#waybar > box > #idle_inhibitor {
-          color: #f38ba8; /* red by default */
-        }
+      /* Override white color for idle_inhibitor specifically */
+      window#waybar > box > #idle_inhibitor {
+        color: #f38ba8; /* red by default */
+      }
 
-        window#waybar > box > #idle_inhibitor.activated {
-          color: #a6e3a1; /* green when activated */
-        }
+      window#waybar > box > #idle_inhibitor.activated {
+        color: #a6e3a1; /* green when activated */
+      }
 
-        window#waybar > box > #idle_inhibitor.deactivated {
-          color: #f38ba8; /* red when deactivated */
-        }
+      window#waybar > box > #idle_inhibitor.deactivated {
+        color: #f38ba8; /* red when deactivated */
+      }
 
-        tooltip {
+      tooltip {
+        background: @base;
+        border-radius: 7px;
+      }
+
+      button {
+        box-shadow: inset 0 3px transparent;
+        border: none;
+        border-radius: 0;
+      }
+
+      button:hover {
+        background: inherit;
+      }
+
+      #pulseaudio:hover {
+        background-color: @mantle;
+      }
+
+      #workspaces button {
+        padding: 0 5px;
+        background-color: transparent;
+      }
+
+      #workspaces button:hover {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 7px;
+      }
+
+      /* Hyprland workspaces - based on working waybar-jak-catppuccin */
+      #workspaces button {
+        color: @sapphire; /* default/inactive workspaces - pale blue */
+        background-color: transparent;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        padding-right: 6px;
+        padding-left: 4px;
+      }
+
+      #workspaces button.active {
+        color: @green; /* active workspace - green */
+        background: transparent;
+        border-radius: 15px;
+      }
+
+      #workspaces button.focused {
+        color: @rosewater; /* focused workspace - rosewater */
+        background: transparent;
+        border-radius: 15px;
+      }
+
+      #workspaces button.urgent {
+        color: @crust;
+        background: transparent;
+        border-radius: 15px;
+      }
+
+      #workspaces button:hover {
+        background: transparent;
+        color: @flamingo;
+        border-radius: 15px;
+      }
+
+      #workspaces button.empty {
+        color: @red; /* empty workspace - red */
+      }
+
+      #workspaces button.urgent {
+        background-color: #eb4d4b;
+      }
+
+      #mode {
+        background-color: #64727d;
+        box-shadow: inset 0 0px #ffffff;
+        background: rgba(5, 5, 5, 0.3);
+        color: #000000;
+        padding: 1px 10px 1px 10px;
+        border-radius: 0px 0px 0px 0px;
+        margin-top: 5px;
+      }
+
+      #clock,
+      #battery,
+      #cpu,
+      #memory,
+      #disk,
+      #temperature,
+      #backlight,
+      #network,
+      #custom-spotify,
+      #pulseaudio,
+      #wireplumber,
+      #custom-media,
+      #custom-waypaper,
+      #tray,
+      #mode,
+      #custom-weather,
+      #idle_inhibitor,
+      #scratchpad,
+      #power-profiles-daemon,
+      #custom-cava,
+      #custom-cava_mviz,
+      #custom-gpt,
+      #custom-mspowers,
+      #custom-qs-wallpaper,
+      #custom-qs-vid-wallpaper,
+      #custom-swaync,
+      #mpd {
+        background: @base;
+        padding: 1px 10px 1px 10px;
+        margin-top: 5px;
+      }
+
+      #window,
+      #workspaces {
+        background: @base;
+        color: @rosewater;
+        padding: 1px 1px 1px 1px;
+        margin-top: 5px;
+      }
+
+      .modules-left > widget:first-child > #workspaces {
+        margin-left: 5px;
+      }
+
+      .modules-right > widget:last-child > #workspaces {
+        margin-right: 0;
+      }
+
+      #clock {
+        color: @pink;
+        margin-top: 5px;
+        margin-right: 5px;
+      }
+
+      #custom-mspowers {
+        color: @yellow;
+        margin-top: 5px;
+      }
+
+      #clock:hover {
+        background-color: @mantle;
+      }
+
+      #custom-weather {
+        color: @sky;
+        padding: 1px 6px 1px 8px;
+      }
+
+      #custom-spotify {
+        color: @maroon;
+        padding: 1px 6px 1px 8px;
+      }
+
+      #custom-waypaper:hover {
+        background-color: @mantle;
+      }
+
+      #custom-cava,
+      #custom-cava_mviz {
+        background: @base;
+        color: @mauve;
+        padding: 1px 10px;
+        margin-left: 8px;
+      }
+
+      #custom-cava:hover,
+      #custom-cava_mviz:hover {
+        background-color: @mantle;
+      }
+
+      #custom-gpt {
+        font-size: 20px;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 15px 15px;
+        color: @mauve;
+        border-radius: 7px;
+      }
+
+      #custom-gpt:hover {
+        background-color: @mantle;
+      }
+
+      #custom-weather:hover {
+        background-color: @mantle;
+      }
+
+      #cava-player .status {
+        font-size: 18px;
+        color: #ffffff;
+      }
+
+      #custom-power {
+        color: @mauve;
+        background-color: @base;
+        margin-right: 5px;
+        margin-top: 5px;
+        padding: 1px 5px 1px 2px;
+      }
+
+      #custom-power:hover {
+        background-color: @mantle;
+      }
+
+      #custom-menu {
+        color: @blue;
+        background-color: @base;
+        margin-left: 5px;
+        margin-top: 5px;
+        padding: 1px 10px 1px 10px;
+        font-size: 18px;
+        min-width: 30px;
+      }
+
+      #custom-menu:hover {
+        background-color: @mantle;
+      }
+
+      #custom-qs-wallpaper,
+      #custom-qs-vid-wallpaper {
+        color: @sapphire;
+        background-color: @base;
+        font-size: 18px;
+        min-width: 20px;
+      }
+
+      #custom-qs-wallpaper:hover,
+      #custom-qs-vid-wallpaper:hover {
+        background-color: @mantle;
+      }
+
+      #custom-swaync {
+        color: @green;
+        background-color: @base;
+      }
+
+      #custom-swaync.notification,
+      #custom-swaync.dnd-notification,
+      #custom-swaync.inhibited-notification,
+      #custom-swaync.dnd-inhibited-notification {
+        color: @red;
+      }
+
+      #custom-swaync:hover {
+        background-color: @mantle;
+      }
+
+      #battery {
+        color: @mauve;
+      }
+
+      #battery.charging,
+      #battery.plugged {
+        color: @green;
+      }
+
+      @keyframes blink {
+        to {
           background: @base;
-          border-radius: 7px;
-        }
-
-        button {
-          box-shadow: inset 0 3px transparent;
-          border: none;
-          border-radius: 0;
-        }
-
-        button:hover {
-          background: inherit;
-        }
-
-        #pulseaudio:hover {
-          background-color: @mantle;
-        }
-
-        #workspaces button {
-          padding: 0 5px;
-          background-color: transparent;
-        }
-
-        #workspaces button:hover {
-          background: rgba(0, 0, 0, 0.3);
-          border-radius: 7px;
-        }
-
-        /* Hyprland workspaces - based on working waybar-jak-catppuccin */
-        #workspaces button {
-          color: @sapphire; /* default/inactive workspaces - pale blue */
-          background-color: transparent;
-          padding-top: 4px;
-          padding-bottom: 4px;
-          padding-right: 6px;
-          padding-left: 4px;
-        }
-
-        #workspaces button.active {
-          color: @green; /* active workspace - green */
-          background: transparent;
-          border-radius: 15px;
-        }
-
-        #workspaces button.focused {
-          color: @rosewater; /* focused workspace - rosewater */
-          background: transparent;
-          border-radius: 15px;
-        }
-
-        #workspaces button.urgent {
-          color: @crust;
-          background: transparent;
-          border-radius: 15px;
-        }
-
-        #workspaces button:hover {
-          background: transparent;
-          color: @flamingo;
-          border-radius: 15px;
-        }
-
-        #workspaces button.empty {
-          color: @red; /* empty workspace - red */
-        }
-
-        #workspaces button.urgent {
-          background-color: #eb4d4b;
-        }
-
-        #mode {
-          background-color: #64727d;
-          box-shadow: inset 0 0px #ffffff;
-          background: rgba(5, 5, 5, 0.3);
           color: #000000;
           padding: 1px 10px 1px 10px;
-          border-radius: 0px 0px 0px 0px;
           margin-top: 5px;
         }
+      }
 
-        #clock,
-        #battery,
-        #cpu,
-        #memory,
-        #disk,
-        #temperature,
-        #backlight,
-        #network,
-        #custom-spotify,
-        #pulseaudio,
-        #wireplumber,
-        #custom-media,
-        #custom-waypaper,
-        #tray,
-        #mode,
-        #custom-weather,
-        #idle_inhibitor,
-        #scratchpad,
-        #power-profiles-daemon,
-        #custom-cava,
-        #custom-cava_mviz,
-        #custom-gpt,
-        #custom-mspowers,
-        #custom-qs-wallpaper,
-        #custom-qs-vid-wallpaper,
-        #custom-swaync,
-        #mpd {
-          background: @base;
-          padding: 1px 10px 1px 10px;
-          margin-top: 5px;
-        }
+      #battery.critical:not(.charging) {
+        color: #ffffff;
+        animation-name: blink;
+        animation-duration: 0.5s;
+        animation-timing-function: steps(12);
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+      }
 
-        #window,
-        #workspaces {
-          background: @base;
-          color: @rosewater;
-          padding: 1px 1px 1px 1px;
-          margin-top: 5px;
-        }
+      #battery:hover {
+        background-color: @mantle;
+      }
 
-        .modules-left > widget:first-child > #workspaces {
-          margin-left: 5px;
-        }
+      #power-profiles-daemon {
+        padding-right: 15px;
+        color: #000000;
+      }
 
-        .modules-right > widget:last-child > #workspaces {
-          margin-right: 0;
-        }
+      #power-profiles-daemon.performance {
+        color: #ffffff;
+      }
 
-        #clock {
-          color: @pink;
-          margin-top: 5px;
-          margin-right: 5px;
-        }
+      #power-profiles-daemon.balanced {
+        color: #ffffff;
+      }
 
-        #custom-mspowers {
-          color: @yellow;
-          margin-top: 5px;
-        }
+      #power-profiles-daemon.power-saver {
+        color: #000000;
+      }
 
-        #clock:hover {
-          background-color: @mantle;
-        }
+      label:focus {
+        background: @base;
+      }
 
-        #custom-weather {
-          color: @sky;
-          padding: 1px 6px 1px 8px;
-        }
+      #memory {
+        color: @yellow;
+      }
 
-        #custom-spotify {
-          color: @maroon;
-          padding: 1px 6px 1px 8px;
-        }
+      #memory:hover {
+        background-color: @mantle;
+      }
 
-        #custom-waypaper:hover {
-          background-color: @mantle;
-        }
+      #disk {
+        background: @base;
+      }
 
-        #custom-cava,
-        #custom-cava_mviz {
-          background: @base;
-          color: @mauve;
-          padding: 1px 10px;
-          margin-left: 8px;
-        }
+      #backlight {
+        color: @green;
+      }
 
-        #custom-cava:hover,
-        #custom-cava_mviz:hover {
-          background-color: @mantle;
-        }
+      #backlight:hover {
+        background-color: @mantle;
+      }
 
-        #custom-gpt {
-          font-size: 20px;
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: 15px 15px;
-          color: @mauve;
-          border-radius: 7px;
-        }
+      #network {
+        color: @peach;
+      }
 
-        #custom-gpt:hover {
-          background-color: @mantle;
-        }
+      #network.disconnected {
+        color: @red;
+      }
 
-        #custom-weather:hover {
-          background-color: @mantle;
-        }
+      #network:hover {
+        background-color: @mantle;
+      }
 
-        #cava-player .status {
-          font-size: 18px;
-          color: #ffffff;
-        }
+      #pulseaudio {
+        color: @peach;
+      }
 
-        #custom-power {
-          color: @mauve;
-          background-color: @base;
-          margin-right: 5px;
-          margin-top: 5px;
-          padding: 1px 5px 1px 2px;
-        }
+      #pulseaudio.muted {
+        color: @peach;
+      }
 
-        #custom-power:hover {
-          background-color: @mantle;
-        }
+      #temperature {
+        background: @base;
+        color: @yellow;
+        padding: 1px 10px 1px 10px;
+        margin-top: 5px;
+      }
 
-        #custom-menu {
-          color: @blue;
-          background-color: @base;
-          margin-left: 5px;
-          margin-top: 5px;
-          padding: 1px 10px 1px 10px;
-          font-size: 18px;
-          min-width: 30px;
-        }
+      #temperature.critical {
+        background-color: #eb4d4b;
+      }
 
-        #custom-menu:hover {
-          background-color: @mantle;
-        }
+      /* Idle inhibitor - comprehensive targeting without !important */
+      #idle_inhibitor,
+      .idle_inhibitor,
+      button#idle_inhibitor,
+      .module#idle_inhibitor,
+      window#waybar #idle_inhibitor,
+      window#waybar .idle_inhibitor,
+      window#waybar button#idle_inhibitor {
+        color: #f38ba8; /* red when deactivated */
+        background-color: #1e1e2e;
+      }
 
-        #custom-qs-wallpaper,
-        #custom-qs-vid-wallpaper {
-          color: @sapphire;
-          background-color: @base;
-          font-size: 18px;
-          min-width: 20px;
-        }
+      #idle_inhibitor.activated,
+      .idle_inhibitor.activated,
+      button#idle_inhibitor.activated,
+      .module#idle_inhibitor.activated,
+      window#waybar #idle_inhibitor.activated,
+      window#waybar .idle_inhibitor.activated,
+      window#waybar button#idle_inhibitor.activated {
+        color: #a6e3a1; /* green when activated */
+        background-color: #1e1e2e;
+      }
 
-        #custom-qs-wallpaper:hover,
-        #custom-qs-vid-wallpaper:hover {
-          background-color: @mantle;
-        }
+      #idle_inhibitor.deactivated,
+      .idle_inhibitor.deactivated,
+      button#idle_inhibitor.deactivated,
+      .module#idle_inhibitor.deactivated,
+      window#waybar #idle_inhibitor.deactivated,
+      window#waybar .idle_inhibitor.deactivated,
+      window#waybar button#idle_inhibitor.deactivated {
+        color: #f38ba8; /* red when deactivated */
+        background-color: #1e1e2e;
+      }
 
-        #custom-swaync {
-          color: @green;
-          background-color: @base;
-        }
+      #idle_inhibitor:hover {
+        background-color: @mantle;
+      }
 
-        #custom-swaync.notification,
-        #custom-swaync.dnd-notification,
-        #custom-swaync.inhibited-notification,
-        #custom-swaync.dnd-inhibited-notification {
-          color: @red;
-        }
-
-        #custom-swaync:hover {
-          background-color: @mantle;
-        }
-
-        #battery {
-          color: @mauve;
-        }
-
-        #battery.charging,
-        #battery.plugged {
-          color: @green;
-        }
-
-        @keyframes blink {
-          to {
-            background: @base;
-            color: #000000;
-            padding: 1px 10px 1px 10px;
-            margin-top: 5px;
-          }
-        }
-
-        #battery.critical:not(.charging) {
-          color: #ffffff;
-          animation-name: blink;
-          animation-duration: 0.5s;
-          animation-timing-function: steps(12);
-          animation-iteration-count: infinite;
-          animation-direction: alternate;
-        }
-
-        #battery:hover {
-          background-color: @mantle;
-        }
-
-        #power-profiles-daemon {
-          padding-right: 15px;
-          color: #000000;
-        }
-
-        #power-profiles-daemon.performance {
-          color: #ffffff;
-        }
-
-        #power-profiles-daemon.balanced {
-          color: #ffffff;
-        }
-
-        #power-profiles-daemon.power-saver {
-          color: #000000;
-        }
-
-        label:focus {
-          background: @base;
-        }
-
-        #memory {
-          color: @yellow;
-        }
-
-        #memory:hover {
-          background-color: @mantle;
-        }
-
-        #disk {
-          background: @base;
-        }
-
-        #backlight {
-          color: @green;
-        }
-
-        #backlight:hover {
-          background-color: @mantle;
-        }
-
-        #network {
-          color: @peach;
-        }
-
-        #network.disconnected {
-          color: @red;
-        }
-
-        #network:hover {
-          background-color: @mantle;
-        }
-
-        #pulseaudio {
-          color: @peach;
-        }
-
-        #pulseaudio.muted {
-          color: @peach;
-        }
-
-        #temperature {
-          background: @base;
-          color: @yellow;
-          padding: 1px 10px 1px 10px;
-          margin-top: 5px;
-        }
-
-        #temperature.critical {
-          background-color: #eb4d4b;
-        }
-
-        /* Idle inhibitor - comprehensive targeting without !important */
-        #idle_inhibitor,
-        .idle_inhibitor,
-        button#idle_inhibitor,
-        .module#idle_inhibitor,
-        window#waybar #idle_inhibitor,
-        window#waybar .idle_inhibitor,
-        window#waybar button#idle_inhibitor {
-          color: #f38ba8; /* red when deactivated */
-          background-color: #1e1e2e;
-        }
-
-        #idle_inhibitor.activated,
-        .idle_inhibitor.activated,
-        button#idle_inhibitor.activated,
-        .module#idle_inhibitor.activated,
-        window#waybar #idle_inhibitor.activated,
-        window#waybar .idle_inhibitor.activated,
-        window#waybar button#idle_inhibitor.activated {
-          color: #a6e3a1; /* green when activated */
-          background-color: #1e1e2e;
-        }
-
-        #idle_inhibitor.deactivated,
-        .idle_inhibitor.deactivated,
-        button#idle_inhibitor.deactivated,
-        .module#idle_inhibitor.deactivated,
-        window#waybar #idle_inhibitor.deactivated,
-        window#waybar .idle_inhibitor.deactivated,
-        window#waybar button#idle_inhibitor.deactivated {
-          color: #f38ba8; /* red when deactivated */
-          background-color: #1e1e2e;
-        }
-
-        #idle_inhibitor:hover {
-          background-color: @mantle;
-        }
-
-      '';
+    '';
   };
 }

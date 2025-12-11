@@ -1,4 +1,4 @@
-{ pkgs }:
+{pkgs}:
 pkgs.writeShellScriptBin "rofi-wallpapers-apply" ''
   #!/usr/bin/env bash
   set -euo pipefail
@@ -9,4 +9,3 @@ pkgs.writeShellScriptBin "rofi-wallpapers-apply" ''
     exec ${pkgs.swww}/bin/swww img --resize fill "$sel"
   fi
 ''
-

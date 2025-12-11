@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# kitty-bg: launch kitty with a random background image via symlink
+# - Picks a random image from a source directory (default: ~/Pictures/Wallpapers)
+# - Updates the symlink at ~/Pictures/current_image
+# - Launches kitty, optionally with a specified config
+#
+# Env overrides:
+#   KBG_SOURCE_DIR: source directory of images
+#   KBG_LINK_PATH:  path to the symlink (default: ~/Pictures/current_image)
+#   KBG_CONFIG:     path to a kitty config to use (passed as --config)
+#
+# CLI options:
+#   -s, --source DIR   Source directory (overrides default/env)
+#   -l, --link PATH    Symlink path (overrides default/env)
+#   -c, --config FILE  Kitty config file to pass via --config
+#   --no-launch        Only update symlink; do not launch kitty
+#   -h, --help         Show help
+#   --                 Stop parsing options; remaining args passed to kitty
+#
+# Remaining (non-option) arguments are passed to kitty.
+
+print_help() {
+  cat <<'EOF'
+Usage: kitty-bg [options] [--] [kitty_args...]
+
+Defaults: Launches kitty in the background; use --foreground to run in the foreground.
+
+Options:
+  -s, --source DIR   Source directory of images (default: ~/Pictures/Wallpapers)
+  -l, --link PATH    Symlink path (default: ~/Pictures/current_image)
+  -c, --config FILE  Kitty config file to pass via --config
+      --no-launch    Only update symlink; do not launch kitty
+      --foreground   Run kitty in the foreground (default is background)
+  -h, --help         Show this help
+
+Environment overrides:
+  KBG_SOURCE_DIR, KBG_LINK_PATH, KBG_CONFIG
+
+Examples:
+  kitty-bg                         # randomize background and launch kitty
+  kitty-bg -s ~/Wallpapers/Anime   # use a different source dir
+  KBG_CONFIG=~/.config/kitty/kitty.conf kitty-bg -- -e htop
+EOF
+}
+
+SOURCE_DIR="${KBG_SOURCE_DIR:-$HOME/Pictures/Wallpapers}"
+LINK_PATH="${KBG_LINK_PATH:-$HOME/Pictures/current_image}"
+CONFIG_FILE="${KBG_CONFIG:-}"
+LAUNCH=1
+FOREGROUND=0
+
+# Parse options
+ARGS=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -s|--source)
+      [[ $# -ge 2 ]] || { echo "Missing value for $1" >&2; exit 2; }
+      SOURCE_DIR="$2"; shift 2;;
+    -l|--link)
+      [[ $# -ge 2 ]] || { echo "Missing value for $1" >&2; exit 2; }
+      LINK_PATH="$2"; shift 2;;
+    -c|--config)
+      [[ $# -ge 2 ]] || { echo "Missing value for $1" >&2; exit 2; }
+      CONFIG_FILE="$2"; shift 2;;
+    --no-launch)
+      LAUNCH=0; shift;;
+    --foreground)
+      FOREGROUND=1; shift;;
+    -h|--help)
+      print_help; exit 0;;
+    --)
+      shift; ARGS+=("$@"); break;;
+    -*)
+      echo "Unknown option: $1" >&2; print_help; exit 2;;
+    *)
+      # First non-option; treat as kitty arg
+      ARGS+=("$1"); shift;;
+  esac
+done
+
+# Resolve source dir and validate
+SOURCE_DIR=${SOURCE_DIR/#~/$HOME}
+LINK_PATH=${LINK_PATH/#~/$HOME}
+if [[ -n "$CONFIG_FILE" ]]; then
+  CONFIG_FILE=${CONFIG_FILE/#~/$HOME}
+fi
+
+if [[ ! -d "$SOURCE_DIR" ]]; then
+  echo "Source directory not found: $SOURCE_DIR" >&2
+  exit 1
+fi
+
+# Collect candidate images (common formats)
+mapfile -d '' FILES < <(find -L "$SOURCE_DIR" -type f \
+  \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.bmp' -o -iname '*.gif' \) \
+  -print0)
+
+if (( ${#FILES[@]} == 0 )); then
+  echo "No images found in: $SOURCE_DIR" >&2
+  exit 1
+fi
+
+# Pick a random file
+RANDOM_INDEX=$(( RANDOM % ${#FILES[@]} ))
+CHOSEN="${FILES[$RANDOM_INDEX]}"
+
+# Ensure parent dir exists and update symlink atomically-ish
+mkdir -p "$(dirname "$LINK_PATH")"
+ln -sfn "$CHOSEN" "$LINK_PATH"
+
+# Optionally launch kitty (background by default)
+if (( LAUNCH )); then
+  if [[ -n "$CONFIG_FILE" ]]; then
+    if (( FOREGROUND )); then
+      kitty --config "$CONFIG_FILE" "${ARGS[@]}"
+    else
+      setsid -f kitty --config "$CONFIG_FILE" "${ARGS[@]}" >/dev/null 2>&1 < /dev/null &
+    fi
+  else
+    if (( FOREGROUND )); then
+      kitty "${ARGS[@]}"
+    else
+      setsid -f kitty "${ARGS[@]}" >/dev/null 2>&1 < /dev/null &
+    fi
+  fi
+fi

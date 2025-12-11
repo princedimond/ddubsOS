@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
     zsh
     zoxide
@@ -13,7 +12,7 @@
     #
     export EDITOR="nvim"
     export VISUAL="nvim"
-    # 
+    #
     # Source Gemini API key if available
     if [ -f "$HOME/gem.key" ]; then
       source "$HOME/gem.key"
@@ -53,7 +52,7 @@
     #eval "$(ssh-agent -s)" &>/dev/null
     #ssh-add ~/.ssh/id_ed25519
     # Run minimal fetch
-    nitch
+    # nitch
 
   '';
 }

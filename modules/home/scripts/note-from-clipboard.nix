@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{pkgs, ...}:
 pkgs.writeShellScriptBin "note-from-clipboard" ''
   #!/usr/bin/env bash
 

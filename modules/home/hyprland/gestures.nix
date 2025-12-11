@@ -1,10 +1,9 @@
-{ ... }:
-{
+{...}: {
   wayland.windowManager.hyprland = {
     settings = {
       gestures = {
         # Hyprland 0.51+ gesture syntax
-        gesture = [ "3, horizontal, workspace" ];
+        gesture = ["3, horizontal, workspace"];
         workspace_swipe_distance = 500;
         workspace_swipe_invert = true;
         workspace_swipe_min_speed_to_force = 30;

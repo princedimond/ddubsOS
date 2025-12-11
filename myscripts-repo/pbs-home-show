@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Allow overriding via env; fall back to module defaults
+export PBS_REPOSITORY="${PBS_REPOSITORY:-root@pam@192.168.40.15:8007:PBS-LUN2}"
+export PBS_FINGERPRINT="${PBS_FINGERPRINT:-4b:c6:2a:49:62:2e:c6:0d:63:0c:d1:b6:8b:78:be:af:28:2a:94:eb:d4:e7:77:ab:d1:af:c9:ea:c9:07:ef:26}"
+BACKUP_ID="${BACKUP_ID:-ixas-dwilliams-home}"
+
+echo "Repository: $PBS_REPOSITORY"
+echo "Fingerprint: $PBS_FINGERPRINT"
+echo "Backup ID: $BACKUP_ID"
+echo "Source: /home/dwilliams"

@@ -1,7 +1,10 @@
-{ pkgs, lib, ... }:
 {
+  pkgs,
+  lib,
+  ...
+}: {
   home.packages = with pkgs; [
-    emacs-pgtk
+    emacs
     git
     lazygit
     ripgrep
@@ -54,13 +57,13 @@
   services.emacs = {
     enable = true;
     defaultEditor = true;
-    package = pkgs.emacs-pgtk;
+    package = pkgs.emacs;
   };
 
   # Ensure Doom Emacs is installed and synchronized on each Home Manager activation
   # - If ~/.emacs.d/bin/doom is missing and ~/.emacs.d is empty or absent, clone Doom
   # - Then run a non-interactive sync to refresh packages/autoloads
-  home.activation.doomSync = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.activation.doomSync = lib.hm.dag.entryAfter ["writeBoundary"] ''
     set -eu
     EMACSDIR="$HOME/.emacs.d"
     if [ ! -x "$EMACSDIR/bin/doom" ]; then
@@ -218,6 +221,10 @@
       (setq ispell-local-dictionary "en_US")
       (setq ispell-local-dictionary-alist
             '(("en_US" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_US") nil utf-8))))
+
+    ;; Comment keybinding (Doom Emacs style)
+    (map! :leader
+          :desc "Comment line" "." #'comment-line)
 
     ;; Git keybindings
     (map! :leader

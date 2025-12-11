@@ -1,5 +1,4 @@
-{ ... }:
-{
+{...}: {
   services.udiskie = {
     enable = true;
     # Optional niceties:
@@ -8,4 +7,3 @@
     # tray = true;        # show a tray icon if your DE supports it
   };
 }
-

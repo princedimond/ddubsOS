@@ -5,7 +5,7 @@
     ./bspwm/picom/picom.nix
     ./bspwm/polybar/polybar.nix
   ];
-  
+
   # Set environment variable for qs-keybinds to know bspwm is enabled
   home.sessionVariables = {
     QS_HAS_BSPWM = "1";

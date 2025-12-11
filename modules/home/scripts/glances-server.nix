@@ -1,10 +1,10 @@
-{ pkgs }:
+{pkgs}:
 pkgs.writeShellScriptBin "glances-server" ''
   # Glances server management script
-  
+
   # Debug: Show what command was received (uncomment for debugging)
   # echo "Debug: Received command: '$1'"
-  
+
   case "''${1:-help}" in
     start)
       echo "Starting glances server..."
@@ -32,7 +32,7 @@ pkgs.writeShellScriptBin "glances-server" ''
     status)
       echo "Glances Server Status:"
       echo "==================="
-      
+
       # Check if container is running
       if ${pkgs.docker}/bin/docker ps --filter name=glances-server --format "{{.Names}}" | grep -q glances-server; then
         echo "✔ Glances server is running"
@@ -43,13 +43,13 @@ pkgs.writeShellScriptBin "glances-server" ''
         echo "Access URLs:"
         echo "  Local:    http://localhost:61210"
         echo "  Local:    http://127.0.0.1:61210"
-        
+
         # Get current local IP address
         local_ip=$(ip route get 1.1.1.1 2>/dev/null | grep -Po 'src \K\S+' 2>/dev/null || echo "Unable to detect")
         if [ "$local_ip" != "Unable to detect" ]; then
           echo "  Network:  http://$local_ip:61210"
         fi
-        
+
         # Try to get hostname for additional access option
         hostname_fqdn=$(hostname -f 2>/dev/null || hostname 2>/dev/null || echo "")
         if [ -n "$hostname_fqdn" ] && [ "$hostname_fqdn" != "localhost" ]; then

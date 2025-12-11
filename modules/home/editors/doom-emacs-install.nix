@@ -1,12 +1,9 @@
-{ pkgs, ... }:
-
-let
+{pkgs, ...}: let
   doom-icon = pkgs.fetchurl {
     url = "https://raw.githubusercontent.com/jeetelongname/doom-banners/master/splashes/doom/doom-emacs-color2.svg";
     sha256 = "1xxi5ra1z8njsqaqiaq96wyn1sc967l42kvjzbji1zrjj8za6bgq";
   };
-in
-{
+in {
   # 1. Create a script to install Doom Emacs
   home.packages = [
     (pkgs.writeShellScriptBin "get-doom" ''
@@ -73,6 +70,6 @@ in
     icon = doom-icon;
     terminal = false;
     type = "Application";
-    categories = [ "Development" "TextEditor" ];
+    categories = ["Development" "TextEditor"];
   };
 }

@@ -173,7 +173,7 @@ _settings_print_columns_text() {
 # Provide friendly example hints for string attributes
 _string_attr_hint() {
 	case "$1" in
-		panelChoice) echo "left|right" ;;
+		panelChoice) echo "hyprpanel|waybar|dms|noctalia" ;;
 		browser) echo "firefox|brave|google-chrome" ;;
 		terminal) echo "kitty|wezterm|alacritty" ;;
 		keyboardLayout) echo "us|de|fr|..." ;;
@@ -299,7 +299,7 @@ settings_set_main() {
 		is_path=true
 		;;
 	panelChoice | keyboardLayout | consoleKeyMap) ;;
-gnomeEnable | bspwmEnable | dwmEnable | wayfireEnable | cosmicEnable | \
+gnomeEnable | bspwmEnable | i3Enable | swayEnable | enableSway | dwmEnable | wayfireEnable | cosmicEnable | \
 	enableEvilhelix | enableVscode | enableMicro | enableAlacritty | enableTmux | enablePtyxis | enableWezterm | enableGhostty | \
 	enableDevEnv | sddmWaylandEnable | enableOpencode | enableObs | clock24h | enableNFS | printEnable | thunarEnable | \
 	enableGlances)
@@ -335,6 +335,18 @@ gnomeEnable | bspwmEnable | dwmEnable | wayfireEnable | cosmicEnable | \
 	local backup
 	backup="$(_settings_backup_file "$vars_file")"
 	echo "Backup created: $backup"
+
+	# Attribute alias handling: prefer updating existing variant in file to avoid duplicates
+	if [ "$attr" = "swayEnable" ] || [ "$attr" = "enableSway" ]; then
+		if "$GREP" -Eq '^[[:space:]]*swayEnable[[:space:]]*=' "$vars_file"; then
+			attr="swayEnable"
+		elif "$GREP" -Eq '^[[:space:]]*enableSway[[:space:]]*=' "$vars_file"; then
+			attr="enableSway"
+		else
+			# default canonical
+			attr="swayEnable"
+		fi
+	fi
 
 	_settings_write_attr_value "$vars_file" "$attr" "$rendered"
 
@@ -428,12 +440,16 @@ settings_view_main() {
 	local monitors
 	monitors="$({ "$GREP" -E '^[[:space:]]*monitor[[:space:]]*=' "$vars_file" | "$SED" -E 's/^[[:space:]]*//'; } 2>/dev/null || true)"
 
-	local enableGlances gnomeEnable bspwmEnable dwmEnable wayfireEnable cosmicEnable
+	local enableGlances gnomeEnable bspwmEnable i3Enable swayEnable dwmEnable wayfireEnable cosmicEnable
 local enableEvilhelix enableVscode enableMicro enableAlacritty enableTmux enablePtyxis enableWezterm enableGhostty
 	local enableDevEnv sddmWaylandEnable enableOpencode enableObs clock24h enableNFS printEnable thunarEnable
 	enableGlances="$(_settings_get_raw "$vars_file" enableGlances)"
 	gnomeEnable="$(_settings_get_raw "$vars_file" gnomeEnable)"
 	bspwmEnable="$(_settings_get_raw "$vars_file" bspwmEnable)"
+	i3Enable="$(_settings_get_raw "$vars_file" i3Enable)"
+	swayEnable="$(_settings_get_raw "$vars_file" swayEnable)"
+	# Backward-compat: some hosts may use enableSway
+	if [ -z "$swayEnable" ]; then swayEnable="$(_settings_get_raw "$vars_file" enableSway)"; fi
 	dwmEnable="$(_settings_get_raw "$vars_file" dwmEnable)"
 	wayfireEnable="$(_settings_get_raw "$vars_file" wayfireEnable)"
 	cosmicEnable="$(_settings_get_raw "$vars_file" cosmicEnable)"
@@ -458,6 +474,8 @@ enableWezterm="$(_settings_get_raw "$vars_file" enableWezterm)"
 	_settings_print_columns \
 		"gnomeEnable" "$gnomeEnable" \
 		"bspwmEnable" "$bspwmEnable" \
+		"i3Enable" "$i3Enable" \
+		"swayEnable" "$swayEnable" \
 		"dwmEnable" "$dwmEnable" \
 		"wayfireEnable" "$wayfireEnable" \
 		"cosmicEnable" "$cosmicEnable"

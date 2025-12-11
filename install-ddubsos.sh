@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
 ######################################
-# Install script for ddubsos  
-# Author:  Don Williams 
+# Install script for ddubsos
+# Author:  Don Williams
 # Date: July 7, 2025
 #######################################
 
 # Define colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
 # Define log file
@@ -53,11 +54,11 @@ print_failure_banner() {
 
 # Optional flags and parameters
 REGEN_HW=0
-BRANCH="Stable-v2.5.8"
+BRANCH="main"
 REPO_URL=""
-REPO_URL_GH="https://github.com/dwilliam62/ddubsos.git"
+#REPO_URL_GH="https://github.com/dwilliam62/ddubsos.git"
 REPO_URL_GL="https://gitlab.com/dwilliam62/ddubsos.git"
-FORCE_GITLAB=0
+FORCE_GITLAB=1
 # New flags
 HOST_CLI=""
 PROFILE_CLI=""
@@ -83,57 +84,71 @@ EOF
 # Argument parsing (supports --arg=value and --arg value)
 while [ $# -gt 0 ]; do
   case "$1" in
-    --regen-hw)
-      REGEN_HW=1
-      shift
-      ;;
-    --branch)
-      BRANCH="$2"; shift 2
-      ;;
-    --branch=*)
-      BRANCH="${1#*=}"; shift 1
-      ;;
-    --repo)
-      REPO_URL="$2"; shift 2
-      ;;
-    --repo=*)
-      REPO_URL="${1#*=}"; shift 1
-      ;;
-    --use-gitlab)
-      FORCE_GITLAB=1; shift 1
-      ;;
-    --host)
-      HOST_CLI="$2"; shift 2
-      ;;
-    --host=*)
-      HOST_CLI="${1#*=}"; shift 1
-      ;;
-    --profile)
-      PROFILE_CLI="$2"; shift 2
-      ;;
-    --profile=*)
-      PROFILE_CLI="${1#*=}"; shift 1
-      ;;
-    --build-host)
-      BUILD_HOST=1; shift 1
-      ;;
-    --non-interactive)
-      NONINTERACTIVE=1; shift 1
-      ;;
-    -h|--help)
-      print_usage; exit 0
-      ;;
-    *)
-      # Unknown positional/flag
-      print_error "Unknown option: $1"; print_usage; exit 1
-      ;;
+  --regen-hw)
+    REGEN_HW=1
+    shift
+    ;;
+  --branch)
+    BRANCH="$2"
+    shift 2
+    ;;
+  --branch=*)
+    BRANCH="${1#*=}"
+    shift 1
+    ;;
+  --repo)
+    REPO_URL="$2"
+    shift 2
+    ;;
+  --repo=*)
+    REPO_URL="${1#*=}"
+    shift 1
+    ;;
+  --use-gitlab)
+    FORCE_GITLAB=1
+    shift 1
+    ;;
+  --host)
+    HOST_CLI="$2"
+    shift 2
+    ;;
+  --host=*)
+    HOST_CLI="${1#*=}"
+    shift 1
+    ;;
+  --profile)
+    PROFILE_CLI="$2"
+    shift 2
+    ;;
+  --profile=*)
+    PROFILE_CLI="${1#*=}"
+    shift 1
+    ;;
+  --build-host)
+    BUILD_HOST=1
+    shift 1
+    ;;
+  --non-interactive)
+    NONINTERACTIVE=1
+    shift 1
+    ;;
+  -h | --help)
+    print_usage
+    exit 0
+    ;;
+  *)
+    # Unknown positional/flag
+    print_error "Unknown option: $1"
+    print_usage
+    exit 1
+    ;;
   esac
 done
 
 print_header "Verifying System Requirements"
 
 # Check for git
-if ! command -v git &> /dev/null; then
+if ! command -v git &>/dev/null; then
   print_error "Git is not installed."
   echo -e "Please install git and pciutils are installed, then re-run the install script."
   echo -e "Example: nix-shell -p git pciutils"
@@ -141,14 +156,14 @@ if ! command -v git &> /dev/null; then
 fi
 
 # Check for lspci (pciutils)
-if ! command -v lspci &> /dev/null; then
+if ! command -v lspci &>/dev/null; then
   print_error "pciutils is not installed."
   echo -e "Please install git and pciutils,  then re-run the install script."
   echo -e "Example: nix-shell -p git pciutils"
   exit 1
 fi
 
-if [ -n "$(grep -i nixos < /etc/os-release)" ]; then
+if [ -n "$(grep -i nixos </etc/os-release)" ]; then
   echo -e "${GREEN}Verified this is NixOS.${NC}"
 else
   print_error "This is not NixOS or the distribution information is not available."
@@ -180,11 +195,11 @@ elif [ -d "$HOME/ddubsos/.git" ]; then
   echo -e "${GREEN}Using existing repository: $REPO_DIR${NC}"
   (
     cd "$HOME/ddubsos" &&
-    echo -e "Fetching latest from remote..." &&
-    git fetch --all --prune &&
-    echo -e "Checking out branch: $BRANCH" &&
-    git checkout "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" &&
-    git pull --ff-only || true
+      echo -e "Fetching latest from remote..." &&
+      git fetch --all --prune &&
+      echo -e "Checking out branch: $BRANCH" &&
+      git checkout "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" &&
+      git pull --ff-only || true
   )
 else
   echo -e "${GREEN}Repository not found. Cloning to $HOME/ddubsos${NC}"
@@ -288,7 +303,7 @@ if [ -z "$profile" ]; then
     echo -e "Non-interactive: defaulting profile to $profile"
   else
     echo -e "${RED}Automatic GPU detection failed or no specific profile found.${NC}"
-printf "Enter Your Hardware Profile (GPU)\nOptions:\n[ amd ]\nnvidia\nnvidia-laptop\namd-hybrid\nintel\nvm\nPlease type out your choice: "
+    printf "Enter Your Hardware Profile (GPU)\nOptions:\n[ amd ]\nnvidia\nnvidia-laptop\namd-hybrid\nintel\nvm\nPlease type out your choice: "
     read -r profile
     if [ -z "$profile" ]; then
       profile="amd"
@@ -296,9 +311,6 @@ printf "Enter Your Hardware Profile (GPU)\nOptions:\n[ amd ]\nnvidia\nnvidia-lap
     echo -e "${GREEN}Selected GPU profile: $profile${NC}"
   fi
 fi
-
-
-
 
 print_header "Configuring Host and Profile"
 mkdir -p hosts/"$hostName"
@@ -354,7 +366,6 @@ echo -e "${GREEN}Git configured: $gitUsername <$gitEmail>${NC}"
 sed -i "s/gitUsername = \".*\";/gitUsername = \"$gitUsername\";/" ./hosts/$hostName/variables.nix
 sed -i "s/gitEmail = \".*\";/gitEmail = \"$gitEmail\";/" ./hosts/$hostName/variables.nix
 
-
 print_header "Keyboard Layout Configuration"
 # Note: Display configuration defaults (legacy monitor lines) are in hosts/default/variables.nix.
 # You can now use Hyprland monitorv2 via structured variables (hyprMonitorsV2) with enable flags and transform mapping.
@@ -396,7 +407,7 @@ if [ $NONINTERACTIVE -eq 1 ]; then
 else
   read -rp "Enter your console keymap: [ $keyboardLayout ] " consoleKeyMap
   if [ -z "$consoleKeyMap" ]; then
-    consoleKeyMap="$keyboardLayout"  # Default to same as keyboard layout
+    consoleKeyMap="$keyboardLayout" # Default to same as keyboard layout
   fi
 fi
 echo -e "${GREEN}Selected console keymap: $consoleKeyMap${NC}"
@@ -465,8 +476,8 @@ ensure_module_wrapper() {
     printf '%s\n' '{'
     cat "$f"
     printf '%s\n' '}'
-  } > "$tmp"
-  sudo tee "$f" < "$tmp" >/dev/null
+  } >"$tmp"
+  sudo tee "$f" <"$tmp" >/dev/null
   rm -f "$tmp"
 }
 
@@ -482,7 +493,8 @@ extract_root_device() {
     inroot && /};/ { inroot=0 }
   ' "$f")
   if [ -n "$out" ]; then
-    printf '%s\n' "$out"; return 0
+    printf '%s\n' "$out"
+    return 0
   fi
   # Fallback: nested syntax fileSystems = { "/" = { ... device = "..." ... }; ... };
   out=$(awk '
@@ -496,7 +508,8 @@ extract_root_device() {
     }
   ' "$f")
   if [ -n "$out" ]; then
-    printf '%s\n' "$out"; return 0
+    printf '%s\n' "$out"
+    return 0
   fi
   return 1
 }
@@ -531,7 +544,7 @@ is_hardware_valid() {
 
 if [ "$REGEN_HW" -eq 1 ]; then
   echo "--regen-hw specified: generating hardware-configuration via nixos-generate-config"
-sudo nixos-generate-config --root / --show-hardware-config | sudo tee "$target" >/dev/null
+  sudo nixos-generate-config --root / --show-hardware-config | sudo tee "$target" >/dev/null
   maybe_append_filesystems_from_system "$target"
   ensure_module_wrapper "$target"
   if ! is_hardware_valid "$target"; then
@@ -542,7 +555,7 @@ sudo nixos-generate-config --root / --show-hardware-config | sudo tee "$target" 
 else
   if [ -f /etc/nixos/hardware-configuration.nix ]; then
     echo "Using /etc/nixos/hardware-configuration.nix"
-sudo cp /etc/nixos/hardware-configuration.nix "$target"
+    sudo cp /etc/nixos/hardware-configuration.nix "$target"
     maybe_append_filesystems_from_system "$target"
     ensure_module_wrapper "$target"
     if ! is_hardware_valid "$target"; then
@@ -567,11 +580,24 @@ print_header "Initiating NixOS Build"
 if [ $NONINTERACTIVE -eq 1 ]; then
   echo -e "Non-interactive: proceeding with initial build"
 else
+
+  print_header "Pre-build Verification"
+  echo -e "About to build configuration with these settings:"
+  echo -e "  🖥️  Host: ${GREEN}$hostName${NC}"
+  echo -e "  🎮  GPU Profile: ${GREEN}$profile${NC}"
+  echo -e "  👤  Username: ${GREEN}$installusername${NC}"
+  echo -e "  🌍  Timezone: ${GREEN}$timeZone${NC}"
+  echo -e "  ⌨️   Keyboard: ${GREEN}$keyboardLayout${NC}"
+  echo ""
+  echo -e "${YELLOW}This will build and apply your ddubsOS configuration.${NC}"
+  echo -e "${YELLOW}The build process may take 10-30 minutes depending on your hardware.${NC}"
+  echo ""
+
   read -p "Ready to run initial build? (Y/N): " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-      echo -e "${RED}Build cancelled.${NC}"
-      exit 1
+    echo -e "${RED}Build cancelled.${NC}"
+    exit 1
   fi
 fi
 

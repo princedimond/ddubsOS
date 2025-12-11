@@ -1,11 +1,10 @@
-{ host
-, pkgs
-, ...
-}:
-let
-  inherit (import ../../hosts/${host}/variables.nix) thunarEnable;
-in
 {
+  host,
+  pkgs,
+  ...
+}: let
+  inherit (import ../../hosts/${host}/variables.nix) thunarEnable;
+in {
   programs = {
     thunar = {
       enable = thunarEnable;

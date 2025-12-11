@@ -1,6 +1,6 @@
 # Hyprscrollinmg  adds niri like layout.
-{ pkgs, ... }: {
+{pkgs, ...}: {
   wayland.windowManager.hyprland = {
-    plugins = [ pkgs.hyprlandPlugins.hyprscrolling ];
+    plugins = [pkgs.hyprlandPlugins.hyprscrolling];
   };
 }

@@ -1,6 +1,7 @@
-{ pkgs
-, lib
-, ...
+{
+  pkgs,
+  lib,
+  ...
 }: {
   xsession.windowManager.bspwm = {
     enable = lib.mkForce true;
@@ -22,8 +23,8 @@
         rectangle = "1280x720+0+0";
         center = true;
       };
-      "qimgv" = { state = "floating"; };
-      "sxiv" = { state = "floating"; };
+      "qimgv" = {state = "floating";};
+      "sxiv" = {state = "floating";};
       "Xarchiver" = {
         state = "floating";
         layer = "normal";
@@ -32,7 +33,7 @@
         state = "floating";
         layer = "normal";
       };
-      "Pavucontrol:pavucontrol" = { state = "floating"; };
+      "Pavucontrol:pavucontrol" = {state = "floating";};
       "Lxappearance" = {
         state = "floating";
         layer = "normal";
@@ -53,7 +54,7 @@
       };
     };
     monitors = lib.mkForce {
-      "Virtual-1" = [ "1" "2" "3" "4" "5" "6" "7" "8" "9" "10" ];
+      "Virtual-1" = ["1" "2" "3" "4" "5" "6" "7" "8" "9" "10"];
     };
     extraConfig = ''
       xrandr --output Virtual-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal

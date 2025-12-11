@@ -1,26 +1,121 @@
-{ host, ... }:
-let
-  inherit (import ../../../hosts/${host}/variables.nix)
+{
+  host,
+  pkgs,
+  ...
+}: let
+  inherit
+    (import ../../../hosts/${host}/variables.nix)
     browser
     terminal
     ;
-in
-{
+
+  hyprLayoutInit = pkgs.writeShellScriptBin "hypr-layout-init" ''
+    #!${pkgs.bash}/bin/bash
+    set -euo pipefail
+
+    # Determine current layout; retry briefly to avoid early-startup nulls
+    attempts=0
+    LAYOUT=""
+    while [ $attempts -lt 3 ] && [ -z "${LAYOUT:-}" ]; do
+      LAYOUT=$(hyprctl -j getoption general:layout | ${pkgs.jq}/bin/jq -r '.str // empty' 2>/dev/null || true)
+      if [ -z "${LAYOUT:-}" ]; then
+        # Fallback: parse non-JSON output (e.g., "str: dwindle")
+        LAYOUT=$(hyprctl getoption general:layout 2>/dev/null | awk -F'str:' 'NF>1 {gsub(/^ +| +$/,"",$2); print $2}')
+      fi
+      [ -n "${LAYOUT:-}" ] && break
+      attempts=$((attempts+1))
+      sleep 0.25
+    done
+    [ -z "${LAYOUT:-}" ] && exit 0
+
+    case "$LAYOUT" in
+      master)
+        # Ensure master layout-style binds
+        hyprctl keyword unbind SUPER,J
+        hyprctl keyword unbind SUPER,K
+        hyprctl keyword unbind SUPER,O
+        hyprctl keyword bind SUPER,J,layoutmsg,cyclenext
+        hyprctl keyword bind SUPER,K,layoutmsg,cycleprev
+        ;;
+      dwindle)
+        # Ensure dwindle layout-style binds
+        hyprctl keyword unbind SUPER,J
+        hyprctl keyword unbind SUPER,K
+        hyprctl keyword unbind SUPER,O
+        hyprctl keyword bind SUPER,J,cyclenext
+        hyprctl keyword bind SUPER,K,cyclenext,prev
+        # ensure SUPER+O togglesplit is available on dwindle
+        hyprctl keyword bind SUPER,O,togglesplit
+        ;;
+    esac
+  '';
+
+  swapLayout = pkgs.writeShellScriptBin "hypr-swap-layout" ''
+    #!${pkgs.bash}/bin/bash
+    set -euo pipefail
+
+    # Read current layout with a short retry loop (early startup can return empty)
+    attempts=0
+    LAYOUT=""
+    while [ $attempts -lt 3 ] && [ -z "${LAYOUT:-}" ]; do
+      LAYOUT=$(hyprctl -j getoption general:layout | ${pkgs.jq}/bin/jq -r '.str // empty' 2>/dev/null || true)
+      if [ -z "${LAYOUT:-}" ]; then
+        LAYOUT=$(hyprctl getoption general:layout 2>/dev/null | awk -F'str:' 'NF>1 {gsub(/^ +| +$/,"",$2); print $2}')
+      fi
+      [ -n "${LAYOUT:-}" ] && break
+      attempts=$((attempts+1))
+      sleep 0.25
+    done
+    case "$LAYOUT" in
+      master)
+        hyprctl keyword general:layout dwindle ;;
+      dwindle)
+        hyprctl keyword general:layout master ;;
+    esac
+    # Reinitialize J/K binds for the new layout
+    hypr-layout-init
+  '';
+in {
+  home.packages = [hyprLayoutInit swapLayout];
+
   wayland.windowManager.hyprland.settings = {
+    exec-once = [
+      # Initialize SUPER+J/K binds to match the current layout at login
+      "hypr-layout-init"
+    ];
+
     bindd = [
       # ============= APPLICATION LAUNCHERS & MENUS =============
       "$modifier CTRL,D, Toggle Dock, exec, dock" # Application dock toggle
-      "ALT, space, Workspace Overview, exec, vicinae"
-      "$modifier,A, App Overview, exec, agsv1 -t 'overview'"
-      "$modifier,R, Rofi Legacy Menu, exec, rofi-legacy.menu"
-      "$modifier SHIFT,Return, Rofi Menu, exec, rofi.menu"
+      "$modifier, TAB, QS Overview, exec, qs ipc -c overview call overview toggle"
+      "$modifier,A, AGS Overview, exec, agsv1 -t 'overview'"
+      "$modifier SHIFT,R, Rofi Legacy Menu, exec, rofi-legacy.menu"
+      "$modifier,R, Rofi Menu, exec, rofi.menu"
+      "$modifier,S, Window List, exec, rofi -show window"
+      "$modifier,P, Panel Switcher , exec, rofi-panels"
+
+      # ============= noctalia-shell binds =============
+
+      "$modifier, D, noctalia Main Menu, exec, noctalia-shell  ipc call launcher toggle   # Main enu"
+      "$modifier, M, noctalia Notifcaitons, exec, noctalia-shell ipc call notifications toggleHistory  # Notifcaitons "
+      "$modifier, V, noctalia clipboard, exec,  noctalia-shell ipc call launcher clipboard # clipboard"
+      "$modifier ALT, P, noctalia Settings,  exec, noctalia-shell ipc call settings toggle   # settings "
+      "$modifier SHIFT, comma, noctalia Settings,  exec, noctalia-shell ipc call settings toggle   # settings "
+      "$modifier ALT , L, noctalia Lock screen, exec, noctalia-shell ipc call sessionMenu lockAndSuspend   #  lock screen"
+      "$modifier SHIFT , Y , noctalia Wallpaper, exec, noctalia-shell ipc call wallpaper toggle   # Pick Wallpaper   "
+      "$modifier , X , noctalia Powermenu, exec, dms noctalia-shell call sessionMenu toggle   # Logout menu  "
+      "$modifier , C , noctalia Control Center, exec, noctalia-shell ipc call controlCenter toggle   # Control center "
+      "$modifier CTRL , R , noctalia screen record , exec, noctalia-shell ipc call screenRecorder toggle   # Screen Record toggle "
 
       # ============= TERMINALS =============
       "$modifier,Return, Terminal, exec, ${terminal}"
-      #"$modifier SHIFT,Return, Foot Terminal (Floating), exec, foot --app-id=foot-floating"
+      "$modifier SHIFT,Return, Foot Terminal (Floating), exec, foot --app-id=foot-floating"
       "$modifier ALT,Return, WezTerm, exec, wezterm"
       "$modifier CTRL,Return, Ghostty, exec, ghostty"
-      "$modifier SHIFT,T, Scratchpad Terminal, exec, pypr toggle term"
+      "$modifier CTRL ALT,Return, Kitty BG (Random Wallpaper), exec, kitty-bg"
+      "$modifier CTRL ALT,G, Ghostty BG (Random Wallpaper), exec, ghostty-bg"
+      "$modifier SHIFT,T, DropDown Terminal, exec, sh -lc 'DropTerminal ''${TERM:-kitty}'"
+      "$modifier ALT,T, Pyprland Scratchpad, exec, pypr toggle term"
 
       # ============= TEXT EDITORS & IDEs =============
       "ALT,E, Emacs Floating, exec, emacsclient -c -a '' --frame-parameters='((name . \"emacs-floating\") (explicit-name . t))'"
@@ -36,14 +131,14 @@ in
       "$modifier,Y, Yazi, exec, kitty -e yazi"
 
       # ============= SYSTEM UTILITIES =============
-      "$modifier,V, Clipboard History, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
-      "$modifier,N, Create Note From Clipboard, exec, note-from-clipboard"
-      "$modifier,C, Color Picker, exec, hyprpicker -a"
-      "$modifier,S, Screenshot, exec, screenshootin"
+      "$modifier SHIFT,V, Clipboard History, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
+      "$modifier SHIFT,N, Create Note From Clipboard, exec, note-from-clipboard"
+      "$modifier ALT,C, Color Picker, exec, hyprpicker -a"
+      "$modifier CTRL,S, Screenshot, exec, screenshootin"
       "$modifier SHIFT,S, Screenshot Satty, exec, screenshootin-satty"
       "ALT SHIFT,S, Screenshot Region, exec, hyprshot -m region -o $HOME/Pictures/Screenshots"
       "$modifier,O, OBS Studio, exec, obs"
-      "$modifier,M, Audio Control, exec, pavucontrol"
+      "$modifier ALT,M, Audio Control, exec, pavucontrol"
       "$modifier SHIFT,E, Emoji Picker, exec, emopicker9000"
 
       # ============= SYSTEM SETTINGS & CONFIGURATION =============
@@ -52,6 +147,7 @@ in
       "$modifier SHIFT,P, Power Menu, exec, $HOME/.config/waybar/scripts/power-menu.sh"
       "$modifier SHIFT,W, Apply Wallpapers, exec, qs-wallpapers-apply"
       "$modifier ALT,W, Warp Build, exec, warp-bld"
+      "$modifier,I, Toggle Screenlock, exec, toggle-idle"
       "ALT SHIFT,Q, Logout Menu, exec, qs-wlogout"
 
       # ============= DOCUMENTATION & HELP =============
@@ -68,7 +164,7 @@ in
       "$modifier,SPACE, Toggle Floating, togglefloating"
       "$modifier SHIFT,SPACE, Workspace All Float, workspaceopt, allfloat"
       "$modifier,P, Pseudo Tile, pseudo,"
-      "$modifier SHIFT, M, Swap Layout, exec, swap_layout"
+      "$modifier SHIFT, M, Swap Layout, exec, hypr-swap-layout"
       "$modifier SHIFT,I, Toggle Split, togglesplit,"
 
       # ============= WINDOW MOVEMENT (ARROW KEYS) =============
@@ -90,10 +186,6 @@ in
       "$modifier ALT, down, Swap Window Down, swapwindow, d"
 
       # ============= WINDOW SWAPPING (VI-STYLE KEYCODES) =============
-      "$modifier ALT, 43, Swap Window Left, swapwindow, l"
-      "$modifier ALT, 46, Swap Window Right, swapwindow, r"
-      "$modifier ALT, 45, Swap Window Up, swapwindow, u"
-      "$modifier ALT, 44, Swap Window Down, swapwindow, d"
 
       # ============= FOCUS MOVEMENT (ARROW KEYS) =============
       "$modifier,left, Focus Left, movefocus, l"
@@ -104,12 +196,14 @@ in
       # ============= FOCUS MOVEMENT (VI-STYLE HJKL) =============
       "$modifier,h, Focus Left, movefocus, l"
       "$modifier,l, Focus Right, movefocus, r"
-      "$modifier,k, Focus Up, movefocus, u"
-      "$modifier,j, Focus Down, movefocus, d"
+      "$modifier ALT,k, Focus Up (vi-alt), movefocus, u"
+      "$modifier ALT,j, Focus Down (vi-alt), movefocus, d"
 
       # ============= WINDOW CYCLING =============
       "ALT,Tab, Cycle Next Window, cyclenext"
       "ALT,Tab, Bring Active To Top, bringactivetotop"
+
+      # SUPER+J/K — dynamic cycle binds (default to dwindle; runtime script adjusts at login and after swaps)
 
       # ============= WORKSPACE SWITCHING (1-10) =============
       "$modifier,1, Workspace 1, workspace, 1"
@@ -153,19 +247,9 @@ in
       ",XF86MonBrightnessUp, Brightness Up, exec, brightnessctl set +5%"
     ];
     # bind = [
-
-    # ============= DISABLED PLUGINS =============
-    # hyprspace plugin  Disabled 9/13/25  Won't build
-    #"$modifier, TAB, overview:toggle, all"
-    #"$modifier SHIFT, TAB, overview:close, all"
-    # hyprexpo plugin
-    #"ALT, space, hyprexpo:expo, toggle"
-
     # ============= DISABLED/COMMENTED BINDINGS =============
     # "$modifier SHIFT,W,exec,web-search"                     # Web search (disabled)
     # "$modifier SHIFT,W,exec, rofi-wallpapers-apply"         # Replaced by qs-wallpapers-apply
-    # Disabled wallsetter I don't like auto change wallpapers
-    #"$modifier ALT,W,exec,wallsetter"
     # "$modifier CTRL,W,exec,waypaper"                        # Replaced by qs-wallpapers-apply
     # "$modifier SHIFT,SPACE,movetoworkspace,special"         # Special workspace (commented)
     # "$modifier,SPACE,togglespecialworkspace"                # Toggle special workspace (commented)
@@ -174,7 +258,6 @@ in
     #"$modifier SHIFT,K,exec, list-keybinds"                  # Replaced by qs-keybinds
 
     # ============= DISABLED Menus =============
-    #"$modifier SHIFT,R,exec, wofi --show drun"               # Wofi application launcher
     #"$modifier ALT,R,exec, bemenu-run -c -l 10 -W 0.2 -H 20 --fixed-height --fn 'JetBrains Mono 19' -p :" # Bemenu launcher
     #"$modifier ALT,P,exec, nwg-drawer -mb 100 -mt 100 -mr 300 -ml 300" # NWG drawer launcher
     #];
@@ -183,7 +266,5 @@ in
       "$modifier, mouse:272, Move Window (Mouse), movewindow"
       "$modifier, mouse:273, Resize Window (Mouse), resizewindow"
     ];
-    #bindm = [
-    #];
   };
 }

@@ -1,6 +1,7 @@
-{ config
-, pkgs
-, ...
+{
+  config,
+  pkgs,
+  ...
 }: {
   services.picom = {
     enable = true;
@@ -22,7 +23,7 @@
       inactive-opacity = 0.8;
       frame-opacity = 1.0;
       inactive-opacity-override = false;
-      opacity-rule = [ "97:class_g = 'Geany'" ];
+      opacity-rule = ["97:class_g = 'Geany'"];
       corner-radius = 10;
       rounded-corners-exclude = [
         "window_type = 'dock'"

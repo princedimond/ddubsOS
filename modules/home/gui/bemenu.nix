@@ -1,6 +1,8 @@
-{ lib, pkgs, ... }:
-
 {
+  lib,
+  pkgs,
+  ...
+}: {
   programs.bemenu = {
     enable = true;
     package = pkgs.bemenu;
@@ -18,10 +20,10 @@
       ab = "#000000";
 
       # Geometry / placement
-      width-factor = 0.2;  # same as -W 0.2
-      list = 10;           # same as -l 10 (vertical)
-      center = true;       # same as -c (Wayland/X11)
-      no-overlap = false;  # avoid forcing top position; center works reliably
+      width-factor = 0.2; # same as -W 0.2
+      list = 10; # same as -l 10 (vertical)
+      center = true; # same as -c (Wayland/X11)
+      no-overlap = false; # avoid forcing top position; center works reliably
     };
   };
 }

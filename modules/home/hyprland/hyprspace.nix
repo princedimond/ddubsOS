@@ -1,7 +1,7 @@
 # Hyprspace is a hyprland plugin that provides a workspaces overview SUPER + TAB .
-{ pkgs, ... }: {
+{pkgs, ...}: {
   wayland.windowManager.hyprland = {
-    plugins = [ pkgs.hyprlandPlugins.hyprspace ];
+    plugins = [pkgs.hyprlandPlugins.hyprspace];
     settings = {
       plugin = {
         overview = {
