@@ -105,10 +105,12 @@
     #  https://github.com/NixOS/nixos-hardware
     #nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    /*
     oxwm = {
-      url = "github:tonybanters/oxwm";
-      inputs.nixpkgs.follows = "nixpkgs";
+      oxwm.url = "github:tonybanters/oxwm";
+      oxwm.inputs.nixpkgs.follows = "nixpkgs";
     };
+    */
 
     # awww wallpaper setter
     awww = {
@@ -129,7 +131,7 @@
     home-manager,
     nix-flatpak,
     nixvim,
-    oxwm,
+    #oxwm,
     hyprland,
     ...
   } @ inputs: let
@@ -176,7 +178,7 @@
           ./modules/home/suckless/dwm-session.nix
           inputs.catppuccin.nixosModules.catppuccin
           nix-flatpak.nixosModules.nix-flatpak
-          oxwm.nixosModules.default
+          #oxwm.nixosModules.default
           hyprland.nixosModules.default
         ];
       };
@@ -233,7 +235,7 @@
           ./modules/home/suckless/dwm-session.nix
           inputs.catppuccin.nixosModules.catppuccin
           nix-flatpak.nixosModules.nix-flatpak
-          oxwm.nixosModules.default
+          #oxwm.nixosModules.default
           hyprland.nixosModules.default
         ];
       };

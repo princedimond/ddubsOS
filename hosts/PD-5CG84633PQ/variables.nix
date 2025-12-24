@@ -20,9 +20,9 @@
   gnomeEnable = false;
   bspwmEnable = false;
   i3Enable = false;
-  dwmEnable = false;
+  dwmEnable = true;
   wayfireEnable = false;
-  cosmicEnable = false;
+  cosmicEnable = true;
   niriEnable = false;
   enableSway = false;
   enableMangowc = false;
@@ -32,7 +32,7 @@
   # Enabling Nixvim disables NVF automatically.
   enableNixvim = true;
   enableEvilhelix = true;
-  enableVscode = false;
+  enableVscode = true;
   enableAntiGravity = false;
   enableMicro = false;
   enableZed = true;
@@ -53,7 +53,7 @@
   enableObs = false;
 
   # Containers
-  enableIncus = false;
+  enableIncus = true;
 
   # Development Environment Options - set to true to enable
   enableDevEnv = false;
@@ -81,7 +81,7 @@
   clock24h = true;
 
   # Program Options
-  browser = "zen-browser"; # Set Default Browser (google-chrome-stable for google-chrome)
+  browser = "microsoft-edge"; # Set Default Browser (google-chrome-stable for google-chrome)
   terminal = "ghostty"; # Set Default System Terminal
   keyboardLayout = "us";
   consoleKeyMap = "us";
@@ -194,7 +194,7 @@
   ];
 
   extraMonitorSettings = "
-     monitor = eDP-1, 1920x1080@60,auto,1
+     #monitor = eDP-1, 1920x1080@60,auto,1
   ";
 
   # Example: Structured legacy monitors (render to `monitor =` lines)

@@ -7,15 +7,15 @@
   vars = import ../../../hosts/${host}/variables.nix;
 
   # Use the per-host browser when set; default to google-chrome-stable
-  browserKey = vars.browser or "google-chrome-stable";
+  browserKey = vars.browser or "microsoft-edge";
   zenEnabled = vars.enableZenBrowser or false;
   ladybirdEnabled = vars.enableLadybird or false;
 
   # Map browser key -> desktop entry ID
   browserDesktop = {
-    # Google Chrome
-    "google-chrome" = "google-chrome.desktop";
-    "google-chrome-stable" = "google-chrome.desktop";
+    # Microsoft Edge
+    "microsoft-edge" = "microsoft-edge.desktop";
+    #"google-chrome-stable" = "google-chrome.desktop";
 
     # Firefox family
     "firefox" = "firefox.desktop";
