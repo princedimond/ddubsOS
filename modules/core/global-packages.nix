@@ -105,7 +105,7 @@
     docker-compose # Allows Controlling Docker From A Single File
     fahclient # folding at home client PewDiPie team: 1066966
     figlet # terminal banner maker
-    franz # combined messaging app
+    #franz # combined messaging app
     fortune # daily fortune needed by variety
     gitnuro # desktop gui for git
     glab # gitlab cli toosl

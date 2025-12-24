@@ -17,6 +17,7 @@
         "com.github.k4zmu2a.spacecadetpinball"
         "de.schmidhuberj.tubefeeder" # watch YT videos
         "de.haeckerfelix.Shortwave" # Internet Radio
+        "dev.edfloreshz.CosmicTweaks"
         # If you prefer the native OBS, comment this out
         # and set `enableObs=true;` in your hosts `variables.nix` file
         # Note the flatpak is the officialy support package
