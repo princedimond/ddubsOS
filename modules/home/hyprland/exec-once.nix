@@ -31,18 +31,29 @@ in {
           "pkill waybar"
           "killall -q swaync"
           "pkill swaync"
-          "noctalia-shell"
+          "noctalia-shell &"
+        ]
+        else if panelChoice == "dms"
+        then [
+          "killall -q hyprpanel"
+          "pkill hyprpanel"
+          "killall -q waybar"
+          "pkill waybar"
+          "killall -q swaync"
+          "pkill swaync"
+          "dms-run"
         ]
         else if panelChoice == "hyprpanel"
         then [
           "hyprpanel"
-          "qs-wallpapers-restore || waypaper --wallpaper ${stylixImage} --backend swaybg"
+          # Note: wallpaper restore is intentionally NOT run for hyprpanel
         ]
         else [
+          # waybar branch: delayed-only restore so Stylix completes first, then user's wallpaper wins
           "killall -q swww;sleep .5 && swww-daemon"
           "killall -q waybar;sleep .5 && waybar"
           #"wallsetter &"
-          "qs-wallpapers-restore || waypaper --wallpaper ${stylixImage} --backend swww"
+          "sh -lc 'sleep 2 && (qs-wallpapers-restore || waypaper --wallpaper ${stylixImage} --backend swww) >/dev/null 2>&1 || true'"
           "nm-applet --indicator"
         ]
       )

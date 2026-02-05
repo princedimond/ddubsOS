@@ -194,7 +194,7 @@
   ];
 
   extraMonitorSettings = "
-     #monitor = eDP-1, 1920x1080@60,auto,1
+     monitor = eDP-1, 1920x1080@60,auto,1.25
   ";
 
   # Example: Structured legacy monitors (render to `monitor =` lines)

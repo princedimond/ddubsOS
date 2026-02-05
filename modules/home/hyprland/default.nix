@@ -1,11 +1,6 @@
 {host, ...}: let
   hostVars = import ../../../hosts/${host}/variables.nix;
   inherit (hostVars) animChoice;
-  enableHyprlandSource = hostVars.enableHyprlandSource or false;
-  windowrulesModule =
-    if enableHyprlandSource
-    then ./windowrules-ng.nix
-    else ./windowrules.nix;
 in {
   imports = [
     animChoice
@@ -26,10 +21,7 @@ in {
     ./nwg-dock.nix
     ./nwg-apps.nix
     ./pyprland.nix
-    windowrulesModule
-    #./hyprexpo.nix   $# Won't build 9/13/25
-    #./hyprtrails.nix  # Getting blob effects off for now
-    #./hyprspace.nix
+    ./windowrules-ng.nix
     ./rofi/default.nix
     ./swappy.nix
     ./swaync.nix

@@ -2,13 +2,16 @@
   wayland.windowManager.hyprland = {
     settings = {
       decoration = {
-        rounding = 0;
+        rounding = 10;
         blur = {
           enabled = true;
           size = 6;
           passes = 3;
-          ignore_opacity = false;
+          xray = true;
+          ignore_opacity = true;
           new_optimizations = true;
+          popups = true;
+          special = true;
         };
         shadow = {
           enabled = true;

@@ -35,7 +35,7 @@
 
     ###  Testig new tools
 
-    ali # load generation tool
+    #ali # load generation tool
     asciinema # CLI recording tool
     bandwhich # network bandwidth monitor
     bluetui # CLI BT GUI
@@ -65,8 +65,8 @@
     frogmouth # Markdown browser for terminal
     fclones # dup finder
     git-cliff # changelog generator
-    gitu # git tool
-    gitui # git tool
+    #gitu # git tool
+    #gitui # git tool
     go # Build GO apps
     gtop # system monitor
     gtt # Translate tui

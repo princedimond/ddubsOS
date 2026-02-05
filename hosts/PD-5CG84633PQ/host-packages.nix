@@ -21,6 +21,9 @@
     nss_latest
     microfetch
     gnome-disk-utility
+    deskflow
+    input-leap
+    kdePackages.kmail
     # nvtop great tool for AMD/Intel/NVIDIA GPUs
     # takes time to build and upgrade
     # Moved here to make it optional
