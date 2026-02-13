@@ -100,7 +100,7 @@
     clapgrep # gui / previewer grep/rg tool
     converseen # KDE image tool
     direnv # Used by vscode
-    discord-canary
+    #discord-canary
     discord
     docker-compose # Allows Controlling Docker From A Single File
     fahclient # folding at home client PewDiPie team: 1066966
