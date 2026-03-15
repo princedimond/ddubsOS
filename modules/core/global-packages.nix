@@ -118,13 +118,13 @@
     kdePackages.okular # PDF reader
     losslesscut-bin # Cut videos w/o re-rendering
     lnav # Log navigator  great tool to review logs
-    lunarvim # alternative NVIM config
+    #lunarvim # alternative NVIM config
     luarocks # Needed for NeoVIM and LunarVIM
     matugen # color palette generator needed for Hyprpanel
     mission-center # system monitor
     monitorets # floating system monitor
     neohtop # high end perf monitor GUI Doesn't build 9/1/25 mismatched npm/crates
-    neofetch # system info fetcher
+    #neofetch # system info fetcher
     nomacs # video image preview tool
     nerdfetch # fetch using nerd fonts
     netpeek # network scanner

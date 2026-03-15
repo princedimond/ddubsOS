@@ -23,9 +23,9 @@
   dwmEnable = true;
   wayfireEnable = false;
   cosmicEnable = true;
-  niriEnable = false;
+  niriEnable =true;
   enableSway = false;
-  enableMangowc = false;
+  enableMangowc = true;
   oxwmEnable = false;
 
   # Editor Options - set to true to enable

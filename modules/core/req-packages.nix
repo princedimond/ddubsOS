@@ -162,7 +162,7 @@ in {
       qt6.qtimageformats # support image formats
       onefetch # CLI tool to show git repo info
       openssl # needed for backup client
-      oxker # TUI for docker containers
+      #oxker # TUI for docker containers
       pulseaudioFull
       pulsemixer
       pyprland # provides drop down terminal in Hyprland

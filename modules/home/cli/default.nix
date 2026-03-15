@@ -12,6 +12,6 @@
     ./lazygit.nix
     ./tealdeer.nix #TLDR Util
     ./holiday-countdown.nix
-    ./xmas-timer.nix
+    #./xmas-timer.nix
   ];
 }

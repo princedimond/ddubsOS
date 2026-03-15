@@ -13,6 +13,7 @@ _: {
     neovim.enable = false;
     nvf.enable = false;
     nixvim.enable = false;
+    gtksourceview.enable = false;
     qt = {
       enable = true;
       platform = "qtct";
